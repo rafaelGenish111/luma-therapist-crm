@@ -1,0 +1,72 @@
+{
+    "name": "wellness-platform-client",
+    "version": "1.0.0",
+    "description": "קליינט React לפלטפורמת המטפלות",
+    "private": true,
+    "dependencies": {
+        "@emotion/react": "^11.11.1",
+        "@emotion/styled": "^11.11.0",
+        "@mui/icons-material": "^5.15.0",
+        "@mui/material": "^5.15.0",
+        "@mui/x-charts": "^6.18.2",
+        "@mui/x-data-grid": "^6.18.2",
+        "@mui/x-date-pickers": "^6.18.2",
+        "axios": "^1.6.2",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.0.0",
+        "date-fns": "^2.30.0",
+        "formik": "^2.4.5",
+        "framer-motion": "^10.16.16",
+        "immer": "^10.0.3",
+        "react": "^18.2.0",
+        "react-big-calendar": "^1.8.5",
+        "react-calendar": "^4.6.0",
+        "react-color": "^2.19.3",
+        "react-dom": "^18.2.0",
+        "react-dropzone": "^14.2.3",
+        "react-hook-form": "^7.48.2",
+        "react-hot-toast": "^2.4.1",
+        "react-image-crop": "^10.1.8",
+        "react-intersection-observer": "^9.5.3",
+        "react-query": "^3.39.3",
+        "react-router-dom": "^6.20.1",
+        "react-virtualized": "^9.22.5",
+        "react-window": "^1.8.8",
+        "recharts": "^2.8.0",
+        "yup": "^1.3.3",
+        "zustand": "^4.4.7"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-react": "^4.2.1",
+        "eslint": "^8.55.0",
+        "eslint-plugin-jsx-a11y": "^6.8.0",
+        "eslint-plugin-react": "^7.33.2",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "prettier": "^3.1.1",
+        "vite": "^5.0.10",
+        "vite-plugin-pwa": "^1.0.3"
+    },
+    "scripts": {
+        "dev": "vite",
+        "start": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+        "lint:fix": "eslint src --ext js,jsx --fix",
+        "format": "prettier --write src/**/*.{js,jsx,json,css,md}"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}

@@ -1,0 +1,208 @@
+/* בסיס וטיפוגרפיה */
+.rt-root {
+  --rt-bg: #ffffff;
+  --rt-card: #f3f9ff;
+  /* תכלת עדין לכרטיסים */
+  --rt-border: #e3eef9;
+  --rt-text: #0f172a;
+  --rt-muted: #475569;
+  --rt-primary: #22a2ff;
+  /* כחול פעולה - התאם לגוון הלוגו */
+  --rt-radius: 16px;
+  --rt-shadow: 0 6px 22px rgba(2, 26, 58, 0.08);
+  color: var(--rt-text);
+  font-size: 16px;
+}
+
+/* ====== TABLE (לדסקטופ/טאבלט) ====== */
+.rt-table-wrapper {
+  overflow-x: auto;
+  /* fallback לגלילה אופקית אם צריך */
+  background: var(--rt-bg);
+  border-radius: var(--rt-radius);
+  box-shadow: var(--rt-shadow);
+}
+
+.rt-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+  /* מונע שבירה אגרסיבית */
+  direction: rtl;
+}
+
+.rt-table th,
+.rt-table td {
+  text-align: right;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rt-border);
+  vertical-align: middle;
+}
+
+.rt-table thead th {
+  background: #eef6ff;
+  color: #0b3b72;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.rt-actions-head,
+.rt-actions-cell {
+  white-space: nowrap;
+}
+
+/* ====== CARDS (למובייל) ====== */
+.rt-cards {
+  display: none;
+  /* מוסתר בדסקטופ */
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.rt-card {
+  background: var(--rt-card);
+  border: 1px solid var(--rt-border);
+  border-radius: var(--rt-radius);
+  box-shadow: var(--rt-shadow);
+  padding: 14px;
+  margin: 10px 0;
+  outline: none;
+}
+
+.rt-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.35);
+}
+
+.rt-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.rt-field {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  /* תווית + ערך (RTL) */
+  align-items: center;
+  gap: 8px;
+}
+
+.rt-label {
+  color: var(--rt-muted);
+  font-size: 0.85rem;
+}
+
+.rt-value {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* תמיכה בצבעי סטטוס */
+.rt-value.status-active {
+  color: #2e7d32;
+  background: #e8f5e8;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.rt-value.status-pending {
+  color: #f57c00;
+  background: #fff3e0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.rt-value.status-inactive {
+  color: #c62828;
+  background: #ffebee;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.rt-card-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.rt-card-actions .btn {
+  border: 1px solid var(--rt-primary);
+  background: var(--rt-bg);
+  color: var(--rt-primary);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.rt-card-actions .btn--primary {
+  background: var(--rt-primary);
+  color: white;
+}
+
+/* תמיכה בכפתורי Material-UI */
+.rt-card-actions .MuiButton-root {
+  border-radius: 12px !important;
+  font-size: 0.9rem !important;
+  padding: 6px 10px !important;
+}
+
+/* ====== CLICKABLE ROWS ====== */
+.rt-clickable-row {
+  cursor: pointer;
+}
+
+.rt-clickable-row:hover {
+  background-color: rgba(34, 162, 255, 0.08);
+  transition: background-color 0.2s ease;
+}
+
+.rt-clickable-card {
+  cursor: pointer;
+}
+
+.rt-clickable-card:hover {
+  background-color: rgba(34, 162, 255, 0.12);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* ====== BREAKPOINTS ====== */
+@media (max-width: 768px) {
+  .rt-table-wrapper {
+    display: none;
+  }
+
+  /* מסתיר טבלה במובייל */
+  .rt-cards {
+    display: block;
+  }
+}
+
+/* מסכים צרים מאוד – תגיות מעל ערכים */
+@media (max-width: 380px) {
+  .rt-field {
+    grid-template-columns: 1fr;
+  }
+
+  .rt-label {
+    margin-bottom: -2px;
+  }
+}
+
+/* ====== STICKY SEARCH ====== */
+.rt-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--rt-bg);
+  padding: 8px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}

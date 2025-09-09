@@ -1,0 +1,59 @@
+{
+    "id": "/therapist-app",
+    "name": "Wellness Platform - לוח מטפל/ת",
+    "short_name": "Wellness",
+    "description": "CRM נייד למטפלות ומטפלים: לקוחות, פגישות, תשלומים ומסמכים.",
+    "lang": "he",
+    "dir": "rtl",
+  
+    "start_url": "/?source=pwa",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": ["standalone", "browser"],
+    "orientation": "portrait",
+  
+    "background_color": "#ffffff",
+    "theme_color": "#3BB9FF",
+    "categories": ["productivity", "health", "business"],
+  
+    "icons": [
+      { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+      { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+      { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ],
+  
+    "screenshots": [
+      { "src": "/screenshots/dashboard-iphone.png", "sizes": "1284x2778", "type": "image/png", "form_factor": "narrow", "label": "דשבורד יומי" },
+      { "src": "/screenshots/clients-android.png", "sizes": "1080x2400", "type": "image/png", "form_factor": "wide", "label": "לקוחות ופגישות" }
+    ],
+  
+    "shortcuts": [
+      {
+        "name": "פגישה חדשה",
+        "short_name": "פגישה",
+        "description": "פתיחת מסך יצירת פגישה",
+        "url": "/appointments/new",
+        "icons": [{ "src": "/icons/shortcut-appointments.png", "sizes": "96x96", "type": "image/png" }]
+      },
+      {
+        "name": "לקוחות",
+        "short_name": "לקוחות",
+        "description": "רשימת לקוחות",
+        "url": "/clients",
+        "icons": [{ "src": "/icons/shortcut-clients.png", "sizes": "96x96", "type": "image/png" }]
+      }
+    ],
+  
+    "protocol_handlers": [
+      { "protocol": "web+wellness", "url": "/deeplink?target=%s" }
+    ],
+  
+    "prefer_related_applications": false,
+    "related_applications": [
+      { "platform": "play", "id": "com.yourorg.therapist", "url": "https://play.google.com/store/apps/details?id=com.yourorg.therapist" },
+      { "platform": "itunes", "url": "https://apps.apple.com/app/id1234567890" }
+    ],
+  
+    "capture_links": "new-client"
+  }
+  
