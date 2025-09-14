@@ -7,6 +7,18 @@ const UnifiedHeader = () => {
     const location = useLocation();
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // בדיקת מובייל
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const navigationItems = [
         { key: 'about', label: 'אודות', path: '/about' },
@@ -28,6 +40,13 @@ const UnifiedHeader = () => {
         setTimeout(() => {
             setIsAnimating(false);
         }, 600);
+    };
+
+    // במובייל - רק לחיצה מפתחת/סוגרת
+    const handleMobileToggle = () => {
+        if (isMobile) {
+            handleHeaderToggle();
+        }
     };
 
     const isActiveRoute = (path) => {
@@ -55,26 +74,26 @@ const UnifiedHeader = () => {
                     overflow: 'hidden',
                     position: 'relative',
                     minWidth: isHeaderExpanded
-                        ? (window.innerWidth > 768 ? '500px' : '90vw')
-                        : (window.innerWidth > 768 ? '160px' : '50px'),
+                        ? (isMobile ? '90vw' : '500px')
+                        : (isMobile ? '50px' : '160px'),
                     maxWidth: isHeaderExpanded
-                        ? (window.innerWidth > 768 ? '500px' : '90vw')
-                        : (window.innerWidth > 768 ? '160px' : '50px'),
+                        ? (isMobile ? '90vw' : '500px')
+                        : (isMobile ? '50px' : '160px'),
                     height: isHeaderExpanded
-                        ? (window.innerWidth > 768 ? '60px' : '45px')
-                        : (window.innerWidth > 768 ? '60px' : '45px'),
+                        ? (isMobile ? '50px' : '60px')
+                        : (isMobile ? '50px' : '60px'),
                     padding: isHeaderExpanded
-                        ? (window.innerWidth > 768 ? '12px 24px' : '6px 12px')
-                        : (window.innerWidth > 768 ? '12px 24px' : '6px 12px')
+                        ? (isMobile ? '8px 16px' : '12px 24px')
+                        : (isMobile ? '8px 16px' : '12px 24px')
                 }}
-                onClick={handleHeaderToggle}
+                onClick={isMobile ? handleMobileToggle : handleHeaderToggle}
                 onMouseEnter={() => {
-                    if (!isAnimating) {
+                    if (!isMobile && !isAnimating) {
                         setIsHeaderExpanded(true);
                     }
                 }}
                 onMouseLeave={() => {
-                    if (!isAnimating) {
+                    if (!isMobile && !isAnimating) {
                         setIsHeaderExpanded(false);
                     }
                 }}
@@ -99,8 +118,8 @@ const UnifiedHeader = () => {
                     }}
                 >
                     <div style={{
-                        width: window.innerWidth > 768 ? '36px' : '28px',
-                        height: window.innerWidth > 768 ? '36px' : '28px',
+                        width: isMobile ? '32px' : '36px',
+                        height: isMobile ? '32px' : '36px',
                         borderRadius: professionalTokens.borderRadius.md,
                         background: `linear-gradient(135deg, ${professionalTokens.colors.primary}, ${professionalTokens.colors.primaryLight})`,
                         display: 'flex',
@@ -135,14 +154,16 @@ const UnifiedHeader = () => {
                             L
                         </div>
                     </div>
-                    <span style={{
-                        fontSize: '18px',
-                        fontWeight: professionalTokens.typography.fontWeight.bold,
-                        color: professionalTokens.colors.headerText,
-                        transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-                    }}>
-                        LUMA
-                    </span>
+                    {!isMobile && (
+                        <span style={{
+                            fontSize: '18px',
+                            fontWeight: professionalTokens.typography.fontWeight.bold,
+                            color: professionalTokens.colors.headerText,
+                            transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                        }}>
+                            LUMA
+                        </span>
+                    )}
                 </div>
 
                 {/* Navigation Section - Appears on Expansion */}
@@ -172,8 +193,8 @@ const UnifiedHeader = () => {
                         }}
                     >
                         <div style={{
-                            width: window.innerWidth > 768 ? '36px' : '24px',
-                            height: window.innerWidth > 768 ? '36px' : '24px',
+                            width: isMobile ? '28px' : '36px',
+                            height: isMobile ? '28px' : '36px',
                             borderRadius: professionalTokens.borderRadius.md,
                             background: `linear-gradient(135deg, ${professionalTokens.colors.primary}, ${professionalTokens.colors.primaryLight})`,
                             display: 'flex',
@@ -221,7 +242,7 @@ const UnifiedHeader = () => {
                     {/* Navigation Items */}
                     <div style={{
                         display: 'flex',
-                        gap: window.innerWidth > 768 ? professionalTokens.spacing.lg : '2px',
+                        gap: isMobile ? '8px' : professionalTokens.spacing.lg,
                         alignItems: 'center',
                         flexWrap: 'nowrap',
                         overflowX: 'auto',
@@ -243,12 +264,12 @@ const UnifiedHeader = () => {
                                     color: isActiveRoute(item.path)
                                         ? professionalTokens.colors.primaryLight
                                         : 'rgba(255, 255, 255, 0.8)',
-                                    fontSize: window.innerWidth > 768 ? '14px' : '9px',
+                                    fontSize: isMobile ? '12px' : '14px',
                                     fontWeight: isActiveRoute(item.path)
                                         ? professionalTokens.typography.fontWeight.semibold
                                         : professionalTokens.typography.fontWeight.medium,
                                     cursor: 'pointer',
-                                    padding: window.innerWidth > 768 ? '8px 16px' : '3px 6px',
+                                    padding: isMobile ? '6px 12px' : '8px 16px',
                                     borderRadius: professionalTokens.borderRadius.md,
                                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                                     position: 'relative',
