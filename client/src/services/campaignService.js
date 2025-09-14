@@ -1,11 +1,11 @@
 // client/src/services/campaignService.js
-import api from './api';
+import { campaignsApi } from './api';
 
 class CampaignService {
     // קבלת כל הקמפיינים
     async getAll(params = {}) {
         const searchParams = new URLSearchParams();
-        
+
         if (params.status) searchParams.append('status', params.status);
         if (params.dateFrom) searchParams.append('dateFrom', params.dateFrom);
         if (params.dateTo) searchParams.append('dateTo', params.dateTo);
@@ -13,82 +13,82 @@ class CampaignService {
         if (params.limit) searchParams.append('limit', params.limit);
 
         const url = `/campaigns${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-        return await api.get(url);
+        return await campaignsApi.getAll();
     }
 
     // קבלת קמפיין ספציפי
     async getById(id) {
-        return await api.get(`/campaigns/${id}`);
+        return await campaignsApi.getById(id);
     }
 
     // יצירת קמפיין חדש
     async create(campaignData) {
-        return await api.post('/campaigns', campaignData);
+        return await campaignsApi.create(campaignData);
     }
 
     // עדכון קמפיין
     async update(id, campaignData) {
-        return await api.put(`/campaigns/${id}`, campaignData);
+        return await campaignsApi.update(id, campaignData);
     }
 
     // מחיקת קמפיין
     async delete(id) {
-        return await api.delete(`/campaigns/${id}`);
+        return await campaignsApi.delete(id);
     }
 
     // שליחת קמפיין
     async send(id) {
-        return await api.post(`/campaigns/${id}/send`);
+        return await campaignsApi.send(id);
     }
 
     // קבלת סטטיסטיקות קמפיין
     async getStats(id) {
-        return await api.get(`/campaigns/${id}/stats`);
+        return await campaignsApi.getStats(id);
     }
 
     // Templates Management
-    
+
     // קבלת תבניות אימייל
     async getTemplates(category = null) {
-        const url = category 
+        const url = category
             ? `/campaigns/templates/list?category=${category}`
             : '/campaigns/templates/list';
-        return await api.get(url);
+        return await campaignsApi.getAll();
     }
 
     // יצירת תבנית חדשה
     async createTemplate(templateData) {
-        return await api.post('/campaigns/templates', templateData);
+        return await campaignsApi.createTemplate(templateData);
     }
 
     // עדכון תבנית
     async updateTemplate(id, templateData) {
-        return await api.put(`/campaigns/templates/${id}`, templateData);
+        return await campaignsApi.updateTemplate(id, templateData);
     }
 
     // מחיקת תבנית
     async deleteTemplate(id) {
-        return await api.delete(`/campaigns/templates/${id}`);
+        return await campaignsApi.deleteTemplate(id);
     }
 
     // Client Lists Management
-    
+
     // קבלת רשימת לקוחות עם פילטרים
     async getClientLists(filters = {}) {
         const searchParams = new URLSearchParams();
-        
+
         if (filters.search) searchParams.append('search', filters.search);
         if (filters.hasEmail) searchParams.append('hasEmail', filters.hasEmail);
         if (filters.lastTreatment) searchParams.append('lastTreatment', filters.lastTreatment);
         if (filters.tags) searchParams.append('tags', filters.tags);
 
         const url = `/campaigns/client-lists/all${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-        return await api.get(url);
+        return await campaignsApi.getAll();
     }
 
     // ייצוא רשימת לקוחות
     async exportClientList(clientIds = [], format = 'csv') {
-        return await api.post('/campaigns/client-lists/export', {
+        return await campaignsApi.exportClientList({
             clientIds,
             format
         });
@@ -100,7 +100,7 @@ class CampaignService {
         formData.append('file', file);
         formData.append('format', format);
 
-        return await api.post('/campaigns/client-lists/import', formData, {
+        return await campaignsApi.importClientList(formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -108,30 +108,30 @@ class CampaignService {
     }
 
     // Utility Functions
-    
+
     // בדיקת תקינות תוכן המייל
     validateEmailContent(content) {
         const errors = [];
-        
+
         if (!content.trim()) {
             errors.push('תוכן המייל לא יכול להיות רק');
         }
-        
+
         if (content.length > 50000) {
             errors.push('תוכן המייל ארוך מדי (מקסימום 50,000 תווים)');
         }
-        
+
         // בדיקת משתנים תקינים
         const variables = content.match(/\{\{([^}]+)\}\}/g) || [];
         const validVariables = ['firstName', 'lastName', 'fullName', 'email', 'phone', 'currentDate'];
-        
+
         variables.forEach(variable => {
             const varName = variable.replace(/[{}]/g, '');
             if (!validVariables.includes(varName)) {
                 errors.push(`משתנה לא תקין: ${variable}`);
             }
         });
-        
+
         return {
             isValid: errors.length === 0,
             errors
@@ -146,9 +146,9 @@ class CampaignService {
             email: 'example@email.com',
             phone: '050-1234567'
         };
-        
+
         const client = sampleClient || defaultClient;
-        
+
         return content
             .replace(/\{\{firstName\}\}/g, client.firstName || '')
             .replace(/\{\{lastName\}\}/g, client.lastName || '')
@@ -163,7 +163,7 @@ class CampaignService {
         // הערכה של 5 מיילים בשנייה
         const emailsPerSecond = 5;
         const estimatedSeconds = Math.ceil(recipientCount / emailsPerSecond);
-        
+
         if (estimatedSeconds < 60) {
             return `כ-${estimatedSeconds} שניות`;
         } else if (estimatedSeconds < 3600) {
@@ -291,7 +291,7 @@ class CampaignService {
     // קבלת הצעות לשיפור קמפיין
     getCampaignSuggestions(campaignStats) {
         const suggestions = [];
-        
+
         if (campaignStats.openRate < 20) {
             suggestions.push({
                 type: 'warning',
@@ -299,7 +299,7 @@ class CampaignService {
                 action: 'שנה נושא המייל להיות יותר מעניין וקצר'
             });
         }
-        
+
         if (campaignStats.clickRate < 5) {
             suggestions.push({
                 type: 'info',
@@ -307,7 +307,7 @@ class CampaignService {
                 action: 'הוסיפי כפתורים בולטים וקריאות לפעולה ברורות'
             });
         }
-        
+
         if (campaignStats.bounced > campaignStats.sent * 0.05) {
             suggestions.push({
                 type: 'error',
@@ -315,7 +315,7 @@ class CampaignService {
                 action: 'בדקי ועדכני כתובות מייל לא תקינות ברשימת הלקוחות'
             });
         }
-        
+
         return suggestions;
     }
 }
