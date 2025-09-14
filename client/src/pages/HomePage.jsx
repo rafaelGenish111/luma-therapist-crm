@@ -1,260 +1,848 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import PublicNavigation from '../components/common/PublicNavigation';
-import Footer from '../components/common/Footer';
+import { professionalTokens } from '../theme/professionalTokens';
+import UnifiedHeader from '../components/common/UnifiedHeader';
+import ProfessionalFooter from '../components/common/ProfessionalFooter';
+import CookieConsentPopup from '../components/common/CookieConsentPopup';
 
-const HomePage = () => {
+const PremiumHomePage = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const [isVisible, setIsVisible] = useState(false);
+    const [activeAccordion, setActiveAccordion] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [backgroundImage, setBackgroundImage] = useState(0);
+    const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
 
-    React.useEffect(() => {
-        if (user) {
-            const role = user.role || user.userType;
-            console.log('HomePage useEffect - User:', user);
-            console.log('HomePage useEffect - Role:', role);
-            if (role === 'admin') {
-                console.log('HomePage useEffect - Navigating to /admin');
-                navigate('/admin', { replace: true });
-            } else {
-                console.log('HomePage useEffect - Navigating to /dashboard');
-                navigate('/dashboard', { replace: true });
-            }
-        }
-    }, [user, navigate]);
+    useEffect(() => {
+        setIsVisible(true);
+    }, []);
 
-    const features = [
+    // Mouse tracking for dynamic background
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            setMousePosition({
+                x: (e.clientX / window.innerWidth) * 100,
+                y: (e.clientY / window.innerHeight) * 100
+            });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
+    // Background images rotation
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setBackgroundImage(prev => (prev + 1) % 4);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const backgroundImages = [
+        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Modern clinic
+        "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Office workspace
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Medical office
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"  // Modern workspace
+    ];
+
+    const benefits = [
         {
-            title: 'CRM מלא',
-            description: 'ניהול לקוחות, פגישות ותשלומים במקום אחד',
-            icon: '👥'
+            icon: "📈",
+            title: "חיסכון עד 15 שעות בשבוע",
+            description: "אוטומציה מלאה של תהליכי הניהול - ללא ניהול ידני מיותר",
+            color: "#10B981"
         },
         {
-            title: 'אתרים אישיים',
-            description: 'בונה אתרים מותאם אישית למטפלות',
-            icon: '🌐'
+            icon: "⚡",
+            title: "40% יותר לקוחות חדשים",
+            description: "עם אתר מקצועי ונוכחות דיגיטלית - ללא איבוד פניות",
+            color: "#3B82F6"
         },
         {
-            title: 'לוח זמנים חכם',
-            description: 'ניהול פגישות עם תזכורות אוטומטיות',
-            icon: '📅'
+            icon: "💰",
+            title: "הגדלת הכנסות ב-25%",
+            description: "בזכות ניהול מקצועי ויעיל - ללא קשיים בגביה",
+            color: "#F59E0B"
         },
         {
-            title: 'תשלומים',
-            description: 'אינטגרציה עם Stripe לתשלומים מאובטחים',
-            icon: '💳'
+            icon: "🤖",
+            title: "תקשורת יעילה ומרכזית",
+            description: "מערכת תקשורת מתקדמת עם לקוחות - ללא בלבול ואיבוד מידע",
+            color: "#8B5CF6"
         }
     ];
 
-    return (
-        <div dir="rtl" style={{
-            minHeight: '100vh',
-            backgroundColor: '#f5f5f5',
-            overflowX: 'hidden',
-            width: '100%'
-        }}>
-            <PublicNavigation />
+    const testimonials = [
+        {
+            name: "ד\"ר שרה כהן",
+            title: "פסיכולוגית קלינית",
+            avatar: "ש",
+            rating: 5,
+            text: "Luma שינתה לי את החיים המקצועיים. חוסכת לי שעות בשבוע ונותנת שירות מקצועי יותר."
+        },
+        {
+            name: "יעל לוי",
+            title: "מטפלת זוגית",
+            avatar: "י",
+            rating: 5,
+            text: "הפלטפורמה הכי מקצועית שיש. הלקוחות שלי מתפעלים מהאתר והתהליכים החלקים."
+        },
+        {
+            name: "ד\"ר מיכל רוזנברג",
+            title: "פיזיותרפיסטית",
+            avatar: "מ",
+            rating: 5,
+            text: "סוף סוף פתרון שמבין מטפלים! הצהרות הבריאות הדיגיטליות פשוט הצילו אותי."
+        }
+    ];
 
-            {/* Hero Section */}
-            <section className="hero" id="home" style={{
-                background: 'radial-gradient(1200px 600px at 70% -10%, #F3FBFE 0%, #EAF7FB 45%, #FFFFFF 100%)',
-                padding: '96px 0 64px',
+    const faqs = [
+        {
+            question: "כמה זמן לוקח להקים את המערכת?",
+            answer: "בדרך כלל 24-48 שעות. אנחנו מספקים ליווי מלא והדרכה אישית."
+        },
+        {
+            question: "האם המערכת מאובטחת לנתונים רפואיים?",
+            answer: "כן, אנחנו עומדים בכל התקנות של משרד הבריאות ו-GDPR עם הצפנה ברמה הגבוהה ביותר."
+        },
+        {
+            question: "האם אפשר לנסות לפני תשלום?",
+            answer: "בהחלט! יש תקופת ניסיון של 14 יום חינם עם כל התכונות."
+        }
+    ];
+
+    const handleNavigation = (section) => {
+        switch (section) {
+            case 'features':
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                break;
+            case 'pricing':
+                navigate('/pricing');
+                break;
+            case 'about':
+                navigate('/about');
+                break;
+            case 'contact':
+                navigate('/contact');
+                break;
+            default:
+                break;
+        }
+        setIsHeaderExpanded(false);
+    };
+
+    return (
+        <div style={{
+            minHeight: '100vh',
+            backgroundColor: professionalTokens.colors.background,
+            overflow: 'hidden',
+            fontFamily: professionalTokens.typography.fontFamily,
+            color: professionalTokens.colors.textPrimary,
+            position: 'relative'
+        }}>
+            <UnifiedHeader />
+
+            {/* Hero Section - Simplified and Centered */}
+            <div style={{
+                minHeight: '100vh',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 textAlign: 'center',
-                width: '100%',
-                boxSizing: 'border-box'
+                overflow: 'hidden'
             }}>
+                {/* Background Images */}
+                {backgroundImages.map((img, index) => (
+                    <div
+                        key={index}
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            backgroundImage: `url(${img})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            opacity: backgroundImage === index ? 0.12 : 0,
+                            transition: 'opacity 1.5s ease-in-out',
+                            filter: 'blur(1px)'
+                        }}
+                    />
+                ))}
+
+                {/* Gradient Overlay */}
                 <div style={{
-                    maxWidth: '1200px',
+                    position: 'absolute',
+                    inset: 0,
+                    background: `
+            linear-gradient(135deg, 
+              rgba(11, 20, 38, 0.95) 0%, 
+              rgba(30, 41, 59, 0.90) 35%, 
+              rgba(51, 65, 85, 0.85) 100%),
+            radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, 
+              rgba(59, 130, 246, 0.08) 0%, 
+              transparent 50%)
+          `
+                }} />
+
+                <div style={{
+                    maxWidth: '900px',
                     margin: '0 auto',
-                    padding: '0 20px',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    padding: '0 24px',
+                    position: 'relative',
+                    zIndex: 2
                 }}>
-                    <h1 style={{
-                        fontSize: 'clamp(2rem, 8vw, 4rem)',
-                        fontWeight: '800',
-                        margin: '0 0 16px 0',
-                        lineHeight: '1.2',
-                        color: '#0A3D62',
-                        letterSpacing: '0.4px'
-                    }}>
-                        Luma
-                    </h1>
-                    <p style={{
-                        fontSize: 'clamp(1rem, 4vw, 1.5rem)',
-                        margin: '14px auto 26px',
-                        lineHeight: '1.4',
-                        color: '#5B6B7A',
-                        maxWidth: '800px'
-                    }}>
-                        פתרונות משרד למטפלות ומטפלים
-                    </p>
+                    {/* Main Headline */}
                     <div style={{
-                        display: 'flex',
-                        gap: '12px',
-                        justifyContent: 'center',
-                        flexWrap: 'wrap'
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+                        transition: 'all 1s ease'
                     }}>
-                        <button
-                            className="btn-cta"
-                            onClick={() => navigate('/register')}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            פתח/י חשבון חינם
-                        </button>
-                        <a
-                            className="btn-cta"
-                            href="#features"
-                            style={{
-                                background: "#fff",
-                                color: "#0A3D62",
-                                boxShadow: "0 6px 16px rgba(13,27,42,.08)",
-                                border: "1px solid #E8EEF3"
+                        <h1 style={{
+                            fontSize: 'clamp(3rem, 7vw, 6rem)',
+                            fontWeight: '800',
+                            marginBottom: '40px',
+                            lineHeight: 1.1,
+                            letterSpacing: '-0.02em'
+                        }}>
+                            <span style={{
+                                background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text'
+                            }}>
+                                LUMA
+                            </span>
+                            <br />
+                            <span style={{
+                                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #10b981)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                                fontSize: '0.8em'
+                            }}>
+                                תהפכו את הזמן שלכם לטיפול
+                            </span>
+                        </h1>
+
+                        <p style={{
+                            color: '#94a3b8',
+                            marginBottom: '48px',
+                            fontSize: 'clamp(1.25rem, 2.5vw, 1.8rem)',
+                            lineHeight: 1.6,
+                            fontWeight: '400',
+                            maxWidth: '700px',
+                            margin: '0 auto 48px'
+                        }}>
+                            תתמקדו במה שאתם הכי טובים בו -
+                            <br />
+                            <span style={{ color: '#64748b' }}>
+                                אנחנו נעשה עבורכם את השאר
+                            </span>
+                        </p>
+
+                        <div style={{
+                            display: 'flex',
+                            gap: '20px',
+                            justifyContent: 'center',
+                            marginBottom: '48px',
+                            flexDirection: window.innerWidth > 480 ? 'row' : 'column',
+                            alignItems: 'center'
+                        }}>
+                            <button
+                                onClick={() => navigate('/register')}
+                                style={{
+                                    background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                                    color: 'white',
+                                    padding: '20px 40px',
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 6px 25px rgba(59, 130, 246, 0.4)',
+                                    letterSpacing: '0.5px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 10px 35px rgba(59, 130, 246, 0.6)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = '0 6px 25px rgba(59, 130, 246, 0.4)';
+                                }}
+                            >
+                                התחילו חינם היום →
+                            </button>
+
+                            <button style={{
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                color: 'white',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                padding: '20px 32px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                backdropFilter: 'blur(10px)'
                             }}
-                        >
-                            צפו בפיצ'רים
-                        </a>
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.12)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                }}>
+                                ▶ צפו בהדגמה
+                            </button>
+                        </div>
+
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px',
+                            color: '#94a3b8',
+                            fontSize: '15px'
+                        }}>
+                            <span style={{
+                                color: '#10b981',
+                                fontSize: '16px'
+                            }}>✓</span>
+                            <span>ללא התחייבות • ניסיון 14 יום חינם • ללא כרטיס אשראי</span>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* Features Section */}
-            <section className="features" id="features" style={{
-                background: '#F7FBFD',
-                padding: '56px 0',
-                width: '100%',
-                boxSizing: 'border-box'
+            {/* App Description Section */}
+            <div id="features" style={{
+                padding: '120px 0',
+                background: '#0B1426',
+                position: 'relative'
             }}>
                 <div style={{
                     maxWidth: '1200px',
                     margin: '0 auto',
-                    padding: '0 20px',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    padding: '0 24px'
                 }}>
-                    <h2 style={{
-                        textAlign: 'center',
-                        fontSize: 'clamp(1.5rem, 6vw, 2.5rem)',
-                        marginBottom: '32px',
-                        color: '#0D1B2A',
-                        fontWeight: '800',
-                        lineHeight: '1.3'
-                    }}>
-                        תכונות עיקריות
-                    </h2>
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <h2 style={{
+                            fontSize: 'clamp(2.5rem, 4vw, 4rem)',
+                            fontWeight: '800',
+                            marginBottom: '24px',
+                            letterSpacing: '-0.02em',
+                            color: '#ffffff'
+                        }}>
+                            פלטפורמה דיגיטלית מתקדמת
+                        </h2>
+                        <p style={{
+                            fontSize: '20px',
+                            color: '#64748b',
+                            maxWidth: '800px',
+                            margin: '0 auto',
+                            lineHeight: 1.7
+                        }}>
+                            LUMA היא פלטפורמה מתקדמת שנבנתה במיוחד עבור מטפלים מקצועיים.
+                            אנחנו מספקים את כל הכלים הדיגיטליים שאתם צריכים -
+                            CRM חכם, בונה אתרים, ניהול תשלומים ואוטומציה מתקדמת.
+                        </p>
+                    </div>
 
-                    <div className="grid" style={{
+                    <div style={{
                         display: 'grid',
-                        gap: '22px',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                        marginTop: '32px',
-                        width: '100%'
+                        gridTemplateColumns: window.innerWidth > 968 ? '1fr 1fr' : '1fr',
+                        gap: '80px',
+                        alignItems: 'center'
                     }}>
-                        {features.map((feature, index) => (
-                            <article key={index} className="feature-card" style={{
-                                background: '#FFFFFF',
-                                border: '1px solid #E8EEF3',
-                                borderRadius: '22px',
-                                boxShadow: '0 10px 30px rgba(13, 27, 42, 0.08)',
-                                padding: '22px 20px',
-                                textAlign: 'center',
-                                transition: 'transform .12s ease, box-shadow .2s ease',
+                        <div style={{ position: 'relative' }}>
+                            <div style={{
                                 width: '100%',
-                                boxSizing: 'border-box'
+                                height: '450px',
+                                borderRadius: '24px',
+                                background: 'linear-gradient(135deg, #1e293b, #334155)',
+                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '24px',
+                                color: '#94a3b8',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.3)'
                             }}>
-                                <div className="feature-icon" style={{
-                                    width: '64px',
-                                    height: '64px',
-                                    margin: '2px auto 12px',
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(145deg, #0BB5CF, #19C7DC)',
-                                    display: 'grid',
-                                    placeItems: 'center',
-                                    color: '#fff',
-                                    fontSize: '28px',
-                                    fontWeight: '700'
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: `
+                    radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)
+                  `
+                                }} />
+                                <div style={{
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    textAlign: 'center',
+                                    padding: '40px'
                                 }}>
-                                    {feature.icon}
+                                    <div style={{
+                                        fontSize: '48px',
+                                        marginBottom: '20px'
+                                    }}>💻</div>
+                                    <div style={{ fontSize: '20px', marginBottom: '12px', color: '#ffffff', fontWeight: '600' }}>
+                                        Dashboard מטפל מתקדם
+                                    </div>
+                                    <div style={{ fontSize: '14px', opacity: 0.7, lineHeight: 1.5 }}>
+                                        ממשק נקי ואינטואיטיבי<br />
+                                        עם כל הכלים שאתם צריכים
+                                    </div>
                                 </div>
-                                <div className="feature-title" style={{
-                                    fontWeight: '700',
-                                    color: '#0D1B2A',
-                                    marginBottom: '6px',
-                                    fontSize: 'clamp(1.1rem, 4vw, 1.3rem)',
-                                    lineHeight: '1.3'
+                            </div>
+
+                            <div style={{
+                                position: 'absolute',
+                                top: '-16px',
+                                right: '-16px',
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
+                                color: 'white',
+                                padding: '12px 20px',
+                                borderRadius: '16px',
+                                fontSize: '13px',
+                                fontWeight: '700',
+                                transform: 'rotate(8deg)',
+                                boxShadow: '0 12px 35px rgba(16, 185, 129, 0.4)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}>
+                                🔥 חדש! AI מובנה
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                            {benefits.map((benefit, index) => (
+                                <div key={index} style={{
+                                    display: 'flex',
+                                    gap: '24px',
+                                    alignItems: 'flex-start',
+                                    padding: '32px',
+                                    background: 'rgba(255, 255, 255, 0.02)',
+                                    borderRadius: '20px',
+                                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    transition: 'all 0.3s ease'
+                                }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                                        e.currentTarget.style.borderColor = `${benefit.color}30`;
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <div style={{
+                                        minWidth: '70px',
+                                        height: '70px',
+                                        fontSize: '2.2rem',
+                                        background: `linear-gradient(135deg, ${benefit.color}20, ${benefit.color}10)`,
+                                        borderRadius: '20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: `1px solid ${benefit.color}25`,
+                                        boxShadow: `0 8px 32px ${benefit.color}15`
+                                    }}>
+                                        {benefit.icon}
+                                    </div>
+                                    <div>
+                                        <h3 style={{
+                                            fontWeight: '700',
+                                            marginBottom: '12px',
+                                            fontSize: '22px',
+                                            color: '#ffffff'
+                                        }}>
+                                            {benefit.title}
+                                        </h3>
+                                        <p style={{
+                                            color: '#94a3b8',
+                                            lineHeight: 1.6,
+                                            fontSize: '16px'
+                                        }}>
+                                            {benefit.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Testimonials Section */}
+            <div style={{
+                padding: '100px 0',
+                background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
+            }}>
+                <div style={{
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    padding: '0 24px'
+                }}>
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <h2 style={{
+                            fontSize: 'clamp(2.5rem, 4vw, 4rem)',
+                            fontWeight: '800',
+                            marginBottom: '20px',
+                            color: '#ffffff',
+                            letterSpacing: '-0.02em'
+                        }}>
+                            מה אומרים המטפלים
+                        </h2>
+                        <p style={{
+                            fontSize: '20px',
+                            color: '#64748b',
+                            lineHeight: 1.6
+                        }}>
+                            אלפי מטפלים כבר משתמשים ב-LUMA ורואים תוצאות
+                        </p>
+                    </div>
+
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+                        gap: '32px'
+                    }}>
+                        {testimonials.map((testimonial, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.03)',
+                                    backdropFilter: 'blur(30px)',
+                                    padding: '40px',
+                                    borderRadius: '24px',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    transition: 'all 0.4s ease',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-8px)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                    e.currentTarget.style.boxShadow = '0 25px 60px rgba(0, 0, 0, 0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '3px',
+                                    background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981)',
+                                    opacity: 0.6
+                                }} />
+
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    marginBottom: '24px'
                                 }}>
-                                    {feature.title}
+                                    <div style={{
+                                        width: '65px',
+                                        height: '65px',
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: '700',
+                                        fontSize: '22px',
+                                        marginLeft: '16px',
+                                        border: '2px solid rgba(255, 255, 255, 0.1)',
+                                        boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)'
+                                    }}>
+                                        {testimonial.avatar}
+                                    </div>
+                                    <div>
+                                        <h4 style={{
+                                            fontWeight: '700',
+                                            marginBottom: '6px',
+                                            color: '#ffffff',
+                                            fontSize: '18px'
+                                        }}>
+                                            {testimonial.name}
+                                        </h4>
+                                        <p style={{
+                                            color: '#94a3b8',
+                                            fontSize: '14px',
+                                            opacity: 0.8
+                                        }}>
+                                            {testimonial.title}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="feature-desc" style={{
-                                    color: '#5B6B7A',
-                                    lineHeight: '1.5',
-                                    fontSize: 'clamp(0.9rem, 3vw, 1rem)'
+
+                                <div style={{
+                                    display: 'flex',
+                                    marginBottom: '20px',
+                                    gap: '2px'
                                 }}>
-                                    {feature.description}
+                                    {[...Array(testimonial.rating)].map((_, i) => (
+                                        <span key={i} style={{
+                                            color: '#fbbf24',
+                                            fontSize: '18px',
+                                            filter: 'drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3))'
+                                        }}>
+                                            ★
+                                        </span>
+                                    ))}
                                 </div>
-                            </article>
+
+                                <p style={{
+                                    fontSize: '16px',
+                                    lineHeight: 1.8,
+                                    fontStyle: 'italic',
+                                    color: '#e2e8f0'
+                                }}>
+                                    "{testimonial.text}"
+                                </p>
+                            </div>
                         ))}
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* CTA Section */}
-            <section style={{
-                background: '#f8f9fa',
-                padding: '40px 16px',
-                textAlign: 'center',
-                width: '100%',
-                boxSizing: 'border-box'
+            {/* FAQ Section */}
+            <div style={{
+                padding: '100px 0',
+                background: '#0B1426'
             }}>
+                <div style={{
+                    maxWidth: '900px',
+                    margin: '0 auto',
+                    padding: '0 24px'
+                }}>
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <h2 style={{
+                            fontSize: 'clamp(2.5rem, 4vw, 4rem)',
+                            fontWeight: '800',
+                            color: '#ffffff',
+                            letterSpacing: '-0.02em'
+                        }}>
+                            שאלות נפוצות
+                        </h2>
+                    </div>
+
+                    {faqs.map((faq, index) => (
+                        <div
+                            key={index}
+                            style={{
+                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                borderRadius: '20px',
+                                marginBottom: '20px',
+                                overflow: 'hidden',
+                                background: 'rgba(255, 255, 255, 0.02)',
+                                backdropFilter: 'blur(10px)',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <div
+                                onClick={() => setActiveAccordion(activeAccordion === index ? null : index)}
+                                style={{
+                                    padding: '28px 32px',
+                                    cursor: 'pointer',
+                                    fontWeight: '700',
+                                    fontSize: '18px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    color: '#ffffff',
+                                    transition: 'background 0.3s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                }}
+                            >
+                                {faq.question}
+                                <span style={{
+                                    transform: activeAccordion === index ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.3s ease',
+                                    color: '#3b82f6',
+                                    fontSize: '20px'
+                                }}>
+                                    ▼
+                                </span>
+                            </div>
+                            <div style={{
+                                maxHeight: activeAccordion === index ? '300px' : '0',
+                                overflow: 'hidden',
+                                transition: 'all 0.3s ease'
+                            }}>
+                                <div style={{
+                                    padding: '0 32px 28px',
+                                    fontSize: '16px',
+                                    lineHeight: 1.8,
+                                    color: '#94a3b8'
+                                }}>
+                                    {faq.answer}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Final CTA Section */}
+            <div style={{
+                padding: '100px 0',
+                background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)',
+                position: 'relative',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `
+            radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 70%),
+            linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%)
+          `
+                }} />
+
                 <div style={{
                     maxWidth: '800px',
                     margin: '0 auto',
-                    padding: '0 16px',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    padding: '0 24px',
+                    position: 'relative',
+                    zIndex: 2
                 }}>
-                    <h3 style={{
-                        fontSize: 'clamp(1.3rem, 6vw, 2rem)',
-                        marginBottom: '16px',
-                        color: '#0A3D62',
-                        fontWeight: '600',
-                        lineHeight: '1.3'
+                    <h2 style={{
+                        fontSize: 'clamp(2.8rem, 4vw, 4.5rem)',
+                        fontWeight: '800',
+                        marginBottom: '28px',
+                        background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1.1
                     }}>
-                        מוכנים להתחיל?
-                    </h3>
-                    <p style={{
-                        fontSize: 'clamp(1rem, 3vw, 1.2rem)',
-                        color: '#5B6B7A',
-                        marginBottom: '24px',
-                        lineHeight: '1.5'
-                    }}>
-                        הצטרפו למאות מטפלות שכבר משתמשות בפלטפורמה שלנו
-                    </p>
-                    <button
-                        onClick={() => navigate('/register')}
-                        style={{
-                            background: 'linear-gradient(135deg, #0BB5CF 0%, #19C7DC 100%)',
-                            color: 'white',
-                            border: 'none',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            fontSize: 'clamp(1rem, 3vw, 1.1rem)',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'transform 0.3s ease',
-                            width: '100%',
-                            maxWidth: '300px',
-                            minHeight: '48px'
-                        }}
-                    >
-                        הרשמה חינם
-                    </button>
-                </div>
-            </section>
+                        מוכנים להפוך למטפלים הכי יעילים?
+                    </h2>
 
-            <Footer />
+                    <p style={{
+                        fontSize: '22px',
+                        color: '#94a3b8',
+                        marginBottom: '48px',
+                        lineHeight: 1.6,
+                        maxWidth: '600px',
+                        margin: '0 auto 48px'
+                    }}>
+                        הצטרפו לאלפי המטפלים שכבר חוסכים זמן ומרוויחים יותר
+                    </p>
+
+                    <div style={{
+                        display: 'flex',
+                        gap: '24px',
+                        justifyContent: 'center',
+                        marginBottom: '48px',
+                        flexDirection: window.innerWidth > 480 ? 'row' : 'column'
+                    }}>
+                        <button
+                            onClick={() => alert('פתח חשבון - הפניה לעמוד הרשמה')}
+                            style={{
+                                background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                                color: 'white',
+                                padding: '20px 40px',
+                                fontSize: '18px',
+                                fontWeight: '700',
+                                borderRadius: '16px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
+                                letterSpacing: '0.5px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-3px)';
+                                e.target.style.boxShadow = '0 16px 48px rgba(59, 130, 246, 0.6)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 8px 32px rgba(59, 130, 246, 0.4)';
+                            }}
+                        >
+                            התחילו 14 יום חינם
+                        </button>
+
+                        <button style={{
+                            color: 'white',
+                            border: '2px solid rgba(255, 255, 255, 0.25)',
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            padding: '20px 36px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            borderRadius: '16px',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            backdropFilter: 'blur(10px)'
+                        }}
+                            onMouseEnter={(e) => {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+                                e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+                                e.target.style.transform = 'translateY(0)';
+                            }}>
+                            דברו איתנו
+                        </button>
+                    </div>
+
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '40px',
+                        flexWrap: 'wrap',
+                        color: '#94a3b8',
+                        fontSize: '15px'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '20px' }}>💳</span>
+                            <span>ללא כרטיס אשראי</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '20px' }}>✅</span>
+                            <span>תמיכה בעברית 24/7</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '20px' }}>🔒</span>
+                            <span>מאובטח לחלוטין</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Professional Footer */}
+            <ProfessionalFooter />
+
+            {/* Cookie Consent Popup */}
+            <CookieConsentPopup />
         </div>
     );
 };
 
-export default HomePage; 
+export default PremiumHomePage;
