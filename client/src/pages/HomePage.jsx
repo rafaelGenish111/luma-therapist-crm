@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { professionalTokens } from '../theme/professionalTokens';
 import UnifiedHeader from '../components/common/UnifiedHeader';
 import ProfessionalFooter from '../components/common/ProfessionalFooter';
-import CookieConsentPopup from '../components/common/CookieConsentPopup';
+// import CookieConsentPopup from '../components/common/CookieConsentPopup';
 
 const PremiumHomePage = () => {
     const navigate = useNavigate();
@@ -347,7 +347,7 @@ const PremiumHomePage = () => {
                         }}>
                             LUMA היא פלטפורמה מתקדמת שנבנתה במיוחד עבור מטפלים מקצועיים.
                             אנחנו מספקים את כל הכלים הדיגיטליים שאתם צריכים -
-                            CRM חכם, בונה אתרים, ניהול תשלומים ואוטומציה מתקדמת.
+                            CRM חכם, בונה אתרים, ניהול תשלומים, ניהול קמפיינים שיווקיים ואוטומציה מתקדמת.
                         </p>
                     </div>
 
@@ -840,7 +840,7 @@ const PremiumHomePage = () => {
             <ProfessionalFooter />
 
             {/* Cookie Consent Popup */}
-            <CookieConsentPopup />
+            {/* <CookieConsentPopup /> */}
         </div>
     );
 };

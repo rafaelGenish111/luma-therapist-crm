@@ -507,7 +507,7 @@ const AboutPage = () => {
             <ProfessionalFooter />
 
             {/* Cookie Consent Popup */}
-            <CookieConsentPopup />
+            {/* <CookieConsentPopup /> */}
         </div>
     );
 };

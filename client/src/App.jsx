@@ -38,6 +38,7 @@ import TreatmentTypesPage from './pages/dashboard/therapist/TreatmentTypesPage'
 import ImportantInfoPage from './pages/dashboard/therapist/ImportantInfoPage'
 import AccessibilityStatement from './pages/AccessibilityStatement'
 import DesignPage from './pages/dashboard/therapist/DesignPage'
+import CampaignsPage from './pages/dashboard/therapist/CampaignsPage';
 // import WebsiteBuilderPage from './pages/dashboard/WebsiteBuilderPage'
 // import SettingsPage from './pages/dashboard/SettingsPage'
 // import ProfilePage from './pages/dashboard/ProfilePage'
@@ -113,6 +114,7 @@ const App = () => {
                         <Route path="settings" element={<SettingsPage />} />
                         <Route path="health-declarations" element={<HealthDeclarationsPage />} />
                         <Route path="design" element={<DesignPage />} />
+                        <Route path="campaigns" element={<CampaignsPage />} />
                     </Route>
                     <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
                     <Route path="/terms" element={<TermsOfUse />} />

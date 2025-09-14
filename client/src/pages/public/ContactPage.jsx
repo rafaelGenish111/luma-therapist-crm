@@ -753,7 +753,7 @@ const ContactPage = () => {
             <ProfessionalFooter />
 
             {/* Cookie Consent Popup */}
-            <CookieConsentPopup />
+            {/* <CookieConsentPopup /> */}
         </div>
     );
 };

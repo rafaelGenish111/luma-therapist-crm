@@ -54,10 +54,18 @@ const UnifiedHeader = () => {
                     boxShadow: professionalTokens.header.boxShadow,
                     overflow: 'hidden',
                     position: 'relative',
-                    minWidth: isHeaderExpanded ? '500px' : '160px',
-                    maxWidth: isHeaderExpanded ? '500px' : '160px',
-                    height: isHeaderExpanded ? '60px' : '60px',
-                    padding: isHeaderExpanded ? '12px 24px' : '12px 24px'
+                    minWidth: isHeaderExpanded
+                        ? (window.innerWidth > 768 ? '500px' : '90vw')
+                        : (window.innerWidth > 768 ? '160px' : '50px'),
+                    maxWidth: isHeaderExpanded
+                        ? (window.innerWidth > 768 ? '500px' : '90vw')
+                        : (window.innerWidth > 768 ? '160px' : '50px'),
+                    height: isHeaderExpanded
+                        ? (window.innerWidth > 768 ? '60px' : '45px')
+                        : (window.innerWidth > 768 ? '60px' : '45px'),
+                    padding: isHeaderExpanded
+                        ? (window.innerWidth > 768 ? '12px 24px' : '6px 12px')
+                        : (window.innerWidth > 768 ? '12px 24px' : '6px 12px')
                 }}
                 onClick={handleHeaderToggle}
                 onMouseEnter={() => {
@@ -81,7 +89,6 @@ const UnifiedHeader = () => {
                         position: 'absolute',
                         left: '50%',
                         top: '50%',
-                        transform: 'translate(-50%, -50%)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: professionalTokens.spacing.sm,
@@ -92,8 +99,8 @@ const UnifiedHeader = () => {
                     }}
                 >
                     <div style={{
-                        width: '36px',
-                        height: '36px',
+                        width: window.innerWidth > 768 ? '36px' : '28px',
+                        height: window.innerWidth > 768 ? '36px' : '28px',
                         borderRadius: professionalTokens.borderRadius.md,
                         background: `linear-gradient(135deg, ${professionalTokens.colors.primary}, ${professionalTokens.colors.primaryLight})`,
                         display: 'flex',
@@ -165,8 +172,8 @@ const UnifiedHeader = () => {
                         }}
                     >
                         <div style={{
-                            width: '36px',
-                            height: '36px',
+                            width: window.innerWidth > 768 ? '36px' : '24px',
+                            height: window.innerWidth > 768 ? '36px' : '24px',
                             borderRadius: professionalTokens.borderRadius.md,
                             background: `linear-gradient(135deg, ${professionalTokens.colors.primary}, ${professionalTokens.colors.primaryLight})`,
                             display: 'flex',
@@ -200,21 +207,29 @@ const UnifiedHeader = () => {
                                 L
                             </div>
                         </div>
-                        <span style={{
-                            fontSize: '18px',
-                            fontWeight: professionalTokens.typography.fontWeight.bold,
-                            color: professionalTokens.colors.headerText
-                        }}>
-                            LUMA
-                        </span>
+                        {window.innerWidth > 768 && (
+                            <span style={{
+                                fontSize: '18px',
+                                fontWeight: professionalTokens.typography.fontWeight.bold,
+                                color: professionalTokens.colors.headerText
+                            }}>
+                                LUMA
+                            </span>
+                        )}
                     </div>
 
                     {/* Navigation Items */}
                     <div style={{
                         display: 'flex',
-                        gap: professionalTokens.spacing.lg,
-                        alignItems: 'center'
-                    }}>
+                        gap: window.innerWidth > 768 ? professionalTokens.spacing.lg : '2px',
+                        alignItems: 'center',
+                        flexWrap: 'nowrap',
+                        overflowX: 'auto',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        WebkitScrollbar: { display: 'none' }
+                    }}
+                        className="no-scrollbar">
                         {navigationItems.map((item, index) => (
                             <button
                                 key={item.key}
@@ -228,12 +243,12 @@ const UnifiedHeader = () => {
                                     color: isActiveRoute(item.path)
                                         ? professionalTokens.colors.primaryLight
                                         : 'rgba(255, 255, 255, 0.8)',
-                                    fontSize: '14px',
+                                    fontSize: window.innerWidth > 768 ? '14px' : '9px',
                                     fontWeight: isActiveRoute(item.path)
                                         ? professionalTokens.typography.fontWeight.semibold
                                         : professionalTokens.typography.fontWeight.medium,
                                     cursor: 'pointer',
-                                    padding: '8px 16px',
+                                    padding: window.innerWidth > 768 ? '8px 16px' : '3px 6px',
                                     borderRadius: professionalTokens.borderRadius.md,
                                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                                     position: 'relative',

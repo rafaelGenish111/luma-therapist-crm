@@ -28,6 +28,7 @@ const chargeRoutes = require('./routes/charges');
 const documentRoutes = require('./routes/documents');
 const communicationRoutes = require('./routes/communications');
 const hookRoutes = require('./routes/hooks');
+const campaignRoutes = require('./routes/campaigns');
 const bookingRoutes = require('./routes/bookings');
 const treatmentTypeRoutes = require('./routes/treatmentTypes');
 const importantInfoRoutes = require('./routes/importantInfo');
@@ -52,15 +53,33 @@ app.use(securityHeaders);
 app.use(compression());
 app.use(morgan('combined'));
 app.use(validateRequest);
-app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:8000',
-    credentials: true
-}));
+
+// עדכון CORS לתמיכה בפרודקשן
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? [
+            process.env.CLIENT_URL,
+            process.env.FRONTEND_URL,
+            // הוסף כאן את הדומיין של הפרונטאנד שלך
+            'https://your-frontend-domain.vercel.app'
+        ]
+        : [
+            'http://localhost:8000',
+            'http://localhost:3000',
+            'http://127.0.0.1:8000',
+            'http://127.0.0.1:3000'
+        ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+    max: process.env.NODE_ENV === 'production' ? 200 : 100 // יותר requests בפרודקשן
 });
 app.use('/api/', limiter);
 
@@ -81,6 +100,7 @@ app.use('/api/charges', chargeRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/communications', communicationRoutes);
 app.use('/api/hooks', hookRoutes);
+app.use('/api/campaigns', campaignRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/treatment-types', treatmentTypeRoutes);
 app.use('/api/important-info', importantInfoRoutes);
@@ -97,7 +117,21 @@ app.use('/api/integrations/calendly', calendlyRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        version: '1.0.0'
+    });
+});
+
+// Root route for Vercel
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Wellness Platform API',
+        status: 'running',
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
 // DEV test email route (protect/remove in production)
@@ -127,39 +161,70 @@ app.use('*', (req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
-// Start server
-const startServer = async () => {
-    try {
-        await connectDB();
+// Initialize database connection
+let isConnected = false;
 
-        // הפעלת עבודות מתוזמנות
-        scheduledTasks.startAll();
+const initializeApp = async () => {
+    if (!isConnected) {
+        try {
+            await connectDB();
+            isConnected = true;
+            console.log('📦 Database connected successfully');
 
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT}`);
-            console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`🌐 Access from other devices: http://192.168.150.133:${PORT}`);
-            console.log('⏰ Scheduled tasks are running');
-        });
-    } catch (error) {
-        console.error('❌ Failed to start server:', error);
-        process.exit(1);
+            // הפעלת עבודות מתוזמנות רק אם לא ב-Vercel
+            if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+                scheduledTasks.startAll();
+                console.log('⏰ Scheduled tasks started');
+            } else {
+                console.log('⏰ Scheduled tasks disabled in serverless environment');
+            }
+        } catch (error) {
+            console.error('❌ Failed to connect to database:', error);
+        }
     }
 };
 
-startServer();
+// For local development
+if (require.main === module) {
+    const startServer = async () => {
+        try {
+            await initializeApp();
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('🛑 SIGTERM received. Shutting down gracefully...');
-    scheduledTasks.stopAll();
-    process.exit(0);
+            const server = app.listen(PORT, '0.0.0.0', () => {
+                console.log(`🚀 Server running on port ${PORT}`);
+                console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(`🌐 Access from other devices: http://192.168.150.133:${PORT}`);
+                }
+            });
+
+            // Graceful shutdown
+            const gracefulShutdown = () => {
+                console.log('🛑 Shutting down gracefully...');
+                scheduledTasks.stopAll();
+                server.close(() => {
+                    console.log('💤 Server closed');
+                    process.exit(0);
+                });
+            };
+
+            process.on('SIGTERM', gracefulShutdown);
+            process.on('SIGINT', gracefulShutdown);
+
+        } catch (error) {
+            console.error('❌ Failed to start server:', error);
+            process.exit(1);
+        }
+    };
+
+    startServer();
+}
+
+// For Vercel - initialize on first request
+app.use(async (req, res, next) => {
+    await initializeApp();
+    next();
 });
 
-process.on('SIGINT', () => {
-    console.log('🛑 SIGINT received. Shutting down gracefully...');
-    scheduledTasks.stopAll();
-    process.exit(0);
-});
-
-module.exports = app; 
+// Export for Vercel
+module.exports = app;

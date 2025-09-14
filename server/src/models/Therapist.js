@@ -634,6 +634,25 @@ const therapistSchema = new mongoose.Schema({
     homeSummary: {
         type: String,
         default: ''
+    },
+
+    // הגדרות קמפיינים
+    campaignSettings: {
+        monthlyEmailLimit: {
+            type: Number,
+            default: function () {
+                switch (this.subscription?.plan) {
+                    case 'free': return 100;
+                    case 'basic': return 500;
+                    case 'premium': return 2000;
+                    case 'extended': return 5000;
+                    case 'enterprise': return -1;
+                    default: return 100;
+                }
+            }
+        },
+        emailsSentThisMonth: { type: Number, default: 0 },
+        lastResetDate: { type: Date, default: Date.now }
     }
 }, {
     timestamps: true,

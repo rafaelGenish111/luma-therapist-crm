@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { professionalTokens } from '../../theme/professionalTokens';
 import UnifiedHeader from '../../components/common/UnifiedHeader';
-import CookieConsentPopup from '../../components/common/CookieConsentPopup';
+// import CookieConsentPopup from '../../components/common/CookieConsentPopup';
 
 const ServicesPage = () => {
     const navigate = useNavigate();
@@ -41,6 +41,7 @@ const ServicesPage = () => {
                 'ניהול תשלומים',
                 'הצהרות בריאות דיגיטליות',
                 'אתר מקצועי + 5 תבניות',
+                'ניהול קמפיינים שיווקיים',
                 'דוחות ואנליטיקה',
                 'תמיכה טלפונית'
             ],
@@ -331,7 +332,7 @@ const ServicesPage = () => {
             </div>
 
             {/* Cookie Consent Popup */}
-            <CookieConsentPopup />
+            {/* <CookieConsentPopup /> */}
         </div>
     );
 };
