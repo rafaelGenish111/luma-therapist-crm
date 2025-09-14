@@ -10,11 +10,19 @@ class ApiClient {
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
 
+        // הוספת Authorization header אם יש token
+        const token = localStorage.getItem('accessToken');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
+            headers,
             credentials: 'include', // חשוב לCORS
             ...options,
         };
@@ -27,6 +35,12 @@ class ApiClient {
             const response = await fetch(url, config);
 
             if (!response.ok) {
+                // טיפול בשגיאות 401 - מחיקת token וניתוב להתחברות
+                if (response.status === 401) {
+                    localStorage.removeItem('accessToken');
+                    // אפשר להוסיף כאן ניתוב להתחברות
+                    // window.location.href = '/login';
+                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 

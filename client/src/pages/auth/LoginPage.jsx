@@ -64,7 +64,7 @@ const LoginPage = () => {
             // איפוס סשן קודם כדי למנוע הדבקה ממשתמש אחר
             try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' } }); } catch { }
             const res = await login(form.email, form.password);
-            if (res.success && (res.data.user.role || res.data.user.userType)) {
+            if (res.success && (res.data?.user?.role || res.data?.user?.userType)) {
                 navigate(roleRedirect(res.data.user.role || res.data.user.userType), { replace: true });
             } else {
                 setError(res.error || 'שגיאה בהתחברות');

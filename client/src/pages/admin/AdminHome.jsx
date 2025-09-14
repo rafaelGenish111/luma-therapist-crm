@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid, Card, CardContent, Typography } from '@mui/material';
-import api from '../../services/api';
+import { healthApi } from '../../services/api';
 
 const StatCard = ({ title, value }) => (
     <Card>
@@ -16,8 +16,13 @@ const AdminHome = () => {
 
     React.useEffect(() => {
         (async () => {
-            const res = await api.get('/admin/system/status');
-            setStatus(res.data?.data);
+            try {
+                const res = await healthApi.check();
+                setStatus(res);
+            } catch (error) {
+                console.error('Failed to fetch system status:', error);
+                setStatus({ db: 'Error', stats: { therapists: 'Error', clients: 'Error' } });
+            }
         })();
     }, []);
 

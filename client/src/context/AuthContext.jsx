@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import api from '../services/api';
+import { authApi } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -78,9 +78,9 @@ export const AuthProvider = ({ children }) => {
         }
         const fetchUser = async () => {
             try {
-                const res = await api.get('/auth/me');
-                setUser(res.data.data.user || null);
-                if (!res.data.data.user) {
+                const res = await authApi.profile();
+                setUser(res.data?.user || null);
+                if (!res.data?.user) {
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('lastActivity');
                 } else {
@@ -100,18 +100,21 @@ export const AuthProvider = ({ children }) => {
     // התחברות
     const login = async (email, password) => {
         console.log('Login function called with:', { email, password });
-        const res = await api.post('/auth/login', { email, password });
+        const res = await authApi.login({ email, password });
         console.log('Raw response:', res);
-        console.log('Login response:', res.data);
-        console.log('res.data.success:', res.data.success);
-        if (res.data.success) {
+        console.log('Login response:', res);
+        console.log('res.success:', res.success);
+        if (res.success) {
             console.log('Inside success block');
-            console.log('Setting user:', res.data.data.user);
-            console.log('Setting accessToken:', res.data.data.accessToken);
-            setUser(res.data.data.user);
-            setAccessToken(res.data.data.accessToken);
+            console.log('Setting user:', res.data?.user);
+            console.log('Setting accessToken:', res.data?.accessToken);
+            setUser(res.data?.user);
+            setAccessToken(res.data?.accessToken);
+            console.log('User set to:', res.data?.user);
+            console.log('User role:', res.data?.user?.role);
+            console.log('User userType:', res.data?.user?.userType);
             console.log('About to save to localStorage');
-            localStorage.setItem('accessToken', res.data.data.accessToken);
+            localStorage.setItem('accessToken', res.data?.accessToken);
             localStorage.setItem('lastActivity', Date.now().toString());
             console.log('accessToken saved to localStorage:', localStorage.getItem('accessToken'));
         } else {
@@ -123,18 +126,18 @@ export const AuthProvider = ({ children }) => {
     // הרשמה
     const register = async (data) => {
         try {
-            const res = await api.post('/auth/register', data);
-            console.log('Register response:', res.data);
-            if (res.data.success) {
-                console.log('Setting user:', res.data.data.user);
-                console.log('Setting accessToken:', res.data.data.accessToken);
-                setUser(res.data.data.user);
-                setAccessToken(res.data.data.accessToken);
-                localStorage.setItem('accessToken', res.data.data.accessToken);
+            const res = await authApi.register(data);
+            console.log('Register response:', res);
+            if (res.success) {
+                console.log('Setting user:', res.data?.user);
+                console.log('Setting accessToken:', res.data?.accessToken);
+                setUser(res.data?.user);
+                setAccessToken(res.data?.accessToken);
+                localStorage.setItem('accessToken', res.data?.accessToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
                 console.log('accessToken saved to localStorage:', localStorage.getItem('accessToken'));
             }
-            return res.data;
+            return res;
         } catch (err) {
             // נחזיר את הודעת השגיאה המפורטת מהשרת (כולל details)
             if (err.response && err.response.data) {
@@ -152,7 +155,7 @@ export const AuthProvider = ({ children }) => {
         setShowSessionWarning(false);
 
         try {
-            await api.post('/auth/logout');
+            await authApi.logout();
         } catch (error) {
             console.log('Logout error:', error);
         }
@@ -166,15 +169,15 @@ export const AuthProvider = ({ children }) => {
     // רענון טוקן
     const refresh = async () => {
         try {
-            const res = await api.post('/auth/refresh');
-            if (res.data?.success && res.data?.data?.accessToken) {
-                const newToken = res.data.data.accessToken;
+            const res = await authApi.refreshToken();
+            if (res?.success && res?.data?.accessToken) {
+                const newToken = res.data.accessToken;
                 setAccessToken(newToken);
                 localStorage.setItem('accessToken', newToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
                 // למשוך את המשתמש מחדש
-                const me = await api.get('/auth/me');
-                setUser(me.data?.data?.user || null);
+                const me = await authApi.profile();
+                setUser(me.data?.user || null);
                 return true;
             }
         } catch {

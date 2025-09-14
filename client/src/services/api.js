@@ -5,7 +5,7 @@ export const authApi = {
     login: (credentials) => apiClient.post('/api/auth/login', credentials),
     register: (userData) => apiClient.post('/api/auth/register', userData),
     logout: () => apiClient.post('/api/auth/logout'),
-    profile: () => apiClient.get('/api/auth/profile'),
+    profile: () => apiClient.get('/api/auth/me'),
     refreshToken: () => apiClient.post('/api/auth/refresh'),
 };
 
