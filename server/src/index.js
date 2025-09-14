@@ -61,7 +61,7 @@ const corsOptions = {
             process.env.CLIENT_URL,
             process.env.FRONTEND_URL,
             // הוסף כאן את הדומיין של הפרונטאנד שלך
-            'https://your-frontend-domain.vercel.app'
+            'https://luma-therapist-crm-frontend.vercel.app',
         ]
         : [
             'http://localhost:8000',
