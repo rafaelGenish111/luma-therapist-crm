@@ -275,6 +275,34 @@ const PremiumHomePage = () => {
                                 התחילו חינם היום →
                             </button>
 
+                            <button
+                                onClick={() => navigate('/login')}
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    color: 'white',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    padding: '20px 32px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    backdropFilter: 'blur(10px)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.12)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                    e.target.style.transform = 'translateY(-2px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                    e.target.style.transform = 'translateY(0)';
+                                }}
+                            >
+                                התחברו
+                            </button>
+
                             <button style={{
                                 background: 'rgba(255, 255, 255, 0.08)',
                                 color: 'white',
@@ -759,7 +787,7 @@ const PremiumHomePage = () => {
                         flexDirection: window.innerWidth > 480 ? 'row' : 'column'
                     }}>
                         <button
-                            onClick={() => alert('פתח חשבון - הפניה לעמוד הרשמה')}
+                            onClick={() => navigate('/register')}
                             style={{
                                 background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
                                 color: 'white',
@@ -783,6 +811,34 @@ const PremiumHomePage = () => {
                             }}
                         >
                             התחילו 14 יום חינם
+                        </button>
+
+                        <button
+                            onClick={() => navigate('/login')}
+                            style={{
+                                color: 'white',
+                                border: '2px solid rgba(255, 255, 255, 0.25)',
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                padding: '20px 36px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                borderRadius: '16px',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                backdropFilter: 'blur(10px)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+                                e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+                                e.target.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            התחברו
                         </button>
 
                         <button style={{
