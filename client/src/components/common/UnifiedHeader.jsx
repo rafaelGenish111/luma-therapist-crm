@@ -305,6 +305,37 @@ const UnifiedHeader = () => {
                                 )}
                             </button>
                         ))}
+                        
+                        {/* Login Button */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleNavigation('/login');
+                            }}
+                            style={{
+                                background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: isMobile ? '12px' : '14px',
+                                fontWeight: professionalTokens.typography.fontWeight.semibold,
+                                cursor: 'pointer',
+                                padding: isMobile ? '8px 16px' : '10px 20px',
+                                borderRadius: professionalTokens.borderRadius.md,
+                                transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                                boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                                marginLeft: isMobile ? '8px' : '16px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)';
+                            }}
+                        >
+                            התחברו
+                        </button>
                     </div>
                 </div>
             </div>
