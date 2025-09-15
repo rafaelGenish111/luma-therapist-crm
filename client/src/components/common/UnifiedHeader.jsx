@@ -191,7 +191,7 @@ const UnifiedHeader = () => {
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
                         WebkitScrollbar: { display: 'none' },
-                        marginRight: professionalTokens.spacing.lg // Match spacing between buttons
+                        marginRight: '120px' // More space to prevent overlap with logo
                     }}
                         className="no-scrollbar">
                         {navigationItems.map((item, index) => (
