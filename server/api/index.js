@@ -254,6 +254,55 @@ app.get('/api/db-check', async (req, res) => {
     }
 });
 
+// Add user endpoint for testing
+app.post('/api/add-user', async (req, res) => {
+    try {
+        const { email, password, firstName, lastName, role } = req.body;
+        
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'User already exists' 
+            });
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 12);
+        
+        // Create user
+        const user = new User({
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            firstName,
+            lastName,
+            role: role || 'therapist'
+        });
+        
+        await user.save();
+        
+        res.json({
+            success: true,
+            message: 'User created successfully',
+            user: {
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role
+            }
+        });
+        
+    } catch (error) {
+        console.error('Add user error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Internal server error' 
+        });
+    }
+});
+
 // Default route
 app.get('/', (req, res) => {
     res.json({ 
