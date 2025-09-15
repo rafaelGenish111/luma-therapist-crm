@@ -154,7 +154,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <PersonAdd color="primary" />
-                <Typography variant="h6">הזמן מטפלת חדשה</Typography>
+                הזמן מטפלת חדשה
             </DialogTitle>
 
             <DialogContent>

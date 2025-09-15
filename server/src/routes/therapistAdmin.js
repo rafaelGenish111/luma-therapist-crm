@@ -3,7 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { authorize } = require('../middleware/authorize');
+const { auth } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
 const { sendEmail } = require('../services/emailService');
 
 // Mock data for now - in production this would come from database
@@ -12,7 +13,7 @@ let approvedTherapists = [];
 let therapistInvitations = [];
 
 // Get pending therapists
-router.get('/pending', authorize(['ADMIN']), async (req, res) => {
+router.get('/pending', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         res.json({
             success: true,
@@ -28,7 +29,7 @@ router.get('/pending', authorize(['ADMIN']), async (req, res) => {
 });
 
 // Get approved therapists
-router.get('/approved', authorize(['ADMIN']), async (req, res) => {
+router.get('/approved', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         res.json({
             success: true,
@@ -44,7 +45,7 @@ router.get('/approved', authorize(['ADMIN']), async (req, res) => {
 });
 
 // Get therapist statistics
-router.get('/statistics', authorize(['ADMIN']), async (req, res) => {
+router.get('/statistics', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         const stats = {
             total: pendingTherapists.length + approvedTherapists.length,
@@ -52,7 +53,7 @@ router.get('/statistics', authorize(['ADMIN']), async (req, res) => {
             approved: approvedTherapists.length,
             active: approvedTherapists.filter(t => t.status === 'active').length
         };
-        
+
         res.json({
             success: true,
             data: stats
@@ -67,10 +68,10 @@ router.get('/statistics', authorize(['ADMIN']), async (req, res) => {
 });
 
 // Send invitation to therapist
-router.post('/invite', authorize(['ADMIN']), async (req, res) => {
+router.post('/invite', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         const { email, firstName, lastName, message, specializations, expectedTherapistType } = req.body;
-        
+
         // Validate required fields
         if (!email || !firstName || !lastName) {
             return res.status(400).json({
@@ -78,10 +79,10 @@ router.post('/invite', authorize(['ADMIN']), async (req, res) => {
                 error: 'Email, first name, and last name are required'
             });
         }
-        
+
         // Generate unique invitation token
         const invitationToken = crypto.randomBytes(32).toString('hex');
-        
+
         // Create invitation record
         const invitation = {
             id: crypto.randomUUID(),
@@ -97,14 +98,14 @@ router.post('/invite', authorize(['ADMIN']), async (req, res) => {
             createdAt: new Date(),
             createdBy: req.user.id
         };
-        
+
         // Store invitation
         therapistInvitations.push(invitation);
-        
+
         // Send invitation email
         const registrationLink = `${process.env.CLIENT_URL || 'http://localhost:8000'}/therapist/register?token=${invitationToken}`;
         const emailContent = invitation.message.replace('[קישור ההרשמה יתווסף אוטומטית]', registrationLink);
-        
+
         try {
             await sendEmail({
                 to: email,
@@ -131,7 +132,7 @@ router.post('/invite', authorize(['ADMIN']), async (req, res) => {
             console.error('Error sending invitation email:', emailError);
             // Don't fail the request if email fails
         }
-        
+
         res.json({
             success: true,
             message: 'Invitation sent successfully',
@@ -140,7 +141,7 @@ router.post('/invite', authorize(['ADMIN']), async (req, res) => {
                 expiresAt: invitation.expiresAt
             }
         });
-        
+
     } catch (error) {
         console.error('Error sending invitation:', error);
         res.status(500).json({
@@ -151,10 +152,10 @@ router.post('/invite', authorize(['ADMIN']), async (req, res) => {
 });
 
 // Approve therapist
-router.post('/:id/approve', authorize(['ADMIN']), async (req, res) => {
+router.post('/:id/approve', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Find therapist in pending list
         const therapistIndex = pendingTherapists.findIndex(t => t._id === id);
         if (therapistIndex === -1) {
@@ -163,9 +164,9 @@ router.post('/:id/approve', authorize(['ADMIN']), async (req, res) => {
                 error: 'Therapist not found'
             });
         }
-        
+
         const therapist = pendingTherapists[therapistIndex];
-        
+
         // Move to approved list
         const approvedTherapist = {
             ...therapist,
@@ -173,10 +174,10 @@ router.post('/:id/approve', authorize(['ADMIN']), async (req, res) => {
             approvedAt: new Date(),
             approvedBy: req.user.id
         };
-        
+
         approvedTherapists.push(approvedTherapist);
         pendingTherapists.splice(therapistIndex, 1);
-        
+
         // Send approval email
         try {
             await sendEmail({
@@ -201,13 +202,13 @@ router.post('/:id/approve', authorize(['ADMIN']), async (req, res) => {
         } catch (emailError) {
             console.error('Error sending approval email:', emailError);
         }
-        
+
         res.json({
             success: true,
             message: 'Therapist approved successfully',
             data: approvedTherapist
         });
-        
+
     } catch (error) {
         console.error('Error approving therapist:', error);
         res.status(500).json({
@@ -218,11 +219,11 @@ router.post('/:id/approve', authorize(['ADMIN']), async (req, res) => {
 });
 
 // Reject therapist
-router.post('/:id/reject', authorize(['ADMIN']), async (req, res) => {
+router.post('/:id/reject', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         const { id } = req.params;
         const { reason } = req.body;
-        
+
         // Find therapist in pending list
         const therapistIndex = pendingTherapists.findIndex(t => t._id === id);
         if (therapistIndex === -1) {
@@ -231,12 +232,12 @@ router.post('/:id/reject', authorize(['ADMIN']), async (req, res) => {
                 error: 'Therapist not found'
             });
         }
-        
+
         const therapist = pendingTherapists[therapistIndex];
-        
+
         // Remove from pending list
         pendingTherapists.splice(therapistIndex, 1);
-        
+
         // Send rejection email
         try {
             await sendEmail({
@@ -257,12 +258,12 @@ router.post('/:id/reject', authorize(['ADMIN']), async (req, res) => {
         } catch (emailError) {
             console.error('Error sending rejection email:', emailError);
         }
-        
+
         res.json({
             success: true,
             message: 'Therapist rejected successfully'
         });
-        
+
     } catch (error) {
         console.error('Error rejecting therapist:', error);
         res.status(500).json({
@@ -273,11 +274,11 @@ router.post('/:id/reject', authorize(['ADMIN']), async (req, res) => {
 });
 
 // Update therapist status
-router.patch('/:id/status', authorize(['ADMIN']), async (req, res) => {
+router.patch('/:id/status', auth, authorize(['ADMIN']), async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        
+
         // Find therapist in approved list
         const therapist = approvedTherapists.find(t => t._id === id);
         if (!therapist) {
@@ -286,17 +287,17 @@ router.patch('/:id/status', authorize(['ADMIN']), async (req, res) => {
                 error: 'Therapist not found'
             });
         }
-        
+
         // Update status
         therapist.status = status;
         therapist.updatedAt = new Date();
-        
+
         res.json({
             success: true,
             message: 'Therapist status updated successfully',
             data: therapist
         });
-        
+
     } catch (error) {
         console.error('Error updating therapist status:', error);
         res.status(500).json({

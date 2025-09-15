@@ -22,16 +22,35 @@ const authorize = (permissions = []) => {
         const userRole = req.user.role.toUpperCase();
         const userPermissions = roles[userRole] || [];
 
+        console.log('Authorize middleware - userRole:', userRole);
+        console.log('Authorize middleware - userPermissions:', userPermissions);
+        console.log('Authorize middleware - required permissions:', permissions);
+
         // SUPER_ADMIN יכול הכל
         if (userPermissions.includes('*')) {
+            console.log('Authorize middleware - SUPER_ADMIN access granted');
             return next();
         }
 
         // בדיקה לפי תפקיד או לפי הרשאה ספציפית
         const hasRolePermission = permissions.some(p => {
             const roleToCheck = p.toUpperCase();
-            return roleToCheck === userRole || userPermissions.includes(p);
+            const hasRole = roleToCheck === userRole;
+            const hasPermission = userPermissions.includes(p);
+            const hasPermissionUpper = userPermissions.includes(roleToCheck);
+
+            console.log(`Authorize middleware - checking permission "${p}":`, {
+                roleToCheck,
+                hasRole,
+                hasPermission,
+                hasPermissionUpper,
+                result: hasRole || hasPermission || hasPermissionUpper
+            });
+
+            return hasRole || hasPermission || hasPermissionUpper;
         });
+
+        console.log('Authorize middleware - hasRolePermission:', hasRolePermission);
 
         if (!hasRolePermission) {
             return res.status(403).json({
