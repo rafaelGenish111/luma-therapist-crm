@@ -40,7 +40,7 @@ import {
     MoreVert,
     Person,
     Settings,
-    Deactivate
+    PersonOff
 } from '@mui/icons-material';
 import { professionalTokens } from '../../theme/professionalTokens';
 
