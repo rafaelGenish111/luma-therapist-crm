@@ -74,10 +74,10 @@ const UnifiedHeader = () => {
                     overflow: 'hidden',
                     position: 'relative',
                     minWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '700px')
+                        ? (isMobile ? '90vw' : '550px')
                         : (isMobile ? '50px' : '160px'),
                     maxWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '700px')
+                        ? (isMobile ? '90vw' : '550px')
                         : (isMobile ? '50px' : '160px'),
                     height: isHeaderExpanded
                         ? (isMobile ? '50px' : '60px')
@@ -184,14 +184,14 @@ const UnifiedHeader = () => {
                     {/* Navigation Items */}
                     <div style={{
                         display: 'flex',
-                        gap: isMobile ? '6px' : '12px',
+                        gap: isMobile ? '4px' : '8px',
                         alignItems: 'center',
                         flexWrap: 'nowrap',
                         overflowX: 'auto',
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
                         WebkitScrollbar: { display: 'none' },
-                        marginRight: '80px' // Optimized space to prevent overlap with logo
+                        marginRight: '60px' // Minimal space to prevent overlap with logo
                     }}
                         className="no-scrollbar">
                         {navigationItems.map((item, index) => (
