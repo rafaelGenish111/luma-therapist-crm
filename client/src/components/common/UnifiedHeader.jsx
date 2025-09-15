@@ -74,10 +74,10 @@ const UnifiedHeader = () => {
                     overflow: 'hidden',
                     position: 'relative',
                     minWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '500px')
+                        ? (isMobile ? '90vw' : '600px')
                         : (isMobile ? '50px' : '160px'),
                     maxWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '500px')
+                        ? (isMobile ? '90vw' : '600px')
                         : (isMobile ? '50px' : '160px'),
                     height: isHeaderExpanded
                         ? (isMobile ? '50px' : '60px')
@@ -184,14 +184,14 @@ const UnifiedHeader = () => {
                     {/* Navigation Items */}
                     <div style={{
                         display: 'flex',
-                        gap: isMobile ? '8px' : professionalTokens.spacing.lg,
+                        gap: isMobile ? '6px' : '12px',
                         alignItems: 'center',
                         flexWrap: 'nowrap',
                         overflowX: 'auto',
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
                         WebkitScrollbar: { display: 'none' },
-                        marginRight: '120px' // More space to prevent overlap with logo
+                        marginRight: '100px' // Balanced space to prevent overlap with logo
                     }}
                         className="no-scrollbar">
                         {navigationItems.map((item, index) => (
@@ -248,7 +248,7 @@ const UnifiedHeader = () => {
                                 )}
                             </button>
                         ))}
-                        
+
                         {/* Login Button */}
                         <button
                             onClick={(e) => {
