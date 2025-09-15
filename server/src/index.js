@@ -209,6 +209,7 @@ const initializeApp = async () => {
             }
         } catch (error) {
             console.error('❌ Failed to connect to database:', error);
+            throw error; // Throw the error so we can catch it
         }
     }
 };
@@ -255,7 +256,7 @@ app.use(async (req, res, next) => {
     console.log('Vercel request received:', req.method, req.url);
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Vercel:', process.env.VERCEL);
-    
+
     if (!isInitialized) {
         try {
             console.log('Initializing app for first time...');
