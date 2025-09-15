@@ -74,10 +74,10 @@ const UnifiedHeader = () => {
                     overflow: 'hidden',
                     position: 'relative',
                     minWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '650px')
+                        ? (isMobile ? '90vw' : '500px')
                         : (isMobile ? '50px' : '160px'),
                     maxWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '650px')
+                        ? (isMobile ? '90vw' : '500px')
                         : (isMobile ? '50px' : '160px'),
                     height: isHeaderExpanded
                         ? (isMobile ? '50px' : '60px')
@@ -98,7 +98,7 @@ const UnifiedHeader = () => {
                     }
                 }}
             >
-                {/* Single Logo that moves smoothly */}
+                {/* Logo Section - Always Visible in Center when closed */}
                 <div
                     onClick={(e) => {
                         e.stopPropagation();
@@ -106,15 +106,16 @@ const UnifiedHeader = () => {
                     }}
                     style={{
                         position: 'absolute',
-                        right: isHeaderExpanded ? '16px' : '50%', // Equal spacing from edge
+                        left: '50%',
                         top: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         gap: professionalTokens.spacing.sm,
                         transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                        transform: isHeaderExpanded ? 'translateY(-50%)' : 'translate(50%, -50%)',
+                        opacity: isHeaderExpanded ? 0 : 1,
+                        transform: isHeaderExpanded ? 'translate(-50%, -50%) scale(0.8)' : 'translate(-50%, -50%) scale(1)',
                         cursor: 'pointer',
-                        zIndex: 2
+                        zIndex: 1
                     }}
                 >
                     <div style={{
@@ -159,9 +160,7 @@ const UnifiedHeader = () => {
                             fontSize: '18px',
                             fontWeight: professionalTokens.typography.fontWeight.bold,
                             color: professionalTokens.colors.headerText,
-                            transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                            opacity: 1,
-                            transform: 'translateX(0)'
+                            transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                         }}>
                             LUMA
                         </span>
@@ -172,28 +171,82 @@ const UnifiedHeader = () => {
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'space-between',
                     width: '100%',
                     height: '100%',
                     transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                     opacity: isHeaderExpanded ? 1 : 0,
                     transform: isHeaderExpanded ? 'translateY(0)' : 'translateY(-10px)',
-                    paddingLeft: isHeaderExpanded ? '16px' : '0px' // Equal spacing from edge
+                    padding: isHeaderExpanded ? '0 16px' : '0'
                 }}>
+
+                    {/* Logo in Expanded State */}
+                    <div
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/');
+                        }}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: professionalTokens.spacing.sm,
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <div style={{
+                            width: isMobile ? '28px' : '32px',
+                            height: isMobile ? '28px' : '32px',
+                            borderRadius: professionalTokens.borderRadius.md,
+                            background: `linear-gradient(135deg, ${professionalTokens.colors.primary}, ${professionalTokens.colors.primaryLight})`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: professionalTokens.typography.fontWeight.extrabold
+                        }}>
+                            <img
+                                src="/images/luma_logo.png"
+                                alt="Luma Logo"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain'
+                                }}
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
+                            <div style={{
+                                display: 'none',
+                                width: '100%',
+                                height: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: professionalTokens.colors.headerText,
+                                fontSize: '14px',
+                                fontWeight: 'bold'
+                            }}>
+                                L
+                            </div>
+                        </div>
+                        {!isMobile && (
+                            <span style={{
+                                fontSize: '16px',
+                                fontWeight: professionalTokens.typography.fontWeight.bold,
+                                color: professionalTokens.colors.headerText
+                            }}>
+                                LUMA
+                            </span>
+                        )}
+                    </div>
 
                     {/* Navigation Items */}
                     <div style={{
                         display: 'flex',
-                        gap: isMobile ? '8px' : '16px', // Equal spacing between buttons
+                        gap: isMobile ? '8px' : '12px',
                         alignItems: 'center',
-                        flexWrap: 'nowrap',
-                        overflowX: 'auto',
-                        scrollbarWidth: 'none',
-                        msOverflowStyle: 'none',
-                        WebkitScrollbar: { display: 'none' },
-                        marginRight: '16px' // Equal spacing to logo
-                    }}
-                        className="no-scrollbar">
+                        flexWrap: 'nowrap'
+                    }}>
                         {navigationItems.map((item, index) => (
                             <button
                                 key={item.key}
