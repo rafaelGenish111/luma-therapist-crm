@@ -106,13 +106,13 @@ const UnifiedHeader = () => {
                     }}
                     style={{
                         position: 'absolute',
-                        left: isHeaderExpanded ? '20px' : '50%',
+                        right: isHeaderExpanded ? '20px' : '50%',
                         top: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         gap: professionalTokens.spacing.sm,
                         transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                        transform: isHeaderExpanded ? 'translateY(-50%)' : 'translate(-50%, -50%)',
+                        transform: isHeaderExpanded ? 'translateY(-50%)' : 'translate(50%, -50%)',
                         cursor: 'pointer',
                         zIndex: 2
                     }}
@@ -172,13 +172,13 @@ const UnifiedHeader = () => {
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'flex-start',
                     width: '100%',
                     height: '100%',
                     transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                     opacity: isHeaderExpanded ? 1 : 0,
                     transform: isHeaderExpanded ? 'translateY(0)' : 'translateY(-10px)',
-                    paddingRight: isHeaderExpanded ? '20px' : '0px'
+                    paddingLeft: isHeaderExpanded ? '20px' : '0px'
                 }}>
 
                     {/* Navigation Items */}
