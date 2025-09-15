@@ -77,7 +77,7 @@ const corsOptions = {
         console.log('CORS check - Origin:', origin);
         console.log('CORS check - Allowed origins:', allowedOrigins);
         console.log('CORS check - NODE_ENV:', process.env.NODE_ENV);
-        
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             console.log('CORS allowed:', origin);
             callback(null, true);
@@ -214,7 +214,7 @@ const initializeApp = async () => {
 };
 
 // For local development
-if (require.main === module) {
+if (require.main === module || process.env.NODE_ENV === 'development') {
     const startServer = async () => {
         try {
             await initializeApp();
@@ -251,6 +251,9 @@ if (require.main === module) {
 
 // For Vercel - initialize on first request
 app.use(async (req, res, next) => {
+    console.log('Vercel request received:', req.method, req.url);
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Vercel:', process.env.VERCEL);
     await initializeApp();
     next();
 });
