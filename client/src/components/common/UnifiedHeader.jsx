@@ -74,10 +74,10 @@ const UnifiedHeader = () => {
                     overflow: 'hidden',
                     position: 'relative',
                     minWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '550px')
+                        ? (isMobile ? '90vw' : '650px')
                         : (isMobile ? '50px' : '160px'),
                     maxWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '550px')
+                        ? (isMobile ? '90vw' : '650px')
                         : (isMobile ? '50px' : '160px'),
                     height: isHeaderExpanded
                         ? (isMobile ? '50px' : '60px')
@@ -106,7 +106,7 @@ const UnifiedHeader = () => {
                     }}
                     style={{
                         position: 'absolute',
-                        right: isHeaderExpanded ? '20px' : '50%',
+                        right: isHeaderExpanded ? '16px' : '50%', // Equal spacing from edge
                         top: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -178,20 +178,20 @@ const UnifiedHeader = () => {
                     transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                     opacity: isHeaderExpanded ? 1 : 0,
                     transform: isHeaderExpanded ? 'translateY(0)' : 'translateY(-10px)',
-                    paddingLeft: isHeaderExpanded ? '12px' : '0px' // Match button spacing
+                    paddingLeft: isHeaderExpanded ? '16px' : '0px' // Equal spacing from edge
                 }}>
 
                     {/* Navigation Items */}
                     <div style={{
                         display: 'flex',
-                        gap: isMobile ? '4px' : '8px',
+                        gap: isMobile ? '8px' : '16px', // Equal spacing between buttons
                         alignItems: 'center',
                         flexWrap: 'nowrap',
                         overflowX: 'auto',
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
                         WebkitScrollbar: { display: 'none' },
-                        marginRight: '60px' // Minimal space to prevent overlap with logo
+                        marginRight: '16px' // Equal spacing to logo
                     }}
                         className="no-scrollbar">
                         {navigationItems.map((item, index) => (
