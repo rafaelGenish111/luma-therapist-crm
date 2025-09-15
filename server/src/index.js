@@ -43,6 +43,8 @@ const esignRoutes = require('./routes/esign');
 const treatmentSessionsRoutes = require('./routes/treatmentSessions');
 const adminRoutes = require('./routes/admin');
 const calendlyRoutes = require('./routes/calendly');
+const therapistAdminRoutes = require('./routes/therapistAdmin');
+const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const scheduledTasks = require('./services/scheduledTasks');
 
 const app = express();
@@ -141,6 +143,8 @@ app.use('/api/geo', geoRoutes);
 app.use('/api/esign', generalLimiter, esignRoutes);
 app.use('/api/treatment-sessions', treatmentSessionsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/therapists', therapistAdminRoutes);
+app.use('/api/therapists', therapistRegistrationRoutes);
 app.use('/api/calendly', calendlyRoutes);
 app.use('/api/integrations/calendly', calendlyRoutes);
 
