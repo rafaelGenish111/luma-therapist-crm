@@ -74,7 +74,12 @@ const corsOptions = {
                 'http://127.0.0.1:3000'
             ];
 
+        console.log('CORS check - Origin:', origin);
+        console.log('CORS check - Allowed origins:', allowedOrigins);
+        console.log('CORS check - NODE_ENV:', process.env.NODE_ENV);
+        
         if (allowedOrigins.indexOf(origin) !== -1) {
+            console.log('CORS allowed:', origin);
             callback(null, true);
         } else {
             console.log('CORS blocked origin:', origin);
@@ -88,6 +93,17 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Handle preflight requests manually
+app.options('*', (req, res) => {
+    console.log('OPTIONS request for:', req.url);
+    console.log('Origin:', req.headers.origin);
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.status(200).end();
+});
 
 // Rate limiting
 const limiter = rateLimit({
