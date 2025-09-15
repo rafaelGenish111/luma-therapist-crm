@@ -74,10 +74,10 @@ const UnifiedHeader = () => {
                     overflow: 'hidden',
                     position: 'relative',
                     minWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '600px')
+                        ? (isMobile ? '90vw' : '700px')
                         : (isMobile ? '50px' : '160px'),
                     maxWidth: isHeaderExpanded
-                        ? (isMobile ? '90vw' : '600px')
+                        ? (isMobile ? '90vw' : '700px')
                         : (isMobile ? '50px' : '160px'),
                     height: isHeaderExpanded
                         ? (isMobile ? '50px' : '60px')
@@ -191,7 +191,7 @@ const UnifiedHeader = () => {
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
                         WebkitScrollbar: { display: 'none' },
-                        marginRight: '100px' // Balanced space to prevent overlap with logo
+                        marginRight: '80px' // Optimized space to prevent overlap with logo
                     }}
                         className="no-scrollbar">
                         {navigationItems.map((item, index) => (
