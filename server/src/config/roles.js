@@ -10,6 +10,8 @@ const roles = {
         'view_scheduled_tasks',
         'manage_all_users',
         'manage_all_appointments',
+        'manage_all_clients',
+        'manage_own_clients',
         'view_system_analytics'
     ],
     THERAPIST: [

@@ -69,4 +69,11 @@ export default {
     appointments: appointmentsApi,
     campaigns: campaignsApi,
     health: healthApi,
+    
+    // Direct API methods for backward compatibility
+    get: (endpoint, options) => apiClient.get(endpoint, options),
+    post: (endpoint, data, options) => apiClient.post(endpoint, data, options),
+    put: (endpoint, data, options) => apiClient.put(endpoint, data, options),
+    delete: (endpoint, options) => apiClient.delete(endpoint, options),
+    patch: (endpoint, data, options) => apiClient.patch(endpoint, data, options),
 }; 
