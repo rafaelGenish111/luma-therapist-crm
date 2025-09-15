@@ -250,13 +250,28 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
     startServer();
 }
 
+// Simple test endpoint for Vercel
+app.get('/api/test', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'Server is working',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV
+    });
+});
+
 // For Vercel - initialize on first request
 let isInitialized = false;
 app.use(async (req, res, next) => {
     console.log('Vercel request received:', req.method, req.url);
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Vercel:', process.env.VERCEL);
-
+    
+    // Skip initialization for test endpoint
+    if (req.url === '/api/test') {
+        return next();
+    }
+    
     if (!isInitialized) {
         try {
             console.log('Initializing app for first time...');
@@ -265,7 +280,7 @@ app.use(async (req, res, next) => {
             console.log('App initialized successfully');
         } catch (error) {
             console.error('Failed to initialize app:', error);
-            return res.status(500).json({ error: 'Server initialization failed' });
+            return res.status(500).json({ error: 'Server initialization failed', details: error.message });
         }
     }
     next();
