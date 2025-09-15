@@ -234,6 +234,24 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Database check endpoint
+app.get('/api/db-check', async (req, res) => {
+    try {
+        const userCount = await User.countDocuments();
+        res.json({ 
+            status: 'connected', 
+            userCount: userCount,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            status: 'error', 
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // Default route
 app.get('/', (req, res) => {
     res.json({ 
