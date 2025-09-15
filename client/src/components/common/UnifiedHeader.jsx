@@ -160,8 +160,8 @@ const UnifiedHeader = () => {
                             fontWeight: professionalTokens.typography.fontWeight.bold,
                             color: professionalTokens.colors.headerText,
                             transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                            opacity: isHeaderExpanded ? 1 : 0,
-                            transform: isHeaderExpanded ? 'translateX(0)' : 'translateX(-10px)'
+                            opacity: 1,
+                            transform: 'translateX(0)'
                         }}>
                             LUMA
                         </span>
@@ -190,7 +190,8 @@ const UnifiedHeader = () => {
                         overflowX: 'auto',
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
-                        WebkitScrollbar: { display: 'none' }
+                        WebkitScrollbar: { display: 'none' },
+                        marginRight: '80px' // Add space for logo
                     }}
                         className="no-scrollbar">
                         {navigationItems.map((item, index) => (
