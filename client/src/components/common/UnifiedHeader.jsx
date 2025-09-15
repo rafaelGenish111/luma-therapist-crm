@@ -178,7 +178,7 @@ const UnifiedHeader = () => {
                     transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                     opacity: isHeaderExpanded ? 1 : 0,
                     transform: isHeaderExpanded ? 'translateY(0)' : 'translateY(-10px)',
-                    paddingLeft: isHeaderExpanded ? '20px' : '0px'
+                    paddingLeft: isHeaderExpanded ? '12px' : '0px' // Match button spacing
                 }}>
 
                     {/* Navigation Items */}
