@@ -102,9 +102,10 @@ const User = mongoose.model('User', userSchema);
 app.get('/api/test', (req, res) => {
     res.json({ 
         status: 'ok', 
-        message: 'Server is working',
+        message: 'Server is working with auth',
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
+        version: '2.0'
     });
 });
 
