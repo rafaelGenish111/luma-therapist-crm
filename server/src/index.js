@@ -202,8 +202,12 @@ const initializeApp = async () => {
 
             // הפעלת עבודות מתוזמנות רק אם לא ב-Vercel
             if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-                scheduledTasks.startAll();
-                console.log('⏰ Scheduled tasks started');
+                try {
+                    scheduledTasks.startAll();
+                    console.log('⏰ Scheduled tasks started');
+                } catch (error) {
+                    console.log('⚠️ Failed to start scheduled tasks:', error.message);
+                }
             } else {
                 console.log('⏰ Scheduled tasks disabled in serverless environment');
             }
@@ -252,8 +256,8 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
 
 // Simple test endpoint for Vercel
 app.get('/api/test', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         message: 'Server is working',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV
@@ -266,12 +270,12 @@ app.use(async (req, res, next) => {
     console.log('Vercel request received:', req.method, req.url);
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Vercel:', process.env.VERCEL);
-    
+
     // Skip initialization for test endpoint
     if (req.url === '/api/test') {
         return next();
     }
-    
+
     if (!isInitialized) {
         try {
             console.log('Initializing app for first time...');
@@ -292,8 +296,16 @@ module.exports = app;
 // Add error handling for Vercel
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
+    // Don't exit in serverless environment
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+        process.exit(1);
+    }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Don't exit in serverless environment
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+        process.exit(1);
+    }
 });
