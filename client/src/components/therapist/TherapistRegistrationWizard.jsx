@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-    Box, 
-    Stepper, 
-    Step, 
-    StepLabel, 
-    Button, 
-    Typography, 
+import {
+    Box,
+    Stepper,
+    Step,
+    StepLabel,
+    Button,
+    Typography,
     Paper,
     Container,
     LinearProgress
@@ -39,11 +39,11 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
             zipCode: ''
         },
         dateOfBirth: '',
-        
+
         // Password
         password: '',
         confirmPassword: '',
-        
+
         // Professional Details
         therapistType: '',
         specializations: [],
@@ -53,7 +53,7 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
         certifications: [],
         languages: [],
         aboutMe: '',
-        
+
         // Payment Details (Demo)
         paymentMethod: '',
         bankDetails: {
@@ -68,7 +68,7 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
             zipCode: ''
         }
     });
-    
+
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
@@ -90,7 +90,7 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
 
     const validateStep = (stepIndex) => {
         const stepErrors = {};
-        
+
         switch (stepIndex) {
             case 0: // Personal Details
                 if (!formData.firstName?.trim()) stepErrors.firstName = 'שם פרטי נדרש';
@@ -99,7 +99,7 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
                 if (!formData.email?.trim()) stepErrors.email = 'כתובת מייל נדרשת';
                 if (!formData.phone?.trim()) stepErrors.phone = 'מספר טלפון נדרש';
                 break;
-                
+
             case 1: // Password
                 if (!formData.password) stepErrors.password = 'סיסמה נדרשת';
                 if (formData.password !== formData.confirmPassword) {
@@ -109,24 +109,24 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
                     stepErrors.password = 'הסיסמה חייבת להכיל לפחות 8 תווים';
                 }
                 break;
-                
+
             case 2: // Professional Details
                 if (!formData.therapistType) stepErrors.therapistType = 'סוג מטפל נדרש';
                 if (!formData.specializations?.length) stepErrors.specializations = 'לפחות התמחות אחת נדרשת';
                 break;
-                
+
             case 3: // Payment Details
                 if (!formData.paymentMethod) stepErrors.paymentMethod = 'שיטת תשלום נדרשת';
                 break;
         }
-        
+
         setErrors(stepErrors);
         return Object.keys(stepErrors).length === 0;
     };
 
     const handleSubmit = async () => {
         if (!validateStep(activeStep)) return;
-        
+
         setLoading(true);
         try {
             // Here we'll call the API to submit the registration
@@ -141,9 +141,9 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
                     invitationToken
                 })
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 // Show success message and redirect
                 alert('ההרשמה נשלחה בהצלחה! יישלח אליך מייל אימות בקרוב.');
@@ -256,12 +256,12 @@ const TherapistRegistrationWizard = ({ invitationToken }) => {
                         >
                             חזרה
                         </Button>
-                        
+
                         <Button
                             variant="contained"
                             onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
                             disabled={loading}
-                            sx={{ 
+                            sx={{
                                 minWidth: 120,
                                 background: `linear-gradient(135deg, ${professionalTokens.colors.primary}, ${professionalTokens.colors.primaryLight})`
                             }}

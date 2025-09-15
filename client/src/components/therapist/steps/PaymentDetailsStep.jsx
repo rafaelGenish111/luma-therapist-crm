@@ -23,7 +23,7 @@ import { professionalTokens } from '../../../theme/professionalTokens';
 const PaymentDetailsStep = ({ data, onChange, errors }) => {
     const handleChange = (field) => (event) => {
         const value = event.target.value;
-        
+
         if (field.includes('.')) {
             const [parent, child] = field.split('.');
             onChange({
@@ -63,29 +63,29 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
             <Typography variant="h6" gutterBottom sx={{ color: professionalTokens.colors.primary, mb: 3 }}>
                 פרטי תשלום
             </Typography>
-            
+
             <Alert severity="info" sx={{ mb: 3 }}>
                 <Typography variant="body2">
                     🚧 <strong>מצב דמו:</strong> זהו מצב דמו לבדיקת הממשק. באפליקציה הסופית יהיה כאן חיבור למערכת תשלומים אמיתית.
                 </Typography>
             </Alert>
-            
+
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
                         בחרי שיטת תשלום מועדפת
                     </Typography>
-                    
+
                     <FormControl error={!!errors.paymentMethod} sx={{ width: '100%' }}>
                         <RadioGroup
                             value={data.paymentMethod || ''}
                             onChange={handleChange('paymentMethod')}
                         >
                             {paymentMethods.map((method) => (
-                                <Card 
-                                    key={method.value} 
-                                    sx={{ 
-                                        mb: 2, 
+                                <Card
+                                    key={method.value}
+                                    sx={{
+                                        mb: 2,
                                         border: data.paymentMethod === method.value ? 2 : 1,
                                         borderColor: data.paymentMethod === method.value ? professionalTokens.colors.primary : 'divider'
                                     }}
@@ -120,7 +120,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                         )}
                     </FormControl>
                 </Grid>
-                
+
                 {data.paymentMethod === 'bank_transfer' && (
                     <>
                         <Grid item xs={12}>
@@ -129,7 +129,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                                 פרטי חשבון בנק
                             </Typography>
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -140,7 +140,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                                 placeholder="בנק הפועלים"
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -151,7 +151,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                                 placeholder="123456"
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -162,7 +162,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                                 placeholder="789"
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -175,7 +175,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                         </Grid>
                     </>
                 )}
-                
+
                 {(data.paymentMethod === 'credit_card' || data.paymentMethod === 'paypal') && (
                     <Grid item xs={12}>
                         <Alert severity="warning" sx={{ mt: 2 }}>
@@ -185,14 +185,14 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                         </Alert>
                     </Grid>
                 )}
-                
+
                 <Grid item xs={12}>
                     <Divider sx={{ my: 2 }} />
                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
                         כתובת לחשבונית
                     </Typography>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={8}>
                     <TextField
                         fullWidth
@@ -202,7 +202,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={4}>
                     <TextField
                         fullWidth
@@ -212,7 +212,7 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
@@ -223,13 +223,13 @@ const PaymentDetailsStep = ({ data, onChange, errors }) => {
                     />
                 </Grid>
             </Grid>
-            
+
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#f0f8ff', borderRadius: 2 }}>
                 <Typography variant="body2" color="textSecondary">
                     💳 <strong>מדיניות תשלומים:</strong> התשלומים מלקוחות יועברו אליך בתוך 2-3 ימי עסקים לאחר הטיפול
                 </Typography>
             </Box>
-            
+
             <Alert severity="success" sx={{ mt: 2 }}>
                 <Typography variant="body2">
                     ✅ כל המידע מוצפן ומאובטח לפי תקני האבטחה הגבוהים ביותר

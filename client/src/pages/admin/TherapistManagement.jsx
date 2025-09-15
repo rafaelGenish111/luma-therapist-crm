@@ -108,20 +108,20 @@ const TherapistManagement = () => {
                 credentials: 'include'
             });
             const data = await response.json();
-            
+
             if (data.success) {
                 // Move therapist from pending to approved
                 const therapist = pendingTherapists.find(t => t._id === therapistId);
                 setPendingTherapists(prev => prev.filter(t => t._id !== therapistId));
                 setApprovedTherapists(prev => [...prev, { ...therapist, status: 'approved' }]);
-                
+
                 // Update statistics
                 setStatistics(prev => ({
                     ...prev,
                     pending: prev.pending - 1,
                     approved: prev.approved + 1
                 }));
-                
+
                 alert('המטפלת אושרה בהצלחה!');
             } else {
                 alert('שגיאה באישור המטפלת: ' + data.error);
@@ -143,14 +143,14 @@ const TherapistManagement = () => {
                 body: JSON.stringify({ reason })
             });
             const data = await response.json();
-            
+
             if (data.success) {
                 setPendingTherapists(prev => prev.filter(t => t._id !== therapistId));
                 setStatistics(prev => ({
                     ...prev,
                     pending: prev.pending - 1
                 }));
-                
+
                 alert('המטפלת נדחתה. נשלח אליה מייל עם הסיבה.');
             } else {
                 alert('שגיאה בדחיית המטפלת: ' + data.error);
@@ -240,12 +240,12 @@ const TherapistManagement = () => {
                     onChange={(e, newValue) => setCurrentTab(newValue)}
                     sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}
                 >
-                    <Tab 
+                    <Tab
                         label={`ממתינות לאישור (${statistics.pending})`}
                         icon={<Pending />}
                         iconPosition="start"
                     />
-                    <Tab 
+                    <Tab
                         label={`מטפלות מאושרות (${statistics.approved})`}
                         icon={<Verified />}
                         iconPosition="start"
@@ -261,7 +261,7 @@ const TherapistManagement = () => {
                             loading={loading}
                         />
                     )}
-                    
+
                     {currentTab === 1 && (
                         <ApprovedTherapistsTable
                             therapists={approvedTherapists}

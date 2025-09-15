@@ -84,8 +84,8 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
             field: '',
             year: ''
         };
-        onChange({ 
-            education: [...(data.education || []), newEducation] 
+        onChange({
+            education: [...(data.education || []), newEducation]
         });
     };
 
@@ -106,8 +106,8 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
             organization: '',
             year: ''
         };
-        onChange({ 
-            certifications: [...(data.certifications || []), newCertification] 
+        onChange({
+            certifications: [...(data.certifications || []), newCertification]
         });
     };
 
@@ -127,7 +127,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
             <Typography variant="h6" gutterBottom sx={{ color: professionalTokens.colors.primary, mb: 3 }}>
                 פרטים מקצועיים
             </Typography>
-            
+
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <FormControl fullWidth error={!!errors.therapistType}>
@@ -146,7 +146,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                         {errors.therapistType && <FormHelperText>{errors.therapistType}</FormHelperText>}
                     </FormControl>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
@@ -158,7 +158,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                         inputProps={{ min: 0, max: 50 }}
                     />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <FormControl fullWidth error={!!errors.specializations}>
                         <InputLabel>התמחויות *</InputLabel>
@@ -185,7 +185,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                         {errors.specializations && <FormHelperText>{errors.specializations}</FormHelperText>}
                     </FormControl>
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <FormControl fullWidth>
                         <InputLabel>שפות</InputLabel>
@@ -211,7 +211,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                         </Select>
                     </FormControl>
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
@@ -224,7 +224,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                         placeholder="ספרי על עצמך, הגישה הטיפולית שלך ומה חשוב לך בעבודה עם לקוחות..."
                     />
                 </Grid>
-                
+
                 {/* Education Section */}
                 <Grid item xs={12}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -240,7 +240,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                             הוסף השכלה
                         </Button>
                     </Box>
-                    
+
                     {(data.education || []).map((edu, index) => (
                         <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
                             <Grid container spacing={2}>
@@ -273,7 +273,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={1}>
-                                    <IconButton 
+                                    <IconButton
                                         onClick={() => removeEducation(index)}
                                         color="error"
                                         size="small"
@@ -294,7 +294,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                         </Box>
                     ))}
                 </Grid>
-                
+
                 {/* Certifications Section */}
                 <Grid item xs={12}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -310,7 +310,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                             הוסף הסמכה
                         </Button>
                     </Box>
-                    
+
                     {(data.certifications || []).map((cert, index) => (
                         <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
                             <Grid container spacing={2}>
@@ -343,7 +343,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={1}>
-                                    <IconButton 
+                                    <IconButton
                                         onClick={() => removeCertification(index)}
                                         color="error"
                                         size="small"
@@ -356,7 +356,7 @@ const ProfessionalDetailsStep = ({ data, onChange, errors }) => {
                     ))}
                 </Grid>
             </Grid>
-            
+
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 2 }}>
                 <Typography variant="body2" color="textSecondary">
                     🎓 <strong>טיפ:</strong> פרטים מקצועיים מפורטים יעזרו לנו להתאים לך לקוחות מתאימים

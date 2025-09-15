@@ -66,32 +66,32 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
             setError('כתובת מייל נדרשת');
             return false;
         }
-        
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             setError('כתובת מייל לא תקינה');
             return false;
         }
-        
+
         if (!formData.firstName.trim()) {
             setError('שם פרטי נדרש');
             return false;
         }
-        
+
         if (!formData.lastName.trim()) {
             setError('שם משפחה נדרש');
             return false;
         }
-        
+
         return true;
     };
 
     const handleSubmit = async () => {
         if (!validateForm()) return;
-        
+
         setLoading(true);
         setError('');
-        
+
         try {
             const response = await fetch('/api/admin/therapists/invite', {
                 method: 'POST',
@@ -101,9 +101,9 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                 credentials: 'include',
                 body: JSON.stringify(formData)
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 onSuccess();
                 handleReset();
@@ -156,19 +156,19 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                 <PersonAdd color="primary" />
                 <Typography variant="h6">הזמן מטפלת חדשה</Typography>
             </DialogTitle>
-            
+
             <DialogContent>
                 <Box sx={{ mt: 2 }}>
                     <Alert severity="info" sx={{ mb: 3 }}>
                         המטפלת תקבל מייל עם קישור ייחודי להרשמה. הקישור יהיה תקף למשך 7 ימים.
                     </Alert>
-                    
+
                     {error && (
                         <Alert severity="error" sx={{ mb: 3 }}>
                             {error}
                         </Alert>
                     )}
-                    
+
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -179,7 +179,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                                 variant="outlined"
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -189,7 +189,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                                 variant="outlined"
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
@@ -201,7 +201,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                                 placeholder="example@email.com"
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <FormControl fullWidth>
                                 <InputLabel>סוג מטפל מצופה</InputLabel>
@@ -218,7 +218,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        
+
                         <Grid item xs={12} sm={6}>
                             <FormControl fullWidth>
                                 <InputLabel>התמחויות מועדפות</InputLabel>
@@ -243,7 +243,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        
+
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
@@ -260,15 +260,15 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
                     </Grid>
                 </Box>
             </DialogContent>
-            
+
             <DialogActions sx={{ p: 3, gap: 2 }}>
-                <Button 
+                <Button
                     onClick={handleClose}
                     disabled={loading}
                 >
                     ביטול
                 </Button>
-                
+
                 <Button
                     onClick={handleSubmit}
                     variant="contained"

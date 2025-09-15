@@ -18,6 +18,7 @@ import AdminLayout from './layouts/AdminLayout'
 import PlansPage from './pages/admin/PlansPage'
 import HealthDeclarationsAdminPage from './pages/admin/HealthDeclarationsAdminPage'
 import AdminSettingsPage from './pages/admin/SettingsPage'
+import TherapistManagement from './pages/admin/TherapistManagement'
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -78,7 +79,7 @@ const App = () => {
                         }
                     >
                         <Route index element={<AdminHome />} />
-                        <Route path="therapists" element={<AdminDashboard />} />
+                        <Route path="therapists" element={<TherapistManagement />} />
                         <Route path="plans" element={<PlansPage />} />
                         <Route path="health-declarations" element={<HealthDeclarationsAdminPage />} />
                         <Route path="settings" element={<AdminSettingsPage />} />

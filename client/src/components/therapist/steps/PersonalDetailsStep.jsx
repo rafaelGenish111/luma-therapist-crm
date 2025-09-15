@@ -15,7 +15,7 @@ import { professionalTokens } from '../../../theme/professionalTokens';
 const PersonalDetailsStep = ({ data, onChange, errors }) => {
     const handleChange = (field) => (event) => {
         const value = event.target.value;
-        
+
         if (field.includes('.')) {
             const [parent, child] = field.split('.');
             onChange({
@@ -34,7 +34,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
             <Typography variant="h6" gutterBottom sx={{ color: professionalTokens.colors.primary, mb: 3 }}>
                 פרטים אישיים
             </Typography>
-            
+
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <TextField
@@ -47,7 +47,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
@@ -59,7 +59,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
@@ -72,7 +72,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         inputProps={{ maxLength: 9 }}
                     />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                     <FormControl fullWidth error={!!errors.gender}>
                         <InputLabel>מגדר</InputLabel>
@@ -89,7 +89,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         {errors.gender && <FormHelperText>{errors.gender}</FormHelperText>}
                     </FormControl>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
@@ -101,7 +101,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
@@ -114,7 +114,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         placeholder="050-1234567"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
@@ -127,13 +127,13 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>
                         כתובת מגורים
                     </Typography>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={8}>
                     <TextField
                         fullWidth
@@ -143,7 +143,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={4}>
                     <TextField
                         fullWidth
@@ -153,7 +153,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                         variant="outlined"
                     />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
@@ -164,7 +164,7 @@ const PersonalDetailsStep = ({ data, onChange, errors }) => {
                     />
                 </Grid>
             </Grid>
-            
+
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
                 <Typography variant="body2" color="textSecondary">
                     💡 <strong>טיפ:</strong> מידע זה יעזור לנו להתאים לך לקוחות באזור המגורים שלך

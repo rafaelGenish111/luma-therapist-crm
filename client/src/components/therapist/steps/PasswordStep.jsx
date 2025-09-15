@@ -23,7 +23,7 @@ const PasswordStep = ({ data, onChange, errors }) => {
 
     const calculatePasswordStrength = (password) => {
         if (!password) return { score: 0, label: '', color: '' };
-        
+
         let score = 0;
         const checks = {
             length: password.length >= 8,
@@ -32,9 +32,9 @@ const PasswordStep = ({ data, onChange, errors }) => {
             numbers: /\d/.test(password),
             special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
-        
+
         score = Object.values(checks).filter(Boolean).length;
-        
+
         if (score <= 2) return { score: score * 20, label: 'חלשה', color: 'error' };
         if (score === 3) return { score: score * 20, label: 'בינונית', color: 'warning' };
         if (score === 4) return { score: score * 20, label: 'חזקה', color: 'info' };
@@ -42,7 +42,7 @@ const PasswordStep = ({ data, onChange, errors }) => {
     };
 
     const passwordStrength = calculatePasswordStrength(data.password);
-    
+
     const passwordRequirements = [
         { text: 'לפחות 8 תווים', met: data.password?.length >= 8 },
         { text: 'אות גדולה באנגלית', met: /[A-Z]/.test(data.password || '') },
@@ -56,11 +56,11 @@ const PasswordStep = ({ data, onChange, errors }) => {
             <Typography variant="h6" gutterBottom sx={{ color: professionalTokens.colors.primary, mb: 3 }}>
                 הגדרת סיסמה
             </Typography>
-            
+
             <Alert severity="info" sx={{ mb: 3 }}>
                 הסיסמה תשמש אותך להתחברות למערכת ניהול הלקוחות שלך
             </Alert>
-            
+
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <TextField
@@ -85,14 +85,14 @@ const PasswordStep = ({ data, onChange, errors }) => {
                             )
                         }}
                     />
-                    
+
                     {data.password && (
                         <Box sx={{ mt: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Typography variant="body2" sx={{ mr: 1 }}>
                                     חוזק הסיסמה:
                                 </Typography>
-                                <Chip 
+                                <Chip
                                     label={passwordStrength.label}
                                     color={passwordStrength.color}
                                     size="small"
@@ -107,7 +107,7 @@ const PasswordStep = ({ data, onChange, errors }) => {
                         </Box>
                     )}
                 </Grid>
-                
+
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
@@ -132,7 +132,7 @@ const PasswordStep = ({ data, onChange, errors }) => {
                         }}
                     />
                 </Grid>
-                
+
                 {data.password && (
                     <Grid item xs={12}>
                         <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
@@ -160,7 +160,7 @@ const PasswordStep = ({ data, onChange, errors }) => {
                     </Grid>
                 )}
             </Grid>
-            
+
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#fff3cd', borderRadius: 2 }}>
                 <Typography variant="body2" color="textSecondary">
                     🔒 <strong>אבטחה:</strong> הסיסמה שלך מוצפנת ומאובטחת במערכת שלנו

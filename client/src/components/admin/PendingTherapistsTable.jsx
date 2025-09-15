@@ -123,7 +123,7 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                                         </Box>
                                     </Box>
                                 </TableCell>
-                                
+
                                 <TableCell>
                                     <Box>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -136,36 +136,36 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                                         </Box>
                                     </Box>
                                 </TableCell>
-                                
+
                                 <TableCell>
                                     <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                                         {therapist.therapistType}
                                     </Typography>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                         {therapist.specializations?.slice(0, 2).map((spec, index) => (
-                                            <Chip 
+                                            <Chip
                                                 key={index}
-                                                label={spec} 
-                                                size="small" 
+                                                label={spec}
+                                                size="small"
                                                 variant="outlined"
                                             />
                                         ))}
                                         {therapist.specializations?.length > 2 && (
-                                            <Chip 
+                                            <Chip
                                                 label={`+${therapist.specializations.length - 2}`}
-                                                size="small" 
+                                                size="small"
                                                 variant="outlined"
                                             />
                                         )}
                                     </Box>
                                 </TableCell>
-                                
+
                                 <TableCell>
                                     <Typography variant="body2">
                                         {formatDate(therapist.createdAt)}
                                     </Typography>
                                 </TableCell>
-                                
+
                                 <TableCell>
                                     <Chip
                                         label={therapist.emailVerified ? 'מאומת' : 'ממתין לאימות'}
@@ -173,20 +173,20 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                                         size="small"
                                     />
                                 </TableCell>
-                                
+
                                 <TableCell align="center">
                                     <Box sx={{ display: 'flex', gap: 1 }}>
                                         <Tooltip title="צפה בפרטים">
-                                            <IconButton 
+                                            <IconButton
                                                 size="small"
                                                 onClick={() => handleViewDetails(therapist)}
                                             >
                                                 <Visibility />
                                             </IconButton>
                                         </Tooltip>
-                                        
+
                                         <Tooltip title="אשר">
-                                            <IconButton 
+                                            <IconButton
                                                 size="small"
                                                 color="success"
                                                 onClick={() => onApprove(therapist._id)}
@@ -195,9 +195,9 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                                                 <CheckCircle />
                                             </IconButton>
                                         </Tooltip>
-                                        
+
                                         <Tooltip title="דחה">
-                                            <IconButton 
+                                            <IconButton
                                                 size="small"
                                                 color="error"
                                                 onClick={() => handleReject(therapist)}
@@ -214,8 +214,8 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
             </TableContainer>
 
             {/* Therapist Details Dialog */}
-            <Dialog 
-                open={showDetailsDialog} 
+            <Dialog
+                open={showDetailsDialog}
                 onClose={() => setShowDetailsDialog(false)}
                 maxWidth="md"
                 fullWidth
@@ -320,7 +320,7 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                                         <Typography variant="h6" gutterBottom color="primary">
                                             השכלה והסמכות
                                         </Typography>
-                                        
+
                                         {selectedTherapist.education?.length > 0 && (
                                             <>
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -334,7 +334,7 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                                                 <Divider sx={{ my: 2 }} />
                                             </>
                                         )}
-                                        
+
                                         {selectedTherapist.certifications?.length > 0 && (
                                             <>
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -359,7 +359,7 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                     </Button>
                     {selectedTherapist && (
                         <>
-                            <Button 
+                            <Button
                                 color="error"
                                 onClick={() => {
                                     setShowDetailsDialog(false);
@@ -368,7 +368,7 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                             >
                                 דחה
                             </Button>
-                            <Button 
+                            <Button
                                 variant="contained"
                                 color="success"
                                 onClick={() => {
@@ -408,7 +408,7 @@ const PendingTherapistsTable = ({ therapists, onApprove, onReject, loading }) =>
                     <Button onClick={() => setShowRejectDialog(false)}>
                         ביטול
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleConfirmReject}
                         color="error"
                         variant="contained"
