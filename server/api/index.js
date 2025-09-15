@@ -238,9 +238,11 @@ app.get('/api/health', (req, res) => {
 app.get('/api/db-check', async (req, res) => {
     try {
         const userCount = await User.countDocuments();
+        const users = await User.find({}, 'email firstName lastName role').limit(5);
         res.json({ 
             status: 'connected', 
             userCount: userCount,
+            users: users,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
