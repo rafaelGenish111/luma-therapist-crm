@@ -43,6 +43,7 @@ import {
     PersonOff
 } from '@mui/icons-material';
 import { professionalTokens } from '../../theme/professionalTokens';
+import apiClient from '../../config/api.js';
 
 const ApprovedTherapistsTable = ({ therapists, onRefresh, loading }) => {
     const [selectedTherapist, setSelectedTherapist] = useState(null);
@@ -76,16 +77,8 @@ const ApprovedTherapistsTable = ({ therapists, onRefresh, loading }) => {
 
     const handleToggleStatus = async (therapistId, newStatus) => {
         try {
-            const response = await fetch(`/api/admin/therapists/${therapistId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({ status: newStatus })
-            });
+            const data = await apiClient.patch(`/api/admin/therapists/${therapistId}/status`, { status: newStatus });
             
-            const data = await response.json();
             if (data.success) {
                 onRefresh();
                 alert(`המטפלת ${newStatus === 'active' ? 'הופעלה' : 'הושבתה'} בהצלחה`);

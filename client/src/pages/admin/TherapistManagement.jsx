@@ -41,6 +41,7 @@ import { professionalTokens } from '../../theme/professionalTokens';
 import PendingTherapistsTable from '../../components/admin/PendingTherapistsTable';
 import ApprovedTherapistsTable from '../../components/admin/ApprovedTherapistsTable';
 import SendInvitationDialog from '../../components/admin/SendInvitationDialog';
+import apiClient from '../../config/api.js';
 
 const TherapistManagement = () => {
     const [currentTab, setCurrentTab] = useState(0);
@@ -64,19 +65,13 @@ const TherapistManagement = () => {
         setLoading(true);
         try {
             // Fetch pending therapists
-            const pendingResponse = await fetch('/api/admin/therapists/pending', {
-                credentials: 'include'
-            });
-            const pendingData = await pendingResponse.json();
+            const pendingData = await apiClient.get('/api/admin/therapists/pending');
             if (pendingData.success) {
                 setPendingTherapists(pendingData.data);
             }
 
             // Fetch approved therapists
-            const approvedResponse = await fetch('/api/admin/therapists/approved', {
-                credentials: 'include'
-            });
-            const approvedData = await approvedResponse.json();
+            const approvedData = await apiClient.get('/api/admin/therapists/approved');
             if (approvedData.success) {
                 setApprovedTherapists(approvedData.data);
             }
@@ -89,10 +84,7 @@ const TherapistManagement = () => {
 
     const fetchStatistics = async () => {
         try {
-            const response = await fetch('/api/admin/therapists/statistics', {
-                credentials: 'include'
-            });
-            const data = await response.json();
+            const data = await apiClient.get('/api/admin/therapists/statistics');
             if (data.success) {
                 setStatistics(data.data);
             }
@@ -103,11 +95,7 @@ const TherapistManagement = () => {
 
     const handleApproveTherapist = async (therapistId) => {
         try {
-            const response = await fetch(`/api/admin/therapists/${therapistId}/approve`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-            const data = await response.json();
+            const data = await apiClient.post(`/api/admin/therapists/${therapistId}/approve`);
 
             if (data.success) {
                 // Move therapist from pending to approved
@@ -134,15 +122,7 @@ const TherapistManagement = () => {
 
     const handleRejectTherapist = async (therapistId, reason) => {
         try {
-            const response = await fetch(`/api/admin/therapists/${therapistId}/reject`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({ reason })
-            });
-            const data = await response.json();
+            const data = await apiClient.post(`/api/admin/therapists/${therapistId}/reject`, { reason });
 
             if (data.success) {
                 setPendingTherapists(prev => prev.filter(t => t._id !== therapistId));

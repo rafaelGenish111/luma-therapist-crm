@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Email, PersonAdd } from '@mui/icons-material';
 import { professionalTokens } from '../../theme/professionalTokens';
+import apiClient from '../../config/api.js';
 
 const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
@@ -93,16 +94,7 @@ const SendInvitationDialog = ({ open, onClose, onSuccess }) => {
         setError('');
 
         try {
-            const response = await fetch('/api/admin/therapists/invite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData)
-            });
-
-            const data = await response.json();
+            const data = await apiClient.post('/api/admin/therapists/invite', formData);
 
             if (data.success) {
                 onSuccess();
