@@ -56,22 +56,35 @@ app.use(validateRequest);
 
 // עדכון CORS לתמיכה בפרודקשן
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? [
-            process.env.CLIENT_URL,
-            process.env.FRONTEND_URL,
-            // הוסף כאן את הדומיין של הפרונטאנד שלך
-            'https://luma-therapist-crm-frontend.vercel.app',
-        ]
-        : [
-            'http://localhost:8000',
-            'http://localhost:3000',
-            'http://127.0.0.1:8000',
-            'http://127.0.0.1:3000'
-        ],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = process.env.NODE_ENV === 'production' 
+            ? [
+                process.env.CLIENT_URL,
+                process.env.FRONTEND_URL,
+                'https://luma-therapist-crm-frontend.vercel.app',
+                'https://luma-therapist-crm.vercel.app'
+              ]
+            : [
+                'http://localhost:8000',
+                'http://localhost:3000',
+                'http://127.0.0.1:8000',
+                'http://127.0.0.1:3000'
+              ];
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));

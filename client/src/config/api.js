@@ -1,5 +1,10 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+    (import.meta.env.PROD ? 'https://luma-therapist-crm.vercel.app' : 'http://localhost:5000');
+
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('PROD:', import.meta.env.PROD);
 
 // יצירת instance של fetch מותאם
 class ApiClient {
@@ -7,19 +12,21 @@ class ApiClient {
         this.baseURL = baseURL;
     }
 
-    async request(endpoint, options = {}) {
-        const url = `${this.baseURL}${endpoint}`;
-
-        // הוספת Authorization header אם יש token
-        const token = localStorage.getItem('accessToken');
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        };
-
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    console.log('API Request:', url, options);
+    
+    // הוספת Authorization header אם יש token
+    const token = localStorage.getItem('accessToken');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
         const config = {
             headers,
@@ -31,24 +38,28 @@ class ApiClient {
             config.body = JSON.stringify(config.body);
         }
 
-        try {
-            const response = await fetch(url, config);
-
-            if (!response.ok) {
-                // טיפול בשגיאות 401 - מחיקת token וניתוב להתחברות
-                if (response.status === 401) {
-                    localStorage.removeItem('accessToken');
-                    // אפשר להוסיף כאן ניתוב להתחברות
-                    // window.location.href = '/login';
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('API Request failed:', error);
-            throw error;
+    try {
+      const response = await fetch(url, config);
+      
+      console.log('API Response:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        // טיפול בשגיאות 401 - מחיקת token וניתוב להתחברות
+        if (response.status === 401) {
+          localStorage.removeItem('accessToken');
+          // אפשר להוסיף כאן ניתוב להתחברות
+          // window.location.href = '/login';
         }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('API Response Data:', data);
+      return data;
+    } catch (error) {
+      console.error('API Request failed:', error);
+      throw error;
+    }
     }
 
     // HTTP Methods
