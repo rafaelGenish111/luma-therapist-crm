@@ -59,21 +59,21 @@ const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        
-        const allowedOrigins = process.env.NODE_ENV === 'production' 
+
+        const allowedOrigins = process.env.NODE_ENV === 'production'
             ? [
                 process.env.CLIENT_URL,
                 process.env.FRONTEND_URL,
                 'https://luma-therapist-crm-frontend.vercel.app',
                 'https://luma-therapist-crm.vercel.app'
-              ]
+            ]
             : [
                 'http://localhost:8000',
                 'http://localhost:3000',
                 'http://127.0.0.1:8000',
                 'http://127.0.0.1:3000'
-              ];
-        
+            ];
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
