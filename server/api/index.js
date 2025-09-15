@@ -65,6 +65,31 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Auth endpoints (simplified for testing)
+app.post('/api/auth/login', (req, res) => {
+    console.log('Login attempt:', req.body);
+    res.json({ 
+        success: false, 
+        error: 'Authentication not implemented in simplified server' 
+    });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+    console.log('Logout attempt');
+    res.json({ 
+        success: true, 
+        message: 'Logged out successfully' 
+    });
+});
+
+app.get('/api/auth/me', (req, res) => {
+    console.log('Profile request');
+    res.status(401).json({ 
+        success: false, 
+        error: 'Not authenticated' 
+    });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ 
