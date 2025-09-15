@@ -1,6 +1,6 @@
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-    (import.meta.env.PROD ? 'https://luma-therapist-crm.vercel.app' : 'http://localhost:5000');
+    (import.meta.env.PROD ? 'https://luma-therapist-crm.vercel.app' : '');
 
 console.log('API_BASE_URL:', API_BASE_URL);
 console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
