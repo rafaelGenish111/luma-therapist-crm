@@ -250,13 +250,34 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
 }
 
 // For Vercel - initialize on first request
+let isInitialized = false;
 app.use(async (req, res, next) => {
     console.log('Vercel request received:', req.method, req.url);
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Vercel:', process.env.VERCEL);
-    await initializeApp();
+    
+    if (!isInitialized) {
+        try {
+            console.log('Initializing app for first time...');
+            await initializeApp();
+            isInitialized = true;
+            console.log('App initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize app:', error);
+            return res.status(500).json({ error: 'Server initialization failed' });
+        }
+    }
     next();
 });
 
 // Export for Vercel
 module.exports = app;
+
+// Add error handling for Vercel
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
