@@ -1,7 +1,37 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
+
+// Database connection
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
+        console.log(`📦 MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.error('❌ Error connecting to MongoDB:', error);
+        throw error;
+    }
+};
+
+// Initialize database on first request
+let isConnected = false;
+app.use(async (req, res, next) => {
+    if (!isConnected) {
+        try {
+            await connectDB();
+            isConnected = true;
+            console.log('Database connected successfully');
+        } catch (error) {
+            console.error('Failed to connect to database:', error);
+            return res.status(500).json({ error: 'Database connection failed' });
+        }
+    }
+    next();
+});
 
 // CORS configuration
 const corsOptions = {
@@ -55,6 +85,19 @@ app.options('*', (req, res) => {
 
 app.use(express.json());
 
+// User Schema
+const userSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    role: { type: String, enum: ['admin', 'therapist', 'client'], default: 'client' },
+    isActive: { type: Boolean, default: true },
+    createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
+
 // Simple test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ 
@@ -65,13 +108,69 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// Auth endpoints (simplified for testing)
-app.post('/api/auth/login', (req, res) => {
-    console.log('Login attempt:', req.body);
-    res.json({ 
-        success: false, 
-        error: 'Authentication not implemented in simplified server' 
-    });
+// Auth endpoints
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        console.log('Login attempt:', req.body);
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Email and password are required' 
+            });
+        }
+
+        // Find user by email
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Invalid credentials' 
+            });
+        }
+
+        // Check password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Invalid credentials' 
+            });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                userId: user._id, 
+                email: user.email, 
+                role: user.role 
+            },
+            process.env.JWT_SECRET || 'fallback-secret',
+            { expiresIn: '24h' }
+        );
+
+        res.json({
+            success: true,
+            data: {
+                user: {
+                    id: user._id,
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    role: user.role
+                },
+                accessToken: token
+            }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Internal server error' 
+        });
+    }
 });
 
 app.post('/api/auth/logout', (req, res) => {
@@ -82,12 +181,47 @@ app.post('/api/auth/logout', (req, res) => {
     });
 });
 
-app.get('/api/auth/me', (req, res) => {
-    console.log('Profile request');
-    res.status(401).json({ 
-        success: false, 
-        error: 'Not authenticated' 
-    });
+app.get('/api/auth/me', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'No token provided' 
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        const user = await User.findById(decoded.userId).select('-password');
+        
+        if (!user) {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'User not found' 
+            });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                user: {
+                    id: user._id,
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    role: user.role
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Profile error:', error);
+        res.status(401).json({ 
+            success: false, 
+            error: 'Invalid token' 
+        });
+    }
 });
 
 // Health check endpoint
