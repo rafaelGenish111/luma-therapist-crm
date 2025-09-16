@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Input, MenuItem, Paper, Alert, Circ
 
 import { getOwnTheme, updateOwnTheme } from '../../../services/therapistService';
 import WebsitePreview from '../../website/WebsitePreview';
-import api from '../../../services/api';
+import api, { therapistsApi } from '../../../services/api';
 
 const fontOptions = [
     'Heebo', 'Assistant', 'Rubik', 'Open Sans', 'Alef', 'Arimo', 'David Libre', 'Varela Round', 'Secular One', 'Arial', 'Tahoma'
@@ -30,8 +30,8 @@ export default function DesignPage() {
                 setLoading(true);
                 const data = await getOwnTheme();
                 setTheme(prev => ({ ...prev, ...data }));
-                const prof = await api.get('/therapists/profile');
-                setProfile(prof.data?.data || null);
+                const prof = await therapistsApi.getProfile();
+                setProfile(prof.data || null);
             } catch (e) {
                 setError('שגיאה בטעינת העיצוב');
             } finally {

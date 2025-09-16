@@ -25,7 +25,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { he } from 'date-fns/locale';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
-import api from '../../services/api';
+import api, { clientsApi, appointmentsApi } from '../../services/api';
 import { updateTherapistProfile, updateOwnTheme } from '../../services/therapistService';
 
 const steps = ['פרטים מקצועיים', 'שעות עבודה', 'עיצוב אתר אישי', 'יצירת תור ראשון'];
@@ -110,8 +110,8 @@ const OnboardingWizard = () => {
         // נטען לקוחות עבור שלב 4
         const loadClients = async () => {
             try {
-                const res = await api.get('/clients');
-                setClients(res.data?.data || []);
+                const res = await clientsApi.getAll();
+                setClients(res.data || []);
             } catch { }
         };
         loadClients();
@@ -142,7 +142,7 @@ const OnboardingWizard = () => {
                 });
 
                 if (aptClient) {
-                    await api.post('/appointments', {
+                    await appointmentsApi.create({
                         client: aptClient,
                         date: aptDate,
                         duration: Number(aptDuration),

@@ -16,7 +16,7 @@ import {
 
 import AppointmentList from './components/AppointmentList';
 import AppointmentForm from './components/AppointmentForm';
-import api from '../../../services/api';
+import api, { clientsApi, appointmentsApi, therapistsApi } from '../../../services/api';
 
 const AppointmentsPage = () => {
     const [appointments, setAppointments] = useState([]);
@@ -35,8 +35,8 @@ const AppointmentsPage = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await api.get('/appointments');
-            setAppointments(res.data.data || []);
+            const res = await appointmentsApi.getAll();
+            setAppointments(res.data || []);
         } catch (err) {
             setError('שגיאה בטעינת פגישות');
             setAppointments([]);
@@ -48,8 +48,8 @@ const AppointmentsPage = () => {
     // שליפת לקוחות
     const fetchClients = async () => {
         try {
-            const res = await api.get('/clients');
-            setClients(res.data.data || []);
+            const res = await clientsApi.getAll();
+            setClients(res.data || []);
         } catch (err) {
             console.error('שגיאה בטעינת לקוחות:', err);
         }
@@ -61,8 +61,8 @@ const AppointmentsPage = () => {
         // בניית קישור לטופס קביעת תור באתר האישי
         (async () => {
             try {
-                const prof = await api.get('/therapists/profile');
-                const id = prof.data?.data?._id || prof.data?.data?.id;
+                const prof = await therapistsApi.getProfile();
+                const id = prof.data?._id || prof.data?.id;
                 if (id) {
                     setBookingLink(`${window.location.origin}/website/${id}/book`);
                 }
@@ -108,10 +108,10 @@ const AppointmentsPage = () => {
         try {
             if (editAppointment) {
                 // עדכון
-                await api.put(`/appointments/${editAppointment._id || editAppointment.id}`, data);
+                await appointmentsApi.update(editAppointment._id || editAppointment.id, data);
             } else {
                 // הוספה
-                await api.post('/appointments', data);
+                await appointmentsApi.create(data);
             }
             setOpen(false);
             fetchAppointments();
@@ -126,7 +126,7 @@ const AppointmentsPage = () => {
     const handleDelete = async (appointment) => {
         if (!window.confirm('האם למחוק את הפגישה?')) return;
         try {
-            await api.delete(`/appointments/${appointment._id || appointment.id}`);
+            await appointmentsApi.delete(appointment._id || appointment.id);
             fetchAppointments();
         } catch (err) {
             setError('שגיאה במחיקת פגישה');

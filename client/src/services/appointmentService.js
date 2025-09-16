@@ -1,4 +1,4 @@
-import api from './api';
+import api, { appointmentsApi } from './api';
 
 class AppointmentService {
     /**
@@ -29,7 +29,7 @@ class AppointmentService {
      * @returns {Promise<Object>} הפגישה שנוצרה
      */
     async create(appointmentData) {
-        const response = await api.post('/appointments', appointmentData);
+        const response = await appointmentsApi.create(appointmentData);
         return response.data;
     }
 
@@ -40,7 +40,7 @@ class AppointmentService {
      * @returns {Promise<Object>} הפגישה המעודכנת
      */
     async update(appointmentId, updateData) {
-        const response = await api.patch(`/appointments/${appointmentId}`, updateData);
+        const response = await appointmentsApi.update(appointmentId, updateData);
         return response.data;
     }
 
@@ -50,7 +50,7 @@ class AppointmentService {
      * @returns {Promise<Object>} תוצאת המחיקה
      */
     async delete(appointmentId) {
-        const response = await api.delete(`/appointments/${appointmentId}`);
+        const response = await appointmentsApi.delete(appointmentId);
         return response.data;
     }
 
@@ -60,7 +60,7 @@ class AppointmentService {
      * @returns {Promise<Object>} פרטי הפגישה
      */
     async getById(appointmentId) {
-        const response = await api.get(`/appointments/${appointmentId}`);
+        const response = await appointmentsApi.getById(appointmentId);
         return response.data;
     }
 
@@ -78,7 +78,7 @@ class AppointmentService {
         if (options.limit) params.append('limit', options.limit);
         if (options.page) params.append('page', options.page);
 
-        const response = await api.get(`/appointments?${params.toString()}`);
+        const response = await appointmentsApi.getAll();
         return response.data;
     }
 

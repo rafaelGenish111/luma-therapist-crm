@@ -68,7 +68,7 @@ export default function ClientCard() {
             setLoading(true);
             setError('');
             const response = await clientService.getClient(clientId);
-            setClient(response.data.data);
+            setClient(response.data);
         } catch (err) {
             console.error('Error loading client:', err);
             setError('שגיאה בטעינת פרטי הלקוח');

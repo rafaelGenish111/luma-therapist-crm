@@ -2,63 +2,63 @@ import apiClient from '../config/api.js';
 
 // Auth Services
 export const authApi = {
-    login: (credentials) => apiClient.post('/api/auth/login', credentials),
-    register: (userData) => apiClient.post('/api/auth/register', userData),
-    logout: () => apiClient.post('/api/auth/logout'),
-    profile: () => apiClient.get('/api/auth/me'),
-    refreshToken: () => apiClient.post('/api/auth/refresh'),
+    login: (credentials) => apiClient.post('/auth/login', credentials),
+    register: (userData) => apiClient.post('/auth/register', userData),
+    logout: () => apiClient.post('/auth/logout'),
+    profile: () => apiClient.get('/auth/me'),
+    refreshToken: () => apiClient.post('/auth/refresh'),
 };
 
 // Therapists Services
 export const therapistsApi = {
-    getAll: () => apiClient.get('/api/therapists'),
-    getById: (id) => apiClient.get(`/api/therapists/${id}`),
-    create: (data) => apiClient.post('/api/therapists', data),
-    update: (id, data) => apiClient.put(`/api/therapists/${id}`, data),
-    delete: (id) => apiClient.delete(`/api/therapists/${id}`),
+    getAll: () => apiClient.get('/therapists'),
+    getById: (id) => apiClient.get(`/therapists/${id}`),
+    create: (data) => apiClient.post('/therapists', data),
+    update: (id, data) => apiClient.put(`/therapists/${id}`, data),
+    delete: (id) => apiClient.delete(`/therapists/${id}`),
 };
 
 // Clients Services
 export const clientsApi = {
-    getAll: () => apiClient.get('/api/clients'),
-    getById: (id) => apiClient.get(`/api/clients/${id}`),
-    create: (data) => apiClient.post('/api/clients', data),
-    update: (id, data) => apiClient.put(`/api/clients/${id}`, data),
-    delete: (id) => apiClient.delete(`/api/clients/${id}`),
+    getAll: () => apiClient.get('/clients'),
+    getById: (id) => apiClient.get(`/clients/${id}`),
+    create: (data) => apiClient.post('/clients', data),
+    update: (id, data) => apiClient.put(`/clients/${id}`, data),
+    delete: (id) => apiClient.delete(`/clients/${id}`),
 };
 
 // Appointments Services
 export const appointmentsApi = {
-    getAll: () => apiClient.get('/api/appointments'),
-    getById: (id) => apiClient.get(`/api/appointments/${id}`),
-    create: (data) => apiClient.post('/api/appointments', data),
-    update: (id, data) => apiClient.put(`/api/appointments/${id}`, data),
-    delete: (id) => apiClient.delete(`/api/appointments/${id}`),
+    getAll: () => apiClient.get('/appointments'),
+    getById: (id) => apiClient.get(`/appointments/${id}`),
+    create: (data) => apiClient.post('/appointments', data),
+    update: (id, data) => apiClient.put(`/appointments/${id}`, data),
+    delete: (id) => apiClient.delete(`/appointments/${id}`),
 };
 
 // Campaigns Services
 export const campaignsApi = {
-    getAll: () => apiClient.get('/api/campaigns'),
-    getById: (id) => apiClient.get(`/api/campaigns/${id}`),
-    create: (data) => apiClient.post('/api/campaigns', data),
-    update: (id, data) => apiClient.put(`/api/campaigns/${id}`, data),
-    delete: (id) => apiClient.delete(`/api/campaigns/${id}`),
-    send: (id) => apiClient.post(`/api/campaigns/${id}/send`),
-    getStats: (id) => apiClient.get(`/api/campaigns/${id}/stats`),
+    getAll: () => apiClient.get('/campaigns'),
+    getById: (id) => apiClient.get(`/campaigns/${id}`),
+    create: (data) => apiClient.post('/campaigns', data),
+    update: (id, data) => apiClient.put(`/campaigns/${id}`, data),
+    delete: (id) => apiClient.delete(`/campaigns/${id}`),
+    send: (id) => apiClient.post(`/campaigns/${id}/send`),
+    getStats: (id) => apiClient.get(`/campaigns/${id}/stats`),
 
     // Templates
-    createTemplate: (data) => apiClient.post('/api/campaigns/templates', data),
-    updateTemplate: (id, data) => apiClient.put(`/api/campaigns/templates/${id}`, data),
-    deleteTemplate: (id) => apiClient.delete(`/api/campaigns/templates/${id}`),
+    createTemplate: (data) => apiClient.post('/campaigns/templates', data),
+    updateTemplate: (id, data) => apiClient.put(`/campaigns/templates/${id}`, data),
+    deleteTemplate: (id) => apiClient.delete(`/campaigns/templates/${id}`),
 
     // Client Lists
-    exportClientList: (data) => apiClient.post('/api/campaigns/client-lists/export', data),
-    importClientList: (formData, options) => apiClient.post('/api/campaigns/client-lists/import', formData, options),
+    exportClientList: (data) => apiClient.post('/campaigns/client-lists/export', data),
+    importClientList: (formData, options) => apiClient.post('/campaigns/client-lists/import', formData, options),
 };
 
 // Health Check
 export const healthApi = {
-    check: () => apiClient.get('/api/health'),
+    check: () => apiClient.get('/health'),
 };
 
 // Default export עם כל הAPIים
@@ -69,11 +69,11 @@ export default {
     appointments: appointmentsApi,
     campaigns: campaignsApi,
     health: healthApi,
-    
+
     // Direct API methods for backward compatibility
-    get: (endpoint, options) => apiClient.get(endpoint, options),
-    post: (endpoint, data, options) => apiClient.post(endpoint, data, options),
-    put: (endpoint, data, options) => apiClient.put(endpoint, data, options),
-    delete: (endpoint, options) => apiClient.delete(endpoint, options),
-    patch: (endpoint, data, options) => apiClient.patch(endpoint, data, options),
+    get: (endpoint, options) => apiClient.get(endpoint.startsWith('/api') ? endpoint.slice(4) : endpoint, options),
+    post: (endpoint, data, options) => apiClient.post(endpoint.startsWith('/api') ? endpoint.slice(4) : endpoint, data, options),
+    put: (endpoint, data, options) => apiClient.put(endpoint.startsWith('/api') ? endpoint.slice(4) : endpoint, data, options),
+    delete: (endpoint, options) => apiClient.delete(endpoint.startsWith('/api') ? endpoint.slice(4) : endpoint, options),
+    patch: (endpoint, data, options) => apiClient.patch(endpoint.startsWith('/api') ? endpoint.slice(4) : endpoint, data, options),
 }; 

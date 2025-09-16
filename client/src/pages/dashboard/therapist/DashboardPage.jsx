@@ -4,7 +4,7 @@ import ResponsiveTableCards from '../../components/ResponsiveTableCards';
 import '../../components/responsive-table.css';
 import ClientList from './components/ClientList';
 import Footer from '../../../components/common/Footer';
-import api from '../../../services/api';
+import api, { clientsApi, articlesApi, galleryApi, therapistsApi } from '../../../services/api';
 import healthDeclarationService from '../../../services/healthDeclarationService';
 import { Link } from 'react-router-dom';
 
@@ -23,11 +23,11 @@ const DashboardPage = () => {
             setLoading(true);
             try {
                 const [clientsRes, articlesRes, galleryRes, declarationsRes, metricsRes] = await Promise.all([
-                    api.get('/clients'),
-                    api.get('/articles'),
-                    api.get('/gallery'),
+                    clientsApi.getAll(),
+                    articlesApi.getAll(),
+                    galleryApi.getAll(),
                     healthDeclarationService.getAll(),
-                    api.get('/therapists/metrics/summary')
+                    therapistsApi.getMetrics()
                 ]);
                 setClients(clientsRes.data.data || []);
                 setArticles(articlesRes.data.data || []);

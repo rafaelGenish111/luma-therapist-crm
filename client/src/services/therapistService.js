@@ -1,9 +1,9 @@
-import api from './api';
+import api, { therapistsApi } from './api';
 
 // קבלת פרופיל המטפלת
 export const getTherapistProfile = async () => {
     try {
-        const response = await api.get('/therapists/profile');
+        const response = await therapistsApi.getProfile();
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -50,7 +50,7 @@ export const uploadProfileImage = async (imageFile) => {
 // מחיקת תמונת פרופיל
 export const deleteProfileImage = async () => {
     try {
-        const response = await api.delete('/therapists/profile/image');
+        const response = await therapistsApi.deleteProfileImage();
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -59,8 +59,8 @@ export const deleteProfileImage = async () => {
 
 // טעינת עיצוב אישי של המטפלת המחוברת
 export const getOwnTheme = async () => {
-    const response = await api.get('/therapists/profile');
-    return response.data.data.theme;
+    const response = await therapistsApi.getProfile();
+    return response.data.theme;
 };
 
 // עדכון עיצוב אישי של המטפלת המחוברת
@@ -87,7 +87,7 @@ export const uploadClinicImage = async (imageFile) => {
 
 // מחיקת תמונת קליניקה
 export const deleteClinicImage = async () => {
-    const response = await api.delete('/therapists/profile/clinic-image');
+    const response = await therapistsApi.deleteClinicImage();
     return response.data;
 };
 
