@@ -21,6 +21,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import FolderIcon from '@mui/icons-material/Folder';
 import MessageIcon from '@mui/icons-material/Message';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import { Psychology as PsychologyIcon } from '@mui/icons-material';
 
 import clientService from '../../../services/clientService';
 import PersonalInfoTab from './components/clientCard/PersonalInfoTab';
@@ -30,6 +31,7 @@ import AppointmentsTab from './components/clientCard/AppointmentsTab';
 import DocumentsTab from './components/clientCard/DocumentsTab';
 import CommunicationTab from './components/clientCard/CommunicationTab';
 import ReportsTab from './components/clientCard/ReportsTab';
+import TreatmentFlowTab from './components/clientCard/TreatmentFlowTab';
 
 function TabPanel({ children, value, index, ...other }) {
     return (
@@ -221,6 +223,12 @@ export default function ClientCard() {
                             id="client-tab-6"
                             aria-controls="client-tabpanel-6"
                         />
+                        <Tab
+                            icon={<PsychologyIcon />}
+                            label="תיעוד טיפול"
+                            id="client-tab-7"
+                            aria-controls="client-tabpanel-7"
+                        />
                     </Tabs>
                 </Box>
 
@@ -252,6 +260,10 @@ export default function ClientCard() {
 
                 <TabPanel value={tabValue} index={6}>
                     <ReportsTab client={client} />
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={7}>
+                    <TreatmentFlowTab client={client} />
                 </TabPanel>
             </Paper>
         </Box>
