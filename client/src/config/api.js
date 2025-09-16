@@ -1,11 +1,14 @@
 // API Configuration
-// Force localhost for development, ignore environment variables
-const API_BASE_URL = 'http://localhost:5000/api';
+// Dynamic API URL based on environment
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api'
+  : 'https://luma-therapist-crm.vercel.app/api';
 
-console.log('🔧 FORCED API_BASE_URL:', API_BASE_URL);
-console.log('❌ IGNORED VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('❌ IGNORED PROD:', import.meta.env.PROD);
-console.log('✅ Using localhost backend on port 5000');
+console.log('🔧 Current hostname:', window.location.hostname);
+console.log('🔧 Selected API_BASE_URL:', API_BASE_URL);
+console.log('🔧 Environment variables:');
+console.log('  - VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('  - PROD:', import.meta.env.PROD);
 
 // יצירת instance של fetch מותאם
 class ApiClient {
