@@ -4,7 +4,7 @@ import api, { therapistsApi } from './api';
 export const getTherapistProfile = async () => {
     try {
         const response = await therapistsApi.getProfile();
-        return response.data;
+        return response.data.data; // response.data הוא {success: true, data: {...}}
     } catch (error) {
         throw error.response?.data || error.message;
     }

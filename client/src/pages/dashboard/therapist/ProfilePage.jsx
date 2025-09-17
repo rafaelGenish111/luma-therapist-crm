@@ -105,7 +105,8 @@ const ProfilePage = () => {
         try {
             setLoading(true);
             const response = await getTherapistProfile();
-            setProfile(response.data);
+            console.log('Profile response:', response);
+            setProfile(response);
         } catch (error) {
             setError('שגיאה בטעינת הפרופיל');
             console.error('Profile load error:', error);
