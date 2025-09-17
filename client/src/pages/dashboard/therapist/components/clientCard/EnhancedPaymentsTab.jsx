@@ -225,7 +225,13 @@ const EnhancedPaymentsTab = ({ client }) => {
     };
 
     const formatDate = (date) => {
-        return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: he });
+        try {
+            if (!date) return 'לא זמין';
+            return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: he });
+        } catch (error) {
+            console.error('Error formatting date:', date, error);
+            return 'תאריך לא תקין';
+        }
     };
 
     const renderSummaryCards = () => {
@@ -446,7 +452,7 @@ const EnhancedPaymentsTab = ({ client }) => {
                                 ) : (
                                     payments.map((payment) => (
                                         <TableRow key={payment._id}>
-                                            <TableCell>{formatDate(payment.processedAt)}</TableCell>
+                                            <TableCell>{formatDate(payment.createdAt)}</TableCell>
                                             <TableCell>{formatAmount(payment.amount)}</TableCell>
                                             <TableCell>
                                                 <Box display="flex" alignItems="center" gap={1}>
@@ -559,10 +565,10 @@ const EnhancedPaymentsTab = ({ client }) => {
                                 {completedAppointments.map((appointment) => (
                                     <TableRow key={appointment._id}>
                                         <TableCell>
-                                            {format(new Date(appointment.date), 'dd/MM/yyyy', { locale: he })}
+                                            {appointment.date ? format(new Date(appointment.date), 'dd/MM/yyyy', { locale: he }) : 'לא זמין'}
                                         </TableCell>
                                         <TableCell>
-                                            {format(new Date(appointment.date), 'HH:mm', { locale: he })}
+                                            {appointment.date ? format(new Date(appointment.date), 'HH:mm', { locale: he }) : 'לא זמין'}
                                         </TableCell>
                                         <TableCell>{formatAmount(appointment.price || 0)}</TableCell>
                                         <TableCell>
