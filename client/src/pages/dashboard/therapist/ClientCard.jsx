@@ -26,7 +26,7 @@ import { Psychology as PsychologyIcon } from '@mui/icons-material';
 import clientService from '../../../services/clientService';
 import PersonalInfoTab from './components/clientCard/PersonalInfoTab';
 import ReferralDescriptionTab from './components/clientCard/ReferralDescriptionTab';
-import PaymentsTab from './components/clientCard/PaymentsTab';
+import PaymentsTab from './components/clientCard/EnhancedPaymentsTab';
 import AppointmentsTab from './components/clientCard/AppointmentsTab';
 import DocumentsTab from './components/clientCard/DocumentsTab';
 import CommunicationTab from './components/clientCard/CommunicationTab';

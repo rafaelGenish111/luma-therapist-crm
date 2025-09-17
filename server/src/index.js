@@ -128,6 +128,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/websites', websiteRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/charges', chargeRoutes);
+app.use('/api', require('./routes/enhancedPayments'));
 app.use('/api/documents', documentRoutes);
 app.use('/api/communications', communicationRoutes);
 app.use('/api/hooks', hookRoutes);

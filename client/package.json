@@ -10,7 +10,7 @@
         "@mui/material": "^5.15.0",
         "@mui/x-charts": "^6.18.2",
         "@mui/x-data-grid": "^6.20.4",
-        "@mui/x-date-pickers": "^6.18.2",
+        "@mui/x-date-pickers": "^6.20.2",
         "axios": "^1.6.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.0.0",

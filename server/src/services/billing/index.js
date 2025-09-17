@@ -1,6 +1,7 @@
 const SimulatedBillingProvider = require('./SimulatedBillingProvider');
 const StripeBillingProvider = require('./StripeBillingProvider');
 const GreenInvoiceProvider = require('./GreenInvoiceProvider');
+const IsraeliPaymentProvider = require('./IsraeliPaymentProvider');
 
 /**
  * Factory לספקי תשלומים
@@ -35,6 +36,10 @@ class BillingProviderFactory {
 
             case 'greeninvoice':
                 this.provider = new GreenInvoiceProvider();
+                break;
+
+            case 'israeli':
+                this.provider = new IsraeliPaymentProvider();
                 break;
 
             // case 'tranzilla':
@@ -97,6 +102,7 @@ class BillingProviderFactory {
             'simulated',
             'stripe',
             'greeninvoice', // זמין כעת
+            'israeli',      // ספק ישראלי חדש
             // 'tranzilla'    // בעתיד
         ];
     }
