@@ -13,9 +13,12 @@ export const authApi = {
 export const therapistsApi = {
     getAll: () => apiClient.get('/therapists'),
     getById: (id) => apiClient.get(`/therapists/${id}`),
+    getProfile: () => apiClient.get('/therapists/profile'),
     create: (data) => apiClient.post('/therapists', data),
     update: (id, data) => apiClient.put(`/therapists/${id}`, data),
     delete: (id) => apiClient.delete(`/therapists/${id}`),
+    deleteProfileImage: () => apiClient.delete('/therapists/profile/image'),
+    deleteClinicImage: () => apiClient.delete('/therapists/profile/clinic-image'),
 };
 
 // Clients Services
