@@ -228,6 +228,7 @@ class EnhancedBillingService {
     async getPaymentSummary(clientId) {
         try {
             const payments = await Payment.find({ clientId: clientId });
+            const charges = await Charge.find({ client: clientId });
             
             const summary = {
                 totalPayments: payments.length,
@@ -239,15 +240,15 @@ class EnhancedBillingService {
                 recentPayments: []
             };
 
-            payments.forEach(payment => {
-                summary.totalAmount += payment.amount;
-                
-                if (payment.status === 'completed' || payment.status === 'paid') {
-                    summary.paidAmount += payment.amount;
-                } else {
-                    summary.pendingAmount += payment.amount;
-                }
+            // Calculate based on charges (more accurate)
+            charges.forEach(charge => {
+                summary.totalAmount += charge.amount;
+                summary.paidAmount += charge.paidAmount || 0;
+                summary.pendingAmount += charge.amount - (charge.paidAmount || 0);
+            });
 
+            // Also calculate from payments for method/status breakdown
+            payments.forEach(payment => {
                 // Count by method
                 summary.byMethod[payment.method] = (summary.byMethod[payment.method] || 0) + 1;
                 
@@ -257,14 +258,14 @@ class EnhancedBillingService {
 
             // Get recent payments
             summary.recentPayments = payments
-                .sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt))
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, 5)
                 .map(payment => ({
                     id: payment._id,
                     amount: payment.amount,
                     method: payment.method,
                     status: payment.status,
-                    processedAt: payment.processedAt
+                    processedAt: payment.createdAt
                 }));
 
             return {

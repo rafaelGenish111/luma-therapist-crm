@@ -129,9 +129,11 @@ const EnhancedPaymentsTab = ({ client }) => {
 
     const handlePaymentSuccess = (payment) => {
         setSuccess('התשלום בוצע בהצלחה!');
+        // Reload all data to reflect changes
         loadPayments();
         loadSummary();
         loadOpenCharges();
+        loadCompletedAppointments();
         setPaymentModalOpen(false);
         setSelectedChargeIds([]);
         setSelectedAppointmentId(null);
@@ -621,7 +623,7 @@ const EnhancedPaymentsTab = ({ client }) => {
                     onClick={() => handleOpenPaymentModal(openCharges.map(c => c._id))}
                     disabled={openCharges.length === 0}
                 >
-                    גבה כל החיובים
+                    גבה כל החיובים ({formatAmount(openCharges.reduce((sum, charge) => sum + (charge.amount - (charge.paidAmount || 0)), 0))})
                 </Button>
             </Box>
 

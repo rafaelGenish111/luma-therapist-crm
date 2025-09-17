@@ -23,8 +23,14 @@ router.post('/payments/process', auth, authorize(['therapist']), async (req, res
             });
         }
 
+        // Add therapist ID to payment data
+        const paymentData = {
+            ...req.body,
+            therapistId: req.user.id
+        };
+
         // Process payment
-        const result = await enhancedBillingService.processPayment(req.body);
+        const result = await enhancedBillingService.processPayment(paymentData);
 
         if (result.success) {
             res.status(201).json({
