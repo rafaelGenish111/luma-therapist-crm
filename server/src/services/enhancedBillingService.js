@@ -41,29 +41,26 @@ class EnhancedBillingService {
             };
 
             // Process payment with provider
-            const paymentResult = await this.paymentProvider.processPayment(providerPaymentData);
+            const paymentResult = await this.paymentProvider.createCharge(providerPaymentData);
 
-            if (!paymentResult.success) {
+            if (!paymentResult.ok) {
                 throw new Error(paymentResult.error || 'Payment processing failed');
             }
 
             // Create payment record in database
             const payment = new Payment({
                 client: paymentData.clientId,
-                amount: paymentResult.amount,
-                currency: paymentResult.currency,
-                method: paymentResult.method,
-                status: paymentResult.status,
+                amount: paymentData.amount,
+                currency: paymentData.currency || 'ILS',
+                method: paymentData.method,
+                status: 'COMPLETED',
                 transactionId: paymentResult.transactionId,
-                provider: paymentResult.provider,
+                provider: this.paymentProvider.constructor.name,
                 description: paymentData.description,
                 metadata: {
                     ...paymentData.metadata,
-                    providerResponse: paymentResult.rawResponse,
-                    invoiceId: paymentResult.invoice?.invoiceId,
-                    invoiceNumber: paymentResult.invoice?.invoiceNumber
-                },
-                processedAt: paymentResult.processedAt
+                    providerResponse: paymentResult.providerResponse
+                }
             });
 
             await payment.save();
