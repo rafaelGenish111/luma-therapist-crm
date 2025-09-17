@@ -108,6 +108,7 @@ router.post('/', auth, authorize(['manage_own_clients']), async (req, res) => {
     try {
         const {
             clientId,
+            appointmentId,
             sessionDate,
             sessionType,
             description,
@@ -141,6 +142,7 @@ router.post('/', auth, authorize(['manage_own_clients']), async (req, res) => {
         const session = new TreatmentSession({
             client: clientId,
             therapist: req.user.id,
+            appointmentId: appointmentId || null,
             sessionDate: sessionDate || new Date(),
             sessionType,
             description,
@@ -150,6 +152,35 @@ router.post('/', auth, authorize(['manage_own_clients']), async (req, res) => {
         });
 
         await session.save();
+
+        // אם יש appointmentId, עדכן את הסטטוס של הפגישה המקורית
+        if (req.body.appointmentId) {
+            try {
+                const Appointment = require('../models/Appointment');
+                const ensureChargeForAppointment = require('../services/billingEngine').ensureChargeForAppointment;
+
+                console.log('Updating appointment:', req.body.appointmentId);
+                const updatedAppointment = await Appointment.findByIdAndUpdate(req.body.appointmentId, {
+                    status: 'completed',
+                    'metadata.documented': true,
+                    'metadata.documentedAt': new Date()
+                }, { new: true });
+
+                console.log('Appointment updated successfully');
+
+                // עדכן את החיוב עבור הפגישה שהסתיימה
+                if (updatedAppointment) {
+                    try {
+                        await ensureChargeForAppointment(updatedAppointment);
+                        console.log('Charge updated for completed appointment');
+                    } catch (chargeError) {
+                        console.warn('Failed to update charge for appointment:', chargeError.message);
+                    }
+                }
+            } catch (appointmentError) {
+                console.warn('Failed to update appointment status:', appointmentError.message);
+            }
+        }
 
         // העלאת הפגישה עם populate
         const populatedSession = await TreatmentSession.findById(session._id)

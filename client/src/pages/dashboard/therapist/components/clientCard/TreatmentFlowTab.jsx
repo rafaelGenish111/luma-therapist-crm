@@ -50,24 +50,26 @@ import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 
 import treatmentSessionService from '../../../../../services/treatmentSessionService';
+import appointmentService from '../../../../../services/appointmentService';
 
 const TreatmentFlowTab = ({ client }) => {
     const [sessions, setSessions] = useState([]);
+    const [completedAppointments, setCompletedAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [expandedRow, setExpandedRow] = useState(null);
-    const [showForm, setShowForm] = useState(false);
     const [metaLabels, setMetaLabels] = useState({});
-    const [editingSession, setEditingSession] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [sessionToDelete, setSessionToDelete] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('timeline'); // timeline או table
     const [aiInsightsOpen, setAiInsightsOpen] = useState(false);
-
-    const [formData, setFormData] = useState({
-        sessionDate: new Date().toISOString().split('T')[0],
+    const [documentationDialogOpen, setDocumentationDialogOpen] = useState(false);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [showDocumentationForm, setShowDocumentationForm] = useState(false);
+    const [documentationForm, setDocumentationForm] = useState({
+        sessionDate: '',
         sessionType: 'followup',
         description: '',
         nextSessionNotes: '',
@@ -79,6 +81,7 @@ const TreatmentFlowTab = ({ client }) => {
     useEffect(() => {
         loadSessions();
         loadMetaLabels();
+        loadCompletedAppointments();
     }, [client]);
 
     const loadSessions = async () => {
@@ -140,64 +143,22 @@ const TreatmentFlowTab = ({ client }) => {
         }
     };
 
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess('');
-
+    const loadCompletedAppointments = async () => {
         try {
-            const sessionData = {
-                ...formData,
-                clientId: client._id,
-                tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
-            };
-
-            if (editingSession) {
-                await treatmentSessionService.update(editingSession._id, sessionData);
-                setSuccess('פגישת הטיפול עודכנה בהצלחה');
-                setEditingSession(null);
-            } else {
-                await treatmentSessionService.create(sessionData);
-                setSuccess('פגישת הטיפול נוספה בהצלחה');
-            }
-
-            setFormData({
-                sessionDate: new Date().toISOString().split('T')[0],
-                sessionType: 'followup',
-                description: '',
-                nextSessionNotes: '',
-                progress: '',
-                mood: '',
-                tags: ''
-            });
-            setShowForm(false);
-            loadSessions();
+            console.log('Loading completed appointments...');
+            const response = await appointmentService.getByClient(client._id);
+            console.log('Appointments response:', response);
+            const allAppointments = response.appointments || [];
+            console.log('All appointments:', allAppointments);
+            const completed = allAppointments.filter(apt =>
+                (apt.status === 'completed' || apt.status === 'בוצעה') &&
+                !apt.metadata?.documented
+            );
+            console.log('Completed appointments (not documented):', completed);
+            setCompletedAppointments(completed);
         } catch (err) {
-            console.error('Error saving treatment session:', err);
-            setError('שגיאה בשמירת פגישת הטיפול');
-        } finally {
-            setLoading(false);
+            console.error('Error loading completed appointments:', err);
         }
-    };
-
-    const handleEdit = (session) => {
-        setFormData({
-            sessionDate: session.sessionDate ? session.sessionDate.split('T')[0] : '',
-            sessionType: session.sessionType || 'followup',
-            description: session.description || '',
-            nextSessionNotes: session.nextSessionNotes || '',
-            progress: session.progress || '',
-            mood: session.mood || '',
-            tags: session.tags?.join(', ') || ''
-        });
-        setEditingSession(session);
-        setShowForm(true);
     };
 
     const handleDelete = async () => {
@@ -218,9 +179,21 @@ const TreatmentFlowTab = ({ client }) => {
         }
     };
 
-    const handleCancel = () => {
-        setFormData({
-            sessionDate: new Date().toISOString().split('T')[0],
+    const toggleRowExpansion = (sessionId) => {
+        setExpandedRow(expandedRow === sessionId ? null : sessionId);
+    };
+
+    const handleOpenDocumentationDialog = (appointment) => {
+        setSelectedAppointment(appointment);
+        setDocumentationDialogOpen(true);
+    };
+
+    const handleCloseDocumentationDialog = () => {
+        setDocumentationDialogOpen(false);
+        setSelectedAppointment(null);
+        setShowDocumentationForm(false);
+        setDocumentationForm({
+            sessionDate: '',
             sessionType: 'followup',
             description: '',
             nextSessionNotes: '',
@@ -228,13 +201,58 @@ const TreatmentFlowTab = ({ client }) => {
             mood: '',
             tags: ''
         });
-        setEditingSession(null);
-        setShowForm(false);
-        setError('');
     };
 
-    const toggleRowExpansion = (sessionId) => {
-        setExpandedRow(expandedRow === sessionId ? null : sessionId);
+    const handleOpenDocumentationForm = () => {
+        if (selectedAppointment) {
+            setDocumentationForm({
+                sessionDate: selectedAppointment.date.split('T')[0],
+                sessionType: 'followup',
+                description: selectedAppointment.description || '',
+                nextSessionNotes: '',
+                progress: '',
+                mood: '',
+                tags: ''
+            });
+            setShowDocumentationForm(true);
+        }
+    };
+
+    const handleDocumentationFormChange = (e) => {
+        const { name, value } = e.target;
+        setDocumentationForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmitDocumentation = async () => {
+        try {
+            const sessionData = {
+                clientId: client._id,
+                appointmentId: selectedAppointment._id,
+                sessionDate: documentationForm.sessionDate,
+                sessionType: documentationForm.sessionType,
+                description: documentationForm.description,
+                nextSessionNotes: documentationForm.nextSessionNotes,
+                progress: documentationForm.progress,
+                mood: documentationForm.mood,
+                tags: documentationForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+            };
+
+            await treatmentSessionService.create(sessionData);
+            setSuccess('הפגישה תועדה בהצלחה');
+
+            // עדכן את הרשימות
+            loadSessions();
+
+            // טען מחדש את רשימת הפגישות כדי לקבל את הנתונים העדכניים מהשרת
+            loadCompletedAppointments();
+
+            handleCloseDocumentationDialog();
+        } catch (err) {
+            setError('שגיאה בתיעוד הפגישה');
+        }
     };
 
     const getProgressColor = (progress) => {
@@ -305,7 +323,10 @@ const TreatmentFlowTab = ({ client }) => {
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
                     <PsychologyIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
                     <Typography variant="h6" color="text.secondary">
-                        {searchTerm ? 'לא נמצאו תוצאות עבור החיפוש' : 'עדיין לא נרשמו פגישות טיפול'}
+                        {searchTerm ? 'לא נמצאו תוצאות עבור החיפוש' : 'עדיין לא תועדו פגישות טיפול'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        פגישות יופיעו כאן לאחר שיועדו בטאב "פגישות"
                     </Typography>
                     {searchTerm && (
                         <Button onClick={() => setSearchTerm('')} sx={{ mt: 2 }}>
@@ -377,13 +398,6 @@ const TreatmentFlowTab = ({ client }) => {
                             )}
 
                             <Box display="flex" justifyContent="flex-end" gap={1}>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleEdit(session)}
-                                    color="primary"
-                                >
-                                    <EditIcon />
-                                </IconButton>
                                 <IconButton
                                     size="small"
                                     onClick={() => {
@@ -466,13 +480,6 @@ const TreatmentFlowTab = ({ client }) => {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleEdit(session)}
-                                            color="primary"
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
                                         <IconButton
                                             size="small"
                                             onClick={() => {
@@ -623,9 +630,52 @@ const TreatmentFlowTab = ({ client }) => {
                 </Grid>
             </Grid>
 
+            {/* פגישות שהסתיימו */}
+            {completedAppointments.length > 0 && (
+                <Paper sx={{ mb: 3 }}>
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="h6">פגישות שהסתיימו - מוכנות לתיעוד</Typography>
+                    </Box>
+                    <Divider />
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>תאריך</TableCell>
+                                    <TableCell>סוג פגישה</TableCell>
+                                    <TableCell>משך</TableCell>
+                                    <TableCell>תיאור</TableCell>
+                                    <TableCell>פעולות</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {completedAppointments.map((appointment) => (
+                                    <TableRow key={appointment._id}>
+                                        <TableCell>{format(new Date(appointment.date), 'dd/MM/yyyy HH:mm', { locale: he })}</TableCell>
+                                        <TableCell>{appointment.type}</TableCell>
+                                        <TableCell>{appointment.duration} דקות</TableCell>
+                                        <TableCell>{appointment.description || 'ללא תיאור'}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                startIcon={<AddIcon />}
+                                                onClick={() => handleOpenDocumentationDialog(appointment)}
+                                            >
+                                                תיעוד פגישה
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
+            )}
+
             {/* Header & Controls */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
-                <Typography variant="h6">תיעוד טיפול</Typography>
+                <Typography variant="h6">היסטוריית טיפול</Typography>
                 <Box display="flex" gap={2} alignItems="center">
                     <TextField
                         placeholder="חיפוש בפגישות..."
@@ -642,140 +692,12 @@ const TreatmentFlowTab = ({ client }) => {
                         <Tab label="ציר זמן" value="timeline" />
                         <Tab label="טבלה" value="table" />
                     </Tabs>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => setShowForm(!showForm)}
-                        disabled={loading}
-                    >
-                        {showForm ? 'ביטול' : 'הוספת פגישה'}
-                    </Button>
+                    <Typography variant="body2" color="text.secondary">
+                        פגישות מתועדות - לתזמון פגישות חדשות עבור לטאב "פגישות"
+                    </Typography>
                 </Box>
             </Box>
 
-            {/* Add Session Form */}
-            {showForm && (
-                <Paper sx={{ p: 3, mb: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                        {editingSession ? 'עריכת פגישת טיפול' : 'הוספת פגישת טיפול חדשה'}
-                    </Typography>
-
-                    <form onSubmit={handleSubmit}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    label="תאריך הפגישה"
-                                    name="sessionDate"
-                                    type="date"
-                                    value={formData.sessionDate}
-                                    onChange={handleFormChange}
-                                    fullWidth
-                                    required
-                                    InputLabelProps={{ shrink: true }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>סוג פגישה</InputLabel>
-                                    <Select
-                                        name="sessionType"
-                                        value={formData.sessionType}
-                                        onChange={handleFormChange}
-                                        label="סוג פגישה"
-                                    >
-                                        {Object.entries(metaLabels?.sessionTypes || {}).map(([key, label]) => (
-                                            <MenuItem key={key} value={key}>{label}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>התקדמות</InputLabel>
-                                    <Select
-                                        name="progress"
-                                        value={formData.progress}
-                                        onChange={handleFormChange}
-                                        label="התקדמות"
-                                    >
-                                        {Object.entries(metaLabels?.progress || {}).map(([key, label]) => (
-                                            <MenuItem key={key} value={key}>{label}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>מצב רוח</InputLabel>
-                                    <Select
-                                        name="mood"
-                                        value={formData.mood}
-                                        onChange={handleFormChange}
-                                        label="מצב רוח"
-                                    >
-                                        {Object.entries(metaLabels?.moods || {}).map(([key, label]) => (
-                                            <MenuItem key={key} value={key}>{label}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="תיאור הפגישה"
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleFormChange}
-                                    multiline
-                                    rows={4}
-                                    fullWidth
-                                    placeholder="תאר את מהלך הפגישה, נושאים שנדונו, שיטות טיפול שנעשה בהן שימוש..."
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="הערות לפגישה הבאה"
-                                    name="nextSessionNotes"
-                                    value={formData.nextSessionNotes}
-                                    onChange={handleFormChange}
-                                    multiline
-                                    rows={2}
-                                    fullWidth
-                                    placeholder="מטלות, נושאים לטיפול, המשך לפגישה הבאה..."
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="תגיות"
-                                    name="tags"
-                                    value={formData.tags}
-                                    onChange={handleFormChange}
-                                    fullWidth
-                                    placeholder="הפרד בפסיקים: חרדה, EMDR, נשימות, התקדמות..."
-                                    helperText="תגיות עוזרות לחיפוש ולארגון הפגישות"
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Box mt={3} display="flex" gap={2}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                startIcon={<SaveIcon />}
-                                disabled={loading}
-                            >
-                                {editingSession ? 'עדכן פגישה' : 'שמור פגישה'}
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                startIcon={<CancelIcon />}
-                                onClick={handleCancel}
-                            >
-                                ביטול
-                            </Button>
-                        </Box>
-                    </form>
-                </Paper>
-            )}
 
             {/* Results Counter */}
             {searchTerm && (
@@ -923,6 +845,196 @@ const TreatmentFlowTab = ({ client }) => {
                     <Button onClick={() => setAiInsightsOpen(false)} variant="contained">
                         סגור
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* דיאלוג תיעוד פגישה */}
+            <Dialog
+                open={documentationDialogOpen}
+                onClose={handleCloseDocumentationDialog}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    תיעוד פגישה - {selectedAppointment?.type}
+                </DialogTitle>
+                <DialogContent>
+                    {selectedAppointment && (
+                        <Box sx={{ pt: 2 }}>
+                            {!showDocumentationForm ? (
+                                <>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="subtitle2" color="text.secondary">
+                                                תאריך הפגישה:
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {format(new Date(selectedAppointment.date), 'dd/MM/yyyy HH:mm', { locale: he })}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="subtitle2" color="text.secondary">
+                                                משך הפגישה:
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {selectedAppointment.duration} דקות
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="subtitle2" color="text.secondary">
+                                                תיאור הפגישה:
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {selectedAppointment.description || 'ללא תיאור'}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Divider sx={{ my: 3 }} />
+
+                                    <Typography variant="h6" gutterBottom>
+                                        תיעוד הפגישה
+                                    </Typography>
+
+                                    <Alert severity="info" sx={{ mb: 2 }}>
+                                        💡 לאחר תיעוד הפגישה, היא תופיע בהיסטוריית הטיפול ותוכל להוסיף הערות, תגיות ומידע נוסף
+                                    </Alert>
+
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                        לחץ על "פתח טופס תיעוד" כדי להתחיל לתעד את הפגישה.
+                                    </Typography>
+                                </>
+                            ) : (
+                                <Box>
+                                    <Typography variant="h6" gutterBottom>
+                                        טופס תיעוד פגישה
+                                    </Typography>
+
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                label="תאריך הפגישה"
+                                                type="date"
+                                                name="sessionDate"
+                                                value={documentationForm.sessionDate}
+                                                onChange={handleDocumentationFormChange}
+                                                fullWidth
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>סוג פגישה</InputLabel>
+                                                <Select
+                                                    name="sessionType"
+                                                    value={documentationForm.sessionType}
+                                                    onChange={handleDocumentationFormChange}
+                                                    label="סוג פגישה"
+                                                >
+                                                    <MenuItem value="intake">אינטייק</MenuItem>
+                                                    <MenuItem value="followup">פגישת מעקב</MenuItem>
+                                                    <MenuItem value="assessment">הערכה</MenuItem>
+                                                    <MenuItem value="therapy">טיפול</MenuItem>
+                                                    <MenuItem value="summary">סיכום</MenuItem>
+                                                    <MenuItem value="emergency">חירום</MenuItem>
+                                                    <MenuItem value="consultation">ייעוץ</MenuItem>
+                                                    <MenuItem value="other">אחר</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                label="תיאור הפגישה"
+                                                name="description"
+                                                value={documentationForm.description}
+                                                onChange={handleDocumentationFormChange}
+                                                multiline
+                                                rows={4}
+                                                fullWidth
+                                                placeholder="תאר את מה שקרה בפגישה, הנושאים שדנו בהם, והתקדמות שהושגה..."
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                label="הערות לפגישה הבאה"
+                                                name="nextSessionNotes"
+                                                value={documentationForm.nextSessionNotes}
+                                                onChange={handleDocumentationFormChange}
+                                                multiline
+                                                rows={2}
+                                                fullWidth
+                                                placeholder="מה חשוב לזכור לפגישה הבאה? איזה נושאים לטפל בהם?"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>התקדמות</InputLabel>
+                                                <Select
+                                                    name="progress"
+                                                    value={documentationForm.progress}
+                                                    onChange={handleDocumentationFormChange}
+                                                    label="התקדמות"
+                                                >
+                                                    <MenuItem value="significant_improvement">שיפור משמעותי</MenuItem>
+                                                    <MenuItem value="improvement">שיפור</MenuItem>
+                                                    <MenuItem value="stable">יציב</MenuItem>
+                                                    <MenuItem value="slight_decline">ירידה קלה</MenuItem>
+                                                    <MenuItem value="decline">ירידה</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>מצב רוח</InputLabel>
+                                                <Select
+                                                    name="mood"
+                                                    value={documentationForm.mood}
+                                                    onChange={handleDocumentationFormChange}
+                                                    label="מצב רוח"
+                                                >
+                                                    <MenuItem value="excellent">מצוין</MenuItem>
+                                                    <MenuItem value="good">טוב</MenuItem>
+                                                    <MenuItem value="neutral">נייטרלי</MenuItem>
+                                                    <MenuItem value="difficult">קשה</MenuItem>
+                                                    <MenuItem value="very_difficult">קשה מאוד</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                label="תגיות (מופרדות בפסיקים)"
+                                                name="tags"
+                                                value={documentationForm.tags}
+                                                onChange={handleDocumentationFormChange}
+                                                fullWidth
+                                                placeholder="דיכאון, חרדה, זוגיות, עבודה..."
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            )}
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDocumentationDialog}>
+                        {showDocumentationForm ? 'ביטול' : 'סגור'}
+                    </Button>
+                    {!showDocumentationForm ? (
+                        <Button
+                            variant="contained"
+                            onClick={handleOpenDocumentationForm}
+                        >
+                            פתח טופס תיעוד
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="contained"
+                            onClick={handleSubmitDocumentation}
+                        >
+                            שמור תיעוד
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
         </Box>

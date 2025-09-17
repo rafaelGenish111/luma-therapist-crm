@@ -17,10 +17,12 @@ import { he } from 'date-fns/locale';
 
 import paymentService from '../../../../../services/paymentService';
 import chargeService from '../../../../../services/chargeService';
+import appointmentService from '../../../../../services/appointmentService';
 
 const PaymentsTab = ({ client }) => {
     const [payments, setPayments] = useState([]);
     const [openCharges, setOpenCharges] = useState([]);
+    const [completedAppointments, setCompletedAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -41,13 +43,50 @@ const PaymentsTab = ({ client }) => {
     const loadPayments = async () => {
         try {
             setLoading(true);
+            console.log('🔵 PaymentsTab - Loading payments for client:', client._id);
+
+            // טען תשלומים קיימים
+            console.log('🔵 PaymentsTab - Loading payments...');
             const response = await paymentService.getByClient(client._id);
-            setPayments(response.payments || response.data?.data || []);
-            // טען חיובים פתוחים
-            const chargesRes = await chargeService.getByClient(client._id, { status: 'open' });
-            setOpenCharges(chargesRes.charges || []);
+            console.log('🔵 PaymentsTab - Payments response:', response);
+            const paymentsData = response?.payments || response?.data?.data || [];
+            console.log('🔵 PaymentsTab - Payments data extracted:', paymentsData);
+            setPayments(paymentsData);
+
+            // טען כל החיובים (פתוחים ועסורים)
+            console.log('🔵 PaymentsTab - Starting to load charges...');
+            try {
+                console.log('🔵 PaymentsTab - Calling chargeService.getByClient...');
+                const chargesRes = await chargeService.getByClient(client._id);
+                console.log('🔵 PaymentsTab - Raw charges response:', chargesRes);
+                const allCharges = chargesRes?.charges || [];
+                console.log('🔵 PaymentsTab - All charges:', allCharges);
+
+                // סנן חיובים פתוחים
+                const openCharges = allCharges.filter(charge =>
+                    ['PENDING', 'PARTIALLY_PAID'].includes(charge.status) &&
+                    charge.amount > 0
+                );
+                console.log('🔵 PaymentsTab - Open charges:', openCharges);
+                setOpenCharges(openCharges);
+            } catch (chargeError) {
+                console.error('🔴 PaymentsTab - Error loading charges:', chargeError);
+                setOpenCharges([]); // אם יש שגיאה, הגדר רשימה ריקה
+            }
+
+            // טען פגישות שהסתיימו (רק כדי להציג)
+            const appointmentsRes = await appointmentService.getByClient(client._id);
+            const allAppointments = appointmentsRes.appointments || [];
+            const completed = allAppointments.filter(apt =>
+                (apt.status === 'completed' || apt.status === 'בוצעה') &&
+                apt.chargeId // רק פגישות שיש להן חיוב
+            );
+            setCompletedAppointments(completed);
         } catch (err) {
+            console.error('🔴 PaymentsTab - Global error loading payments:', err);
             setError('שגיאה בטעינת תשלומים');
+            setOpenCharges([]); // ודא שהחיובים הפתוחים ריקים במקרה של שגיאה
+            setCompletedAppointments([]); // ודא שהפגישות שהסתיימו ריקות במקרה של שגיאה
         } finally {
             setLoading(false);
         }
@@ -152,6 +191,16 @@ const PaymentsTab = ({ client }) => {
         }
     };
 
+    const handleCreateChargeForAppointment = async (appointment) => {
+        try {
+            await chargeService.ensureForAppointment(appointment._id);
+            setSuccess('חיוב נוצר עבור הפגישה');
+            loadPayments();
+        } catch (err) {
+            setError('שגיאה ביצירת חיוב עבור הפגישה');
+        }
+    };
+
     const getTotalAmount = () => {
         return payments.reduce((sum, payment) => sum + payment.amount, 0);
     };
@@ -168,6 +217,14 @@ const PaymentsTab = ({ client }) => {
         const paidOnOpenCharges = openCharges.reduce((sum, ch) => sum + (ch.paidAmount || 0), 0);
         const balance = openChargesTotal - paidOnOpenCharges;
         return balance > 0 ? balance : 0;
+    };
+
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString('he-IL');
+    };
+
+    const formatAmount = (amount) => {
+        return `₪${amount?.toFixed(2) || '0.00'}`;
     };
 
     if (loading) {
@@ -259,12 +316,79 @@ const PaymentsTab = ({ client }) => {
                                         </TableCell>
                                         <TableCell>
                                             <Button
-                                                variant="outlined"
+                                                variant="contained"
                                                 size="small"
+                                                color="primary"
                                                 onClick={() => handleOpenDialog(null, ch)}
                                             >
-                                                גבייה (סימולציה)
+                                                גבה תשלום
                                             </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
+            )}
+
+            {/* פגישות שהסתיימו */}
+            {completedAppointments.length > 0 && (
+                <Paper sx={{ mb: 2 }}>
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="h6">פגישות שהסתיימו</Typography>
+                    </Box>
+                    <Divider />
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>תאריך</TableCell>
+                                    <TableCell>סוג פגישה</TableCell>
+                                    <TableCell>משך</TableCell>
+                                    <TableCell>מחיר</TableCell>
+                                    <TableCell>סטטוס חיוב</TableCell>
+                                    <TableCell>פעולות</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {completedAppointments.map((appointment) => (
+                                    <TableRow key={appointment._id}>
+                                        <TableCell>{formatDate(appointment.date)}</TableCell>
+                                        <TableCell>{appointment.type}</TableCell>
+                                        <TableCell>{appointment.duration} דקות</TableCell>
+                                        <TableCell>
+                                            <Typography variant="body2" fontWeight="bold">
+                                                {formatAmount(appointment.price)}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={
+                                                    appointment.paymentStatus === 'PAID' ? 'שולם' :
+                                                        appointment.chargeId ? 'חויב - ממתין לתשלום' : 'לא חויב'
+                                                }
+                                                color={
+                                                    appointment.paymentStatus === 'PAID' ? 'success' :
+                                                        appointment.chargeId ? 'warning' : 'error'
+                                                }
+                                                size="small"
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            {appointment.paymentStatus === 'PAID' ? (
+                                                <Chip label="שולם" color="success" size="small" />
+                                            ) : appointment.chargeId ? (
+                                                <Chip label="חויב" color="info" size="small" />
+                                            ) : (
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    onClick={() => handleCreateChargeForAppointment(appointment)}
+                                                >
+                                                    צור חיוב
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}

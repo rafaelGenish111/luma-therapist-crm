@@ -41,6 +41,9 @@ async function ensureChargeForAppointment(appointment) {
         status = 'PAID';
     } else if ((existingCharge?.paidAmount || 0) > 0) {
         status = 'PARTIALLY_PAID';
+    } else if (appointment.status === 'completed') {
+        // פגישה שהסתיימה - חיוב ממתין לתשלום
+        status = 'PENDING';
     } else {
         status = 'PENDING';
     }

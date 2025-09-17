@@ -225,7 +225,7 @@ export default function ClientCard() {
                         />
                         <Tab
                             icon={<PsychologyIcon />}
-                            label="תיעוד טיפול"
+                            label="היסטוריית טיפול"
                             id="client-tab-7"
                             aria-controls="client-tabpanel-7"
                         />

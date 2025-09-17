@@ -116,6 +116,17 @@ const appointmentSchema = new mongoose.Schema({
     autoDeleted: {
         type: Boolean,
         default: false
+    },
+
+    // מטא-דאטה
+    metadata: {
+        documented: {
+            type: Boolean,
+            default: false
+        },
+        documentedAt: {
+            type: Date
+        }
     }
 
 }, {

@@ -43,8 +43,14 @@ const AppointmentsTab = ({ client }) => {
         try {
             setLoading(true);
             const response = await appointmentService.getByClient(client._id);
-            setAppointments(response.appointments || response.data?.data || []);
+            console.log('📅 Full API response:', response);
+
+            // השרת מחזיר את הנתונים ישירות ב-response.appointments
+            const appointmentsData = response.appointments || [];
+            console.log('📅 Loaded appointments:', appointmentsData);
+            setAppointments(appointmentsData);
         } catch (err) {
+            console.error('❌ Error loading appointments:', err);
             setError('שגיאה בטעינת פגישות');
         } finally {
             setLoading(false);
@@ -240,18 +246,31 @@ const AppointmentsTab = ({ client }) => {
 
     const getFutureAppointments = () => {
         const now = new Date();
-        return appointments.filter(apt =>
-            new Date(apt.date) > now &&
-            ['scheduled', 'confirmed'].includes(apt.status)
-        );
+        const futureAppointments = appointments.filter(apt => {
+            const appointmentDate = new Date(apt.date);
+            const isFuture = appointmentDate > now;
+            const isActiveStatus = ['scheduled', 'confirmed', 'מתוכננת', 'אושרה'].includes(apt.status);
+            console.log(`🔍 Appointment ${apt._id}:`, {
+                date: apt.date,
+                status: apt.status,
+                isFuture,
+                isActiveStatus,
+                willShow: isFuture && isActiveStatus
+            });
+            return isFuture && isActiveStatus;
+        });
+        console.log('📅 Future appointments count:', futureAppointments.length);
+        return futureAppointments;
     };
 
     const getPastAppointments = () => {
         const now = new Date();
-        return appointments.filter(apt =>
-            new Date(apt.date) <= now ||
-            ['completed', 'cancelled', 'no_show'].includes(apt.status)
-        );
+        return appointments.filter(apt => {
+            const appointmentDate = new Date(apt.date);
+            const isPast = appointmentDate <= now;
+            const isCompletedStatus = ['completed', 'cancelled', 'no_show', 'בוצעה', 'בוטלה', 'לא הופיעה'].includes(apt.status);
+            return isPast || isCompletedStatus;
+        });
     };
 
     const futureAppointments = getFutureAppointments();
@@ -278,6 +297,10 @@ const AppointmentsTab = ({ client }) => {
                     {success}
                 </Alert>
             )}
+
+            <Alert severity="info" sx={{ mb: 2 }}>
+                💡 לאחר סיום פגישה, עבור לטאב "היסטוריית טיפול" כדי לתעד את הפגישה
+            </Alert>
 
             {/* סיכום פגישות */}
             <Grid container spacing={2} sx={{ mb: 3 }}>

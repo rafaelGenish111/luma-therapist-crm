@@ -16,7 +16,8 @@ class AppointmentService {
 
         try {
             const response = await api.get(`/appointments/clients/${clientId}/appointments?${params.toString()}`);
-            return response.data;
+            // ה-API מחזיר את הנתונים ישירות, לא עטוף ב-data
+            return response;
         } catch (error) {
             console.error('Error fetching appointments:', error);
             return { appointments: [], stats: {} };

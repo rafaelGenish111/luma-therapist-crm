@@ -11,6 +11,11 @@ const TreatmentSessionSchema = new mongoose.Schema({
         ref: 'Therapist',
         required: true,
     },
+    appointmentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Appointment',
+        required: false,
+    },
     sessionNumber: {
         type: Number,
         default: 1,

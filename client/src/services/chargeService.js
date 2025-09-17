@@ -5,12 +5,14 @@ const chargeService = {
         const params = new URLSearchParams();
         if (status) params.append('status', status);
         const res = await api.get(`/charges/clients/${clientId}?${params.toString()}`);
-        return res.data;
+        // ה-API מחזיר את הנתונים ישירות, לא עטוף ב-data
+        return res;
     },
 
     ensureForAppointment: async (appointmentId) => {
         const res = await api.post(`/charges/appointments/${appointmentId}/ensure`);
-        return res.data;
+        // ה-API מחזיר את הנתונים ישירות, לא עטוף ב-data
+        return res;
     }
 };
 
