@@ -115,7 +115,7 @@ const EnhancedPaymentsTab = ({ client }) => {
 
     const loadCompletedAppointments = async () => {
         try {
-            const response = await api.get(`/appointments/clients/${client._id}`);
+            const response = await api.get(`/appointments/clients/${client._id}/appointments`);
             const allAppointments = response.appointments || [];
             const completed = allAppointments.filter(apt =>
                 (apt.status === 'completed' || apt.status === 'בוצעה') &&
