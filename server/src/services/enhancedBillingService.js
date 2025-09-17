@@ -2,11 +2,11 @@ const Payment = require('../models/Payment');
 const Charge = require('../models/Charge');
 const Appointment = require('../models/Appointment');
 const Client = require('../models/Client');
-const IsraeliPaymentProvider = require('./billing/IsraeliPaymentProvider');
+const { getBillingProvider } = require('./billing');
 
 class EnhancedBillingService {
     constructor() {
-        this.paymentProvider = new IsraeliPaymentProvider();
+        this.paymentProvider = getBillingProvider();
     }
 
     async processPayment(paymentData) {
