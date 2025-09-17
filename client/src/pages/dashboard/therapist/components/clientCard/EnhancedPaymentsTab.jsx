@@ -56,7 +56,6 @@ const EnhancedPaymentsTab = ({ client }) => {
     const [payments, setPayments] = useState([]);
     const [summary, setSummary] = useState(null);
     const [openCharges, setOpenCharges] = useState([]);
-    const [completedAppointments, setCompletedAppointments] = useState([]);
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [selectedChargeIds, setSelectedChargeIds] = useState([]);
     const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
@@ -73,7 +72,6 @@ const EnhancedPaymentsTab = ({ client }) => {
         loadPayments();
         loadSummary();
         loadOpenCharges();
-        loadCompletedAppointments();
     }, [client._id]);
 
     const loadPayments = async () => {
@@ -114,19 +112,6 @@ const EnhancedPaymentsTab = ({ client }) => {
         }
     };
 
-    const loadCompletedAppointments = async () => {
-        try {
-            const response = await api.get(`/appointments/clients/${client._id}/appointments`);
-            const allAppointments = response.appointments || [];
-            const completed = allAppointments.filter(apt =>
-                (apt.status === 'completed' || apt.status === 'בוצעה') &&
-                apt.chargeId
-            );
-            setCompletedAppointments(completed);
-        } catch (err) {
-            console.error('Error loading appointments:', err);
-        }
-    };
 
     const handlePaymentSuccess = (payment) => {
         setSuccess('התשלום בוצע בהצלחה!');
@@ -134,7 +119,6 @@ const EnhancedPaymentsTab = ({ client }) => {
         loadPayments();
         loadSummary();
         loadOpenCharges();
-        loadCompletedAppointments();
         setPaymentModalOpen(false);
         setSelectedChargeIds([]);
         setSelectedAppointmentId(null);
@@ -591,63 +575,6 @@ const EnhancedPaymentsTab = ({ client }) => {
         </Card>
     );
 
-    const renderCompletedAppointments = () => (
-        <Card>
-            <CardContent>
-                <Typography variant="h6" gutterBottom>
-                    פגישות שהסתיימו
-                </Typography>
-                {completedAppointments.length === 0 ? (
-                    <Typography color="textSecondary">
-                        אין פגישות שהסתיימו
-                    </Typography>
-                ) : (
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>תאריך</TableCell>
-                                    <TableCell>שעה</TableCell>
-                                    <TableCell>מחיר</TableCell>
-                                    <TableCell>סטטוס תשלום</TableCell>
-                                    <TableCell>פעולות</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {completedAppointments.map((appointment) => (
-                                    <TableRow key={appointment._id}>
-                                        <TableCell>
-                                            {appointment.date ? format(new Date(appointment.date), 'dd/MM/yyyy', { locale: he }) : 'לא זמין'}
-                                        </TableCell>
-                                        <TableCell>
-                                            {appointment.date ? format(new Date(appointment.date), 'HH:mm', { locale: he }) : 'לא זמין'}
-                                        </TableCell>
-                                        <TableCell>{formatAmount(appointment.price || 0)}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={appointment.paymentStatus === 'paid' ? 'שולם' : 'לא שולם'}
-                                                color={appointment.paymentStatus === 'paid' ? 'success' : 'warning'}
-                                                size="small"
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button
-                                                size="small"
-                                                variant="contained"
-                                                onClick={() => handleOpenPaymentModal([], appointment._id)}
-                                            >
-                                                צור חיוב
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                )}
-            </CardContent>
-        </Card>
-    );
 
     return (
         <Box>
@@ -691,7 +618,6 @@ const EnhancedPaymentsTab = ({ client }) => {
                     <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
                         <Tab label="היסטוריית תשלומים" />
                         <Tab label="חיובים פתוחים" />
-                        <Tab label="פגישות שהסתיימו" />
                     </Tabs>
                 </Box>
 
@@ -703,7 +629,6 @@ const EnhancedPaymentsTab = ({ client }) => {
                         </>
                     )}
                     {activeTab === 1 && renderOpenCharges()}
-                    {activeTab === 2 && renderCompletedAppointments()}
                 </Box>
             </Card>
 
