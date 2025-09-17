@@ -235,6 +235,22 @@ const EnhancedPaymentsTab = ({ client }) => {
         }).format(amount);
     };
 
+    const getAppointmentStatus = (appointment) => {
+        if (!appointment || !appointment.date) return null;
+        
+        const now = new Date();
+        const appointmentDate = new Date(appointment.date);
+        const appointmentEnd = new Date(appointmentDate.getTime() + (appointment.duration || 60) * 60000);
+        
+        if (now < appointmentDate) {
+            return { status: 'future', label: 'עתידית', color: 'default' };
+        } else if (now >= appointmentDate && now <= appointmentEnd) {
+            return { status: 'current', label: 'מתקיימת עכשיו', color: 'success' };
+        } else {
+            return { status: 'past', label: 'הסתיימה', color: 'error' };
+        }
+    };
+
     const formatDate = (date) => {
         try {
             if (!date) return 'לא זמין';
@@ -516,6 +532,8 @@ const EnhancedPaymentsTab = ({ client }) => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>תיאור</TableCell>
+                                    <TableCell>תאריך פגישה</TableCell>
+                                    <TableCell>סטטוס פגישה</TableCell>
                                     <TableCell>סכום</TableCell>
                                     <TableCell>שולם</TableCell>
                                     <TableCell>נותר</TableCell>
@@ -523,25 +541,48 @@ const EnhancedPaymentsTab = ({ client }) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {openCharges.map((charge) => (
-                                    <TableRow key={charge._id}>
-                                        <TableCell>{charge.description}</TableCell>
-                                        <TableCell>{formatAmount(charge.amount)}</TableCell>
-                                        <TableCell>{formatAmount(charge.paidAmount || 0)}</TableCell>
-                                        <TableCell>
-                                            {formatAmount(charge.amount - (charge.paidAmount || 0))}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button
-                                                size="small"
-                                                variant="contained"
-                                                onClick={() => handleOpenPaymentModal([charge._id])}
-                                            >
-                                                גבה תשלום
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {openCharges.map((charge) => {
+                                    const appointmentStatus = getAppointmentStatus(charge.appointmentId);
+                                    return (
+                                        <TableRow key={charge._id}>
+                                            <TableCell>{charge.description}</TableCell>
+                                            <TableCell>
+                                                {charge.appointmentId ? formatDate(charge.appointmentId.date) : 'לא זמין'}
+                                            </TableCell>
+                                            <TableCell>
+                                                {appointmentStatus ? (
+                                                    <Chip
+                                                        label={appointmentStatus.label}
+                                                        color={appointmentStatus.color}
+                                                        size="small"
+                                                        variant="outlined"
+                                                    />
+                                                ) : (
+                                                    <Chip
+                                                        label="לא זמין"
+                                                        color="default"
+                                                        size="small"
+                                                        variant="outlined"
+                                                    />
+                                                )}
+                                            </TableCell>
+                                            <TableCell>{formatAmount(charge.amount)}</TableCell>
+                                            <TableCell>{formatAmount(charge.paidAmount || 0)}</TableCell>
+                                            <TableCell>
+                                                {formatAmount(charge.amount - (charge.paidAmount || 0))}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    size="small"
+                                                    variant="contained"
+                                                    onClick={() => handleOpenPaymentModal([charge._id])}
+                                                >
+                                                    גבה תשלום
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>

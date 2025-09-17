@@ -25,13 +25,16 @@ router.get('/clients/:clientId', auth, authorize(['therapist', 'admin']), async 
             // רק חיובים עם יתרה אמיתית > 0
             charges = await Charge.find({ clientId, therapistId, status: { $in: ['PENDING', 'PARTIALLY_PAID'] } })
                 .where('amount').gt(0)
+                .populate('appointmentId', 'date duration status type')
                 .sort({ createdAt: -1 });
             // סינון נוסף לפי balance מחושב (amount - paidAmount - discounts + tax + tip)
             charges = charges.filter(c => ((c.amount || 0) + (c.taxAmount || 0) + (c.tipAmount || 0) - (c.discountAmount || 0) - (c.paidAmount || 0)) > 0.0001);
         } else {
             const query = { clientId, therapistId };
             if (status) query.status = status;
-            charges = await Charge.find(query).sort({ createdAt: -1 });
+            charges = await Charge.find(query)
+                .populate('appointmentId', 'date duration status type')
+                .sort({ createdAt: -1 });
         }
 
         const stats = {
