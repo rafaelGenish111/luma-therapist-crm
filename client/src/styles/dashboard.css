@@ -1,0 +1,387 @@
+/* Dashboard Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap');
+
+:root {
+  /* צבעים עיקריים */
+  --primary: #667eea;
+  --secondary: #764ba2;
+  --success: #2ed573;
+  --warning: #ffa502;
+  --danger: #ff4757;
+  --info: #3742fa;
+  --light: #f8f9fa;
+  --dark: #2f3542;
+  
+  /* גרדיאנטים */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #2ed573 0%, #17c0eb 100%);
+  --gradient-warning: linear-gradient(135deg, #ffa502 0%, #ff6348 100%);
+  --gradient-danger: linear-gradient(135deg, #ff4757 0%, #c44569 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+  
+  /* צללים */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.25);
+  
+  /* רדיוסים */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* טרנזישנים */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* טיפוגרפיה עברית */
+body {
+  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-feature-settings: "liga" on, "calt" on;
+  direction: rtl;
+  text-align: right;
+}
+
+/* אנימציות CSS */
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes countUp {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* כרטיסי KPI */
+.kpi-card {
+  animation: slideInUp 0.5s ease-out;
+  transition: all var(--transition-normal);
+}
+
+.kpi-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* גרפים */
+.revenue-chart {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* פעילות */
+.activity-item {
+  animation: slideInRight 0.4s ease-out;
+  transition: all var(--transition-fast);
+}
+
+.activity-item:hover {
+  transform: translateX(4px);
+  background-color: var(--light);
+}
+
+/* התראות */
+.notification-item {
+  animation: scaleIn 0.3s ease-out;
+  transition: all var(--transition-fast);
+}
+
+.notification-item:hover {
+  transform: scale(1.02);
+}
+
+/* פעולות מהירות */
+.action-item {
+  animation: slideInUp 0.4s ease-out;
+  transition: all var(--transition-normal);
+}
+
+.action-item:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+/* אפקטי טעינה */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* אנימציות מספרים */
+.number-counter {
+  animation: countUp 1s ease-out;
+}
+
+.animate-number {
+  animation: pulse 0.5s ease-in-out;
+}
+
+/* אפקטי hover */
+.hover-lift {
+  transition: all var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.hover-scale {
+  transition: all var(--transition-fast);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-glow {
+  transition: all var(--transition-normal);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+/* אנימציות כניסה */
+.animate-in {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.animate-in-delay-1 {
+  animation: slideInUp 0.6s ease-out 0.1s both;
+}
+
+.animate-in-delay-2 {
+  animation: slideInUp 0.6s ease-out 0.2s both;
+}
+
+.animate-in-delay-3 {
+  animation: slideInUp 0.6s ease-out 0.3s both;
+}
+
+.animate-in-delay-4 {
+  animation: slideInUp 0.6s ease-out 0.4s both;
+}
+
+/* אנימציות יציאה */
+.animate-out {
+  animation: slideInUp 0.3s ease-in reverse;
+}
+
+/* אפקטי focus */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+/* אנימציות טעינה */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* אנימציות התראות */
+.notification-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-exit {
+  animation: slideInRight 0.3s ease-in reverse;
+}
+
+/* אנימציות כפתורים */
+.btn-animate {
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-animate::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-animate:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* אנימציות גרפים */
+.chart-container {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.chart-bar {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.chart-line {
+  animation: drawLine 1s ease-out;
+}
+
+@keyframes drawLine {
+  from {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* אנימציות מובייל */
+@media (max-width: 768px) {
+  .kpi-card {
+    animation: slideInUp 0.4s ease-out;
+  }
+  
+  .activity-item {
+    animation: slideInUp 0.3s ease-out;
+  }
+  
+  .action-item {
+    animation: slideInUp 0.3s ease-out;
+  }
+}
+
+/* אנימציות נגישות */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* אנימציות dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gradient-card: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* אנימציות הדפסה */
+@media print {
+  .kpi-card,
+  .activity-item,
+  .action-item,
+  .notification-item {
+    animation: none !important;
+    transition: none !important;
+  }
+}

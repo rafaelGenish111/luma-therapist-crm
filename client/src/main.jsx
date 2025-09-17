@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import App from './App'
 import './index.css'
 import './theme.css'
+import './styles/dashboard.css'
 import { AuthProvider } from './context/AuthContext'
 import { CustomThemeProvider } from './context/ThemeContext'
 
