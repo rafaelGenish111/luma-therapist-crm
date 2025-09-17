@@ -46,18 +46,18 @@ class EnhancedBillingService {
             if (!paymentResult.ok) {
                 // For simulation, we'll still create a payment record but mark it as failed
                 const payment = new Payment({
-                    client: paymentData.clientId,
+                    clientId: paymentData.clientId,
                     amount: paymentData.amount,
                     currency: paymentData.currency || 'ILS',
-                    method: paymentData.method,
-                    status: 'FAILED',
+                    method: paymentData.method === 'simulation' ? 'simulated' : paymentData.method,
+                    status: 'failed',
                     transactionId: null,
-                    provider: this.paymentProvider.constructor.name,
-                    description: paymentData.description,
-                    metadata: {
+                    createdBy: paymentData.therapistId,
+                    meta: {
                         ...paymentData.metadata,
                         providerResponse: paymentResult.providerResponse,
-                        error: paymentResult.error
+                        error: paymentResult.error,
+                        provider: this.paymentProvider.constructor.name
                     }
                 });
 
@@ -72,17 +72,17 @@ class EnhancedBillingService {
 
             // Create payment record in database
             const payment = new Payment({
-                client: paymentData.clientId,
+                clientId: paymentData.clientId,
                 amount: paymentData.amount,
                 currency: paymentData.currency || 'ILS',
-                method: paymentData.method,
-                status: 'COMPLETED',
+                method: paymentData.method === 'simulation' ? 'simulated' : paymentData.method,
+                status: 'paid',
                 transactionId: paymentResult.transactionId,
-                provider: this.paymentProvider.constructor.name,
-                description: paymentData.description,
-                metadata: {
+                createdBy: paymentData.therapistId,
+                meta: {
                     ...paymentData.metadata,
-                    providerResponse: paymentResult.providerResponse
+                    providerResponse: paymentResult.providerResponse,
+                    provider: this.paymentProvider.constructor.name
                 }
             });
 
@@ -188,7 +188,7 @@ class EnhancedBillingService {
                 endDate
             } = options;
 
-            const query = { client: clientId };
+            const query = { clientId: clientId };
 
             if (status) query.status = status;
             if (method) query.method = method;
@@ -227,7 +227,7 @@ class EnhancedBillingService {
 
     async getPaymentSummary(clientId) {
         try {
-            const payments = await Payment.find({ client: clientId });
+            const payments = await Payment.find({ clientId: clientId });
             
             const summary = {
                 totalPayments: payments.length,
