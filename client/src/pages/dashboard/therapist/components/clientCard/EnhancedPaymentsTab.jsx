@@ -60,6 +60,7 @@ const EnhancedPaymentsTab = ({ client }) => {
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [selectedChargeIds, setSelectedChargeIds] = useState([]);
     const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+    const [defaultPaymentAmount, setDefaultPaymentAmount] = useState(0);
     const [activeTab, setActiveTab] = useState(0);
     const [filters, setFilters] = useState({
         status: '',
@@ -137,12 +138,22 @@ const EnhancedPaymentsTab = ({ client }) => {
         setPaymentModalOpen(false);
         setSelectedChargeIds([]);
         setSelectedAppointmentId(null);
+        setDefaultPaymentAmount(0);
     };
 
     const handleOpenPaymentModal = (chargeIds = [], appointmentId = null) => {
         setSelectedChargeIds(chargeIds);
         setSelectedAppointmentId(appointmentId);
         setPaymentModalOpen(true);
+    };
+
+    const handleCollectAllCharges = () => {
+        const totalPendingAmount = openCharges.reduce((sum, charge) => sum + (charge.amount - (charge.paidAmount || 0)), 0);
+        setSelectedChargeIds(openCharges.map(c => c._id));
+        setSelectedAppointmentId(null);
+        setPaymentModalOpen(true);
+        // Store the default amount for the modal
+        setDefaultPaymentAmount(totalPendingAmount);
     };
 
     const handleFilterChange = (field, value) => {
@@ -626,7 +637,7 @@ const EnhancedPaymentsTab = ({ client }) => {
                 <Button
                     variant="outlined"
                     startIcon={<PaymentIcon />}
-                    onClick={() => handleOpenPaymentModal(openCharges.map(c => c._id))}
+                    onClick={handleCollectAllCharges}
                     disabled={openCharges.length === 0}
                 >
                     גבה כל החיובים ({formatAmount(openCharges.reduce((sum, charge) => sum + (charge.amount - (charge.paidAmount || 0)), 0))})
@@ -663,6 +674,7 @@ const EnhancedPaymentsTab = ({ client }) => {
                 chargeIds={selectedChargeIds}
                 appointmentId={selectedAppointmentId}
                 onPaymentSuccess={handlePaymentSuccess}
+                defaultAmount={defaultPaymentAmount}
             />
         </Box>
     );

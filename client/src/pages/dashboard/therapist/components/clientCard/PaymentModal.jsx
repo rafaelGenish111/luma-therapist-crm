@@ -38,7 +38,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { he } from 'date-fns/locale';
 import api from '../../../../../services/api';
 
-const PaymentModal = ({ open, onClose, client, chargeIds = [], appointmentId = null, onPaymentSuccess }) => {
+const PaymentModal = ({ open, onClose, client, chargeIds = [], appointmentId = null, onPaymentSuccess, defaultAmount = 0 }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -77,7 +77,7 @@ const PaymentModal = ({ open, onClose, client, chargeIds = [], appointmentId = n
 
     const resetForm = () => {
         setFormData({
-            amount: '',
+            amount: defaultAmount > 0 ? defaultAmount.toString() : '',
             currency: 'ILS',
             method: 'simulation',
             description: 'תשלום עבור טיפול',
