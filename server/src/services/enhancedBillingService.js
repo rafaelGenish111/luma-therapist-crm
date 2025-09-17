@@ -193,14 +193,14 @@ class EnhancedBillingService {
             if (status) query.status = status;
             if (method) query.method = method;
             if (startDate || endDate) {
-                query.processedAt = {};
-                if (startDate) query.processedAt.$gte = new Date(startDate);
-                if (endDate) query.processedAt.$lte = new Date(endDate);
+                query.createdAt = {};
+                if (startDate) query.createdAt.$gte = new Date(startDate);
+                if (endDate) query.createdAt.$lte = new Date(endDate);
             }
 
             const payments = await Payment.find(query)
                 .populate('client', 'firstName lastName email phone')
-                .sort({ processedAt: -1 })
+                .sort({ createdAt: -1 })
                 .limit(limit * 1)
                 .skip((page - 1) * limit);
 
@@ -244,7 +244,10 @@ class EnhancedBillingService {
             charges.forEach(charge => {
                 summary.totalAmount += charge.amount;
                 summary.paidAmount += charge.paidAmount || 0;
-                summary.pendingAmount += charge.amount - (charge.paidAmount || 0);
+                // Only count pending charges (not fully paid)
+                if (charge.status !== 'PAID') {
+                    summary.pendingAmount += charge.amount - (charge.paidAmount || 0);
+                }
             });
 
             // Also calculate from payments for method/status breakdown
