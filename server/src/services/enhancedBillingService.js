@@ -90,7 +90,9 @@ class EnhancedBillingService {
 
             // Update related charges
             if (paymentData.chargeIds && paymentData.chargeIds.length > 0) {
-                await this.updateChargesAfterPayment(paymentData.chargeIds, payment._id, paymentResult.amount);
+                // Fallback: if provider didn't return amount, use the requested amount
+                const appliedAmount = typeof paymentResult.amount === 'number' ? paymentResult.amount : paymentData.amount;
+                await this.updateChargesAfterPayment(paymentData.chargeIds, payment._id, appliedAmount);
             }
 
             // Update appointment if specified
@@ -136,11 +138,15 @@ class EnhancedBillingService {
                 const amountToApply = Math.min(remainingAmount, remainingChargeAmount);
 
                 charge.paidAmount = currentPaidAmount + amountToApply;
+                if (!Array.isArray(charge.payments)) {
+                    charge.payments = [];
+                }
                 charge.payments.push(paymentId);
 
                 // Update status based on payment
                 if (charge.paidAmount >= charge.amount) {
                     charge.status = 'PAID';
+                    charge.paidAt = new Date();
                 } else if (charge.paidAmount > 0) {
                     charge.status = 'PARTIALLY_PAID';
                 }
