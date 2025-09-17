@@ -5,7 +5,7 @@ const authorize = require('../middleware/authorize');
 const enhancedBillingService = require('../services/enhancedBillingService');
 
 // Process payment
-router.post('/payments/process', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.post('/payments/process', auth, authorize('therapist'), async (req, res) => {
     try {
         console.log('💳 Enhanced Payments API - Processing payment request:', {
             clientId: req.body.clientId,
@@ -50,7 +50,7 @@ router.post('/payments/process', auth, authorize(['therapist', 'admin']), async 
 });
 
 // Get payment history for client
-router.get('/payments/clients/:clientId/history', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.get('/payments/clients/:clientId/history', auth, authorize('therapist'), async (req, res) => {
     try {
         const { clientId } = req.params;
         const {
@@ -93,7 +93,7 @@ router.get('/payments/clients/:clientId/history', auth, authorize(['therapist', 
 });
 
 // Get payment summary for client
-router.get('/payments/clients/:clientId/summary', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.get('/payments/clients/:clientId/summary', auth, authorize('therapist'), async (req, res) => {
     try {
         const { clientId } = req.params;
 
@@ -120,7 +120,7 @@ router.get('/payments/clients/:clientId/summary', auth, authorize(['therapist', 
 });
 
 // Get available payment methods
-router.get('/payments/methods', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.get('/payments/methods', auth, authorize('therapist'), async (req, res) => {
     try {
         const result = await enhancedBillingService.getPaymentMethods();
 
@@ -138,7 +138,7 @@ router.get('/payments/methods', auth, authorize(['therapist', 'admin']), async (
 });
 
 // Get payment status
-router.get('/payments/status/:transactionId', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.get('/payments/status/:transactionId', auth, authorize('therapist'), async (req, res) => {
     try {
         const { transactionId } = req.params;
 
@@ -165,7 +165,7 @@ router.get('/payments/status/:transactionId', auth, authorize(['therapist', 'adm
 });
 
 // Process refund
-router.post('/payments/:paymentId/refund', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.post('/payments/:paymentId/refund', auth, authorize('therapist'), async (req, res) => {
     try {
         const { paymentId } = req.params;
         const { amount, reason } = req.body;
@@ -259,7 +259,7 @@ router.post('/payments/greeninvoice-callback', async (req, res) => {
 });
 
 // Get payment statistics
-router.get('/payments/stats', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.get('/payments/stats', auth, authorize('therapist'), async (req, res) => {
     try {
         const { startDate, endDate, clientId } = req.query;
 
@@ -313,7 +313,7 @@ router.get('/payments/stats', auth, authorize(['therapist', 'admin']), async (re
 });
 
 // Test payment endpoint (for development)
-router.post('/payments/test', auth, authorize(['therapist', 'admin']), async (req, res) => {
+router.post('/payments/test', auth, authorize('therapist'), async (req, res) => {
     try {
         if (process.env.NODE_ENV !== 'development') {
             return res.status(403).json({
