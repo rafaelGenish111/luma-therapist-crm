@@ -44,7 +44,30 @@ class EnhancedBillingService {
             const paymentResult = await this.paymentProvider.createCharge(providerPaymentData);
 
             if (!paymentResult.ok) {
-                throw new Error(paymentResult.error || 'Payment processing failed');
+                // For simulation, we'll still create a payment record but mark it as failed
+                const payment = new Payment({
+                    client: paymentData.clientId,
+                    amount: paymentData.amount,
+                    currency: paymentData.currency || 'ILS',
+                    method: paymentData.method,
+                    status: 'FAILED',
+                    transactionId: null,
+                    provider: this.paymentProvider.constructor.name,
+                    description: paymentData.description,
+                    metadata: {
+                        ...paymentData.metadata,
+                        providerResponse: paymentResult.providerResponse,
+                        error: paymentResult.error
+                    }
+                });
+
+                await payment.save();
+
+                return {
+                    success: false,
+                    payment: payment,
+                    error: paymentResult.error || 'Payment processing failed'
+                };
             }
 
             // Create payment record in database
