@@ -25,6 +25,9 @@ class ApiClient {
     const token = localStorage.getItem('accessToken');
     const headers = {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
       ...options.headers,
     };
 

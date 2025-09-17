@@ -119,6 +119,13 @@ const handleValidationErrors = (req, res, next) => {
 // @access  Private
 router.get('/profile', auth, authorize(['manage_own_profile']), async (req, res) => {
     try {
+        // מניעת cache
+        res.set({
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
+
         const therapist = await Therapist.findById(req.user.id);
 
         if (!therapist) {
