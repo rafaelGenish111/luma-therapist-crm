@@ -199,7 +199,7 @@ class EnhancedBillingService {
             }
 
             const payments = await Payment.find(query)
-                .populate('client', 'firstName lastName email phone')
+                .populate('clientId', 'firstName lastName email phone')
                 .sort({ createdAt: -1 })
                 .limit(limit * 1)
                 .skip((page - 1) * limit);
@@ -228,7 +228,7 @@ class EnhancedBillingService {
     async getPaymentSummary(clientId) {
         try {
             const payments = await Payment.find({ clientId: clientId });
-            const charges = await Charge.find({ client: clientId });
+            const charges = await Charge.find({ clientId: clientId });
             
             const summary = {
                 totalPayments: payments.length,
