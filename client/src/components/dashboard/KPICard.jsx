@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  Calendar, 
-  DollarSign, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Calendar,
+  DollarSign,
   Clock,
   Star,
   AlertCircle,
@@ -24,12 +24,12 @@ const iconMap = {
   x: XCircle
 };
 
-const KPICard = ({ 
-  title, 
-  value, 
-  change, 
-  icon, 
-  color = "#667eea", 
+const KPICard = ({
+  title,
+  value,
+  change,
+  icon,
+  color = "#667eea",
   trend = "neutral",
   progress,
   target,
@@ -38,19 +38,34 @@ const KPICard = ({
   successRate,
   className = ""
 }) => {
+  console.log(`🎯 KPICard "${title}" received:`, {
+    title,
+    value,
+    change,
+    icon,
+    color,
+    trend,
+    details,
+    progress,
+    target,
+    breakdown,
+    successRate
+  });
+
   const [displayValue, setDisplayValue] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // זמני: מתחיל כ-true כדי לתקן את הבעיה
 
   const IconComponent = iconMap[icon] || Users;
 
   // אנימציית מספרים עולים
   useEffect(() => {
+    console.log(`🎯 KPICard "${title}" useEffect triggered:`, { value, isVisible, valueType: typeof value });
     if (isVisible && typeof value === 'number') {
       const duration = 1000;
       const steps = 60;
       const increment = value / steps;
       let current = 0;
-      
+
       const timer = setInterval(() => {
         current += increment;
         if (current >= value) {
@@ -62,31 +77,34 @@ const KPICard = ({
       }, duration / steps);
 
       return () => clearInterval(timer);
+    } else {
+      console.log(`🎯 KPICard "${title}" setting display value to 0 because:`, { isVisible, valueType: typeof value, value });
+      setDisplayValue(Number(value) || 0);
     }
-  }, [isVisible, value]);
+  }, [isVisible, value, title]);
 
   // פורמט מספרים
   const formatValue = (val) => {
     if (typeof val !== 'number') return val;
-    
+
     if (title.includes('₪') || title.includes('הכנסות')) {
       return `₪${val.toLocaleString()}`;
     }
-    
+
     if (val >= 1000) {
       return `${(val / 1000).toFixed(1)}K`;
     }
-    
+
     return val.toString();
   };
 
   // פורמט שינוי
   const formatChange = (change) => {
     if (!change) return null;
-    
+
     const isPositive = change.includes('+') || change.includes('עלייה');
     const isNegative = change.includes('-') || change.includes('ירידה');
-    
+
     return {
       text: change,
       isPositive,
@@ -102,8 +120,8 @@ const KPICard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ 
-        y: -8, 
+      whileHover={{
+        y: -8,
         boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
         transition: { duration: 0.3 }
       }}
@@ -136,9 +154,9 @@ const KPICard = ({
         {progress !== undefined && (
           <div className="kpi-progress">
             <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ 
+              <div
+                className="progress-fill"
+                style={{
                   width: `${Math.min(progress, 100)}%`,
                   backgroundColor: color
                 }}

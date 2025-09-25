@@ -45,6 +45,7 @@ const adminRoutes = require('./routes/admin');
 const calendlyRoutes = require('./routes/calendly');
 const therapistAdminRoutes = require('./routes/therapistAdmin');
 const therapistRegistrationRoutes = require('./routes/therapistRegistration');
+const dashboardRoutes = require('./routes/dashboard');
 const scheduledTasks = require('./services/scheduledTasks');
 
 const app = express();
@@ -148,6 +149,7 @@ app.use('/api/admin/therapists', therapistAdminRoutes);
 app.use('/api/therapists', therapistRegistrationRoutes);
 app.use('/api/calendly', calendlyRoutes);
 app.use('/api/integrations/calendly', calendlyRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

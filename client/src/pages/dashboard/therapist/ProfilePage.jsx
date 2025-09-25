@@ -101,15 +101,58 @@ const ProfilePage = () => {
         loadProfile();
     }, []);
 
+    // Cleanup blob URLs when component unmounts
+    useEffect(() => {
+        return () => {
+            if (previewClinicImage) {
+                URL.revokeObjectURL(previewClinicImage);
+            }
+        };
+    }, []);
+
     const loadProfile = async () => {
         try {
             setLoading(true);
+            setError('');
+
+            // בדיקת התחברות
+            console.log('Current user:', user);
+            console.log('Access token exists:', !!localStorage.getItem('accessToken'));
+
+            if (!user) {
+                console.log('User not authenticated');
+                setError('נדרש להתחבר למערכת');
+                return;
+            }
+
             const response = await getTherapistProfile();
             console.log('Profile response:', response);
+            console.log('Profile response type:', typeof response);
+            console.log('Profile response data:', response);
+
+            // אם התגובה היא מערך ריק או undefined, ננסה לטעון שוב או להציג הודעת שגיאה
+            if (!response || (Array.isArray(response) && response.length === 0)) {
+                console.log('Profile data is empty or undefined');
+                setError('לא נמצאו נתוני פרופיל - ייתכן שהפרופיל לא הוגדר עדיין');
+                return;
+            }
+
             setProfile(response);
         } catch (error) {
-            setError('שגיאה בטעינת הפרופיל');
             console.error('Profile load error:', error);
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response,
+                data: error.response?.data
+            });
+
+            if (error.message && error.message.includes('Unauthorized')) {
+                setError('נדרש להתחבר מחדש למערכת');
+            } else if (error.message) {
+                setError(error.message);
+            } else {
+                setError('שגיאה בטעינת הפרופיל: ' + (error.message || 'שגיאה לא ידועה'));
+            }
         } finally {
             setLoading(false);
         }
@@ -213,6 +256,18 @@ const ProfilePage = () => {
     const handleImageSelect = (event) => {
         const file = event.target.files[0];
         if (file) {
+            // בדיקת סוג הקובץ
+            if (!file.type.startsWith('image/')) {
+                setError('אנא בחר קובץ תמונה בלבד');
+                return;
+            }
+
+            // בדיקת גודל הקובץ (5MB מקסימום)
+            if (file.size > 5 * 1024 * 1024) {
+                setError('גודל הקובץ לא יכול לעלות על 5MB');
+                return;
+            }
+
             setSelectedImage(file);
             // העלאה אוטומטית מיד לאחר בחירה
             handleImageUpload(file);
@@ -258,16 +313,42 @@ const ProfilePage = () => {
     const handleClinicImageUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        setPreviewClinicImage(URL.createObjectURL(file));
+
+        // בדיקת סוג הקובץ
+        if (!file.type.startsWith('image/')) {
+            setError('אנא בחר קובץ תמונה בלבד');
+            return;
+        }
+
+        // בדיקת גודל הקובץ (5MB מקסימום)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('גודל הקובץ לא יכול לעלות על 5MB');
+            return;
+        }
+
         try {
             setUploading(true);
             setError('');
+            setSuccess('');
+
             const res = await uploadClinicImage(file);
             setProfile(prev => ({ ...prev, clinicImage: res.url }));
             setSuccess('התמונה הועלתה בהצלחה');
+
+            // ניקוי ה-preview URL הישן
+            if (previewClinicImage) {
+                URL.revokeObjectURL(previewClinicImage);
+            }
             setPreviewClinicImage(null);
-        } catch {
-            setError('שגיאה בהעלאת תמונה');
+        } catch (error) {
+            console.error('Clinic image upload error:', error);
+            setError('שגיאה בהעלאת תמונה: ' + (error.message || 'שגיאה לא ידועה'));
+
+            // ניקוי ה-preview URL במקרה של שגיאה
+            if (previewClinicImage) {
+                URL.revokeObjectURL(previewClinicImage);
+                setPreviewClinicImage(null);
+            }
         } finally {
             setUploading(false);
         }
@@ -295,10 +376,53 @@ const ProfilePage = () => {
         );
     }
 
-    if (!profile) {
+    if (!profile && !loading) {
         return (
             <Container maxWidth="lg">
-                <Alert severity="error">לא ניתן לטעון את הפרופיל</Alert>
+                {error ? (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                        {error.includes('לא נמצאו נתוני פרופיל') && (
+                            <Box sx={{ mt: 2 }}>
+                                <Button
+                                    variant="contained"
+                                    onClick={loadProfile}
+                                    sx={{ mr: 1 }}
+                                >
+                                    נסה שוב
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => {
+                                        // יצירת פרופיל חדש עם נתונים בסיסיים
+                                        const newProfile = {
+                                            firstName: user?.firstName || '',
+                                            lastName: user?.lastName || '',
+                                            email: user?.email || '',
+                                            phone: user?.phone || '',
+                                            businessName: user?.businessName || '',
+                                            professionalDescription: '',
+                                            specializations: [],
+                                            website: {
+                                                isActive: false,
+                                                domain: '',
+                                                theme: {}
+                                            }
+                                        };
+                                        setProfile(newProfile);
+                                        setEditing(true);
+                                    }}
+                                >
+                                    צור פרופיל חדש
+                                </Button>
+                            </Box>
+                        )}
+                    </Alert>
+                ) : (
+                    <Alert severity="info">
+                        טוען פרופיל...
+                    </Alert>
+                )}
             </Container>
         );
     }

@@ -44,7 +44,7 @@ const DashboardPage = () => {
         const fetchProfile = async () => {
             try {
                 const res = await getTherapistProfile();
-                setProfile(res?.data || null);
+                setProfile(res || null);
             } catch (e) {
                 setProfile(null);
             }
@@ -65,7 +65,7 @@ const DashboardPage = () => {
             setActivating(true);
             await setWebsiteActiveState(true);
             const res = await getTherapistProfile();
-            setProfile(res?.data || null);
+            setProfile(res || null);
             // רענון פגישה קרובה לאחר שינוי מצב אתר (ליתר ביטחון)
             try {
                 const nextRes = await appointmentService.getAll({ futureOnly: 1 });

@@ -51,6 +51,8 @@ const Sidebar = () => {
     const sidebarContent = (
         <Box
             width={isMobile ? '100%' : 220}
+            minWidth={isMobile ? 'auto' : 220}
+            maxWidth={isMobile ? 'auto' : 220}
             bgcolor="#fff"
             minHeight="100vh"
             boxShadow={isMobile ? 0 : 2}
@@ -59,12 +61,28 @@ const Sidebar = () => {
             sx={{
                 '@media (max-width: 768px)': {
                     width: '100%',
+                    minWidth: 'auto',
+                    maxWidth: 'auto',
                     minHeight: 'auto'
+                },
+                '@media (min-width: 769px)': {
+                    width: '220px !important',
+                    minWidth: '220px !important',
+                    maxWidth: '220px !important',
+                    flexShrink: 0
                 }
             }}
         >
-            <Box p={2} borderBottom="1px solid" borderColor="divider" display="flex" justifyContent="space-between" alignItems="center">
-                <Box display="flex" justifyContent="center" flex={1}>
+            <Box
+                p={2}
+                borderBottom="1px solid"
+                borderColor="divider"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ minWidth: 0 }} // מאפשר לתוכן להתכווץ
+            >
+                <Box display="flex" justifyContent="center" flex={1} sx={{ minWidth: 0 }}>
                     <Logo variant="small" />
                 </Box>
                 {isMobile && (
@@ -73,8 +91,8 @@ const Sidebar = () => {
                     </IconButton>
                 )}
             </Box>
-            <Box flex={1} sx={{ overflowY: 'auto' }}>
-                <List>
+            <Box flex={1} sx={{ overflowY: 'auto', minWidth: 0 }}>
+                <List sx={{ width: '100%', padding: 0 }}>
                     {links.map(link => {
                         const item = (
                             <ListItem
@@ -86,6 +104,8 @@ const Sidebar = () => {
                                 title={link.title}
                                 onClick={handleNavClick}
                                 sx={{
+                                    width: '100%',
+                                    minWidth: 0,
                                     '@media (max-width: 768px)': {
                                         py: 2,
                                         px: 3
@@ -95,6 +115,13 @@ const Sidebar = () => {
                                 <ListItemText
                                     primary={link.label}
                                     sx={{
+                                        width: '100%',
+                                        minWidth: 0,
+                                        '& .MuiListItemText-primary': {
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        },
                                         '@media (max-width: 768px)': {
                                             '& .MuiListItemText-primary': {
                                                 fontSize: '1.1rem'
@@ -118,7 +145,7 @@ const Sidebar = () => {
                     })}
                 </List>
             </Box>
-            <Box p={2}>
+            <Box p={2} sx={{ minWidth: 0 }}>
                 <Divider sx={{ mb: 2 }} />
                 <Button
                     variant="outlined"
@@ -127,6 +154,7 @@ const Sidebar = () => {
                     startIcon={<LogoutIcon />}
                     onClick={handleLogout}
                     sx={{
+                        minWidth: 0,
                         '@media (max-width: 768px)': {
                             py: 1.5,
                             fontSize: '1rem'
@@ -173,7 +201,8 @@ const Sidebar = () => {
                         '& .MuiDrawer-paper': {
                             boxSizing: 'border-box',
                             width: '100%',
-                            maxWidth: 320
+                            maxWidth: 320,
+                            minWidth: 280
                         },
                     }}
                 >

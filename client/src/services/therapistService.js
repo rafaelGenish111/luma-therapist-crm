@@ -4,9 +4,38 @@ import api, { therapistsApi } from './api';
 export const getTherapistProfile = async () => {
     try {
         const response = await therapistsApi.getProfile();
-        return response.data.data; // response.data הוא {success: true, data: {...}}
+        console.log('Raw API response:', response);
+        console.log('Response type:', typeof response);
+        console.log('Response success:', response.success);
+        console.log('Response data:', response.data);
+
+        // אם התגובה לא מוצלחת
+        if (!response.success) {
+            console.log('API returned success: false, error:', response.error);
+            throw new Error(response.error || 'שגיאה בטעינת פרופיל');
+        }
+
+        console.log('API returned success: true, checking data...');
+
+        // אם אין נתונים או שהם ריקים
+        if (!response.data || (Array.isArray(response.data) && response.data.length === 0)) {
+            console.log('No profile data found');
+            return null;
+        }
+
+        console.log('Profile data found, returning:', response.data);
+        return response.data; // response הוא {success: true, data: {...}}
     } catch (error) {
-        throw error.response?.data || error.message;
+        console.error('getTherapistProfile error:', error);
+        console.error('Error response:', error.response);
+        console.error('Error message:', error.message);
+
+        // אם השגיאה היא בגלל הודעת שגיאה מהשרת
+        if (error.response?.data?.error) {
+            throw new Error(error.response.data.error);
+        }
+
+        throw error.response?.data || error.message || new Error('שגיאה לא ידועה');
     }
 };
 
@@ -60,7 +89,7 @@ export const deleteProfileImage = async () => {
 // טעינת עיצוב אישי של המטפלת המחוברת
 export const getOwnTheme = async () => {
     const response = await therapistsApi.getProfile();
-    return response.data.theme;
+    return response.theme;
 };
 
 // עדכון עיצוב אישי של המטפלת המחוברת
@@ -72,7 +101,7 @@ export const updateOwnTheme = async (theme) => {
 // טעינת עיצוב ציבורי לפי מזהה מטפלת
 export const getPublicTheme = async (therapistId) => {
     const response = await api.get(`/therapists/${therapistId}/theme`);
-    return response.data.data;
+    return response.data;
 };
 
 // העלאת תמונת קליניקה

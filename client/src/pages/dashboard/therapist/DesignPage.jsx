@@ -30,8 +30,8 @@ export default function DesignPage() {
                 setLoading(true);
                 const data = await getOwnTheme();
                 setTheme(prev => ({ ...prev, ...data }));
-                const prof = await therapistsApi.getProfile();
-                setProfile(prof.data || null);
+                const prof = await getTherapistProfile();
+                setProfile(prof || null);
             } catch (e) {
                 setError('שגיאה בטעינת העיצוב');
             } finally {

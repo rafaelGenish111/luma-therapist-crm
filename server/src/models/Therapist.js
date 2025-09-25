@@ -618,6 +618,14 @@ const therapistSchema = new mongoose.Schema({
         calendlyBookings: { type: Number, default: 0 }
     },
 
+    // יעדי הכנסות
+    monthlyRevenueTarget: {
+        type: Number,
+        default: 15000,
+        min: [0, 'יעד ההכנסות החודשי לא יכול להיות שלילי'],
+        max: [1000000, 'יעד ההכנסות החודשי לא יכול להיות יותר מ-1,000,000']
+    },
+
     // נתונים מוצפנים (טוקנים רגישים)
     encryptedData: {
         calendlyAccessToken: { type: String, select: false },

@@ -19,6 +19,7 @@ export const therapistsApi = {
     delete: (id) => apiClient.delete(`/therapists/${id}`),
     deleteProfileImage: () => apiClient.delete('/therapists/profile/image'),
     deleteClinicImage: () => apiClient.delete('/therapists/profile/clinic-image'),
+    updateRevenueTarget: (monthlyRevenueTarget) => apiClient.put('/therapists/revenue-target', { monthlyRevenueTarget })
 };
 
 // Clients Services

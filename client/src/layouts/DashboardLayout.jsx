@@ -8,9 +8,17 @@ const DashboardLayout = () => {
     return (
         <Box display="flex" minHeight="100vh" bgcolor="#f5f5f5">
             <Sidebar />
-            <Box flex={1} display="flex" flexDirection="column">
+            <Box
+                flex={1}
+                display="flex"
+                flexDirection="column"
+                sx={{
+                    minWidth: 0, // מאפשר לתוכן להתכווץ אם צריך
+                    overflow: 'hidden' // מונע overflow
+                }}
+            >
                 <Topbar />
-                <Box p={3} flex={1}>
+                <Box p={3} flex={1} sx={{ overflow: 'auto' }}>
                     <Outlet />
                 </Box>
             </Box>

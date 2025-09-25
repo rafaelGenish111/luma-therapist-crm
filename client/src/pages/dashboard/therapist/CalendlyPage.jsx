@@ -31,11 +31,11 @@ const CalendlyPage = () => {
     const loadTherapistProfile = async () => {
         try {
             setLoading(true);
-            const response = await getTherapistProfile();
-            const therapistData = response.data;
+            const therapistData = await getTherapistProfile();
+            console.log('CalendlyPage - therapistData:', therapistData);
             setTherapist(therapistData);
 
-            if (therapistData.calendlyUrl) {
+            if (therapistData && therapistData.calendlyUrl) {
                 setCalendlyUrl(therapistData.calendlyUrl);
                 setIsConnected(true);
             }

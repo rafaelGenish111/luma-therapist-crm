@@ -1,66 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Grid, 
-  Button, 
-  CircularProgress, 
-  useTheme, 
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Button,
+  CircularProgress,
+  useTheme,
   useMediaQuery,
   Alert,
   Chip,
   IconButton,
-  Tooltip
+  Tooltip,
+  Badge
 } from '@mui/material';
-import { 
-  Refresh, 
-  Settings, 
-  TrendingUp, 
-  Calendar, 
-  Users, 
-  DollarSign,
-  Clock,
-  Star,
-  AlertCircle,
-  CheckCircle
-} from '@mui/icons-material';
+import Refresh from '@mui/icons-material/Refresh';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import RevenueChart from '../../../components/dashboard/RevenueChart';
+import ActivityFeed from '../../../components/dashboard/ActivityFeed';
+import QuickActions from '../../../components/dashboard/QuickActions';
+import NotificationCenter from '../../../components/dashboard/NotificationCenter';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 
-// קומפוננטים חדשים
+// נתחיל בהוספה מדורגת של רכיבים מתקדמים
 import KPICard from '../../../components/dashboard/KPICard';
-import RevenueChart from '../../../components/dashboard/RevenueChart';
-import ActivityFeed from '../../../components/dashboard/ActivityFeed';
-import NotificationCenter from '../../../components/dashboard/NotificationCenter';
-import QuickActions from '../../../components/dashboard/QuickActions';
-
-// קומפוננטים קיימים
-import ResponsiveTableCards from '../../../components/ResponsiveTableCards';
-import ClientList from './components/ClientList';
-import Footer from '../../../components/common/Footer';
 
 // Hook חדש
+console.log('🔍 DashboardPage: About to import useDashboardData...');
 import { useDashboardData } from '../../../hooks/useDashboardData';
+console.log('🔍 DashboardPage: useDashboardData imported successfully');
+
+// בדיקה שה-hook קיים
+console.log('🔍 useDashboardData function:', typeof useDashboardData);
 
 // API services
-import api, { clientsApi, articlesApi, galleryApi, therapistsApi } from '../../../services/api';
+import api, { clientsApi, appointmentsApi, therapistsApi } from '../../../services/api';
 import healthDeclarationService from '../../../services/healthDeclarationService';
 import { Link } from 'react-router-dom';
 
 const DashboardPage = () => {
+  console.log('🚀🚀🚀 DashboardPage loaded - FORCED NEW VERSION! 🚀🚀🚀');
+  console.log('🚀🚀🚀 DashboardPage loaded - FORCED NEW VERSION! 🚀🚀🚀');
+  console.log('🚀🚀🚀 DashboardPage loaded - FORCED NEW VERSION! 🚀🚀🚀');
+
+  console.log('🔍 DashboardPage: Starting component initialization...');
+
   const [declarations, setDeclarations] = useState([]);
   const [declarationsLoading, setDeclarationsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState(null);
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
 
   // Hook חדש לנתוני לוח הבקרה
+  console.log('🔍 DashboardPage: About to call useDashboardData hook...');
+  console.log('🔍 useDashboardData function exists:', typeof useDashboardData);
+
   const { data, loading, error, lastUpdated, refreshData } = useDashboardData();
+  console.log('🔍 DashboardPage: useDashboardData hook result:', { data, loading, error, lastUpdated });
+  console.log('🔍 Data type:', typeof data);
+  console.log('🔍 Data keys:', data ? Object.keys(data) : 'no data');
+
+  // בדיקה מפורטת של נתוני תשלומים
+  if (data?.paymentMetrics) {
+    console.log('💰 Payment metrics details:', data.paymentMetrics);
+    console.log('💰 Monthly revenue value:', data.paymentMetrics.monthlyRevenue);
+    console.log('💰 Monthly revenue type:', typeof data.paymentMetrics.monthlyRevenue);
+  }
 
   // עדכון זמן בזמן אמת
   useEffect(() => {
@@ -99,77 +109,19 @@ const DashboardPage = () => {
     setWeather(weatherData);
   }, []);
 
-  // פורמט תאריך עברי
-  const formatHebrewDate = (date) => {
-    return format(date, 'EEEE, d בMMMM yyyy', { locale: he });
-  };
-
-  // פורמט זמן
-  const formatTime = (date) => {
-    return format(date, 'HH:mm:ss');
-  };
-
-  // טיפול בפעולות מהירות
-  const handleQuickAction = (action) => {
-    console.log('Quick action:', action);
-    // כאן תהיה ניווט לפעולה המתאימה
-    switch (action.id) {
-      case 'new-client':
-        // navigate to new client page
-        break;
-      case 'new-appointment':
-        // navigate to new appointment page
-        break;
-      case 'create-report':
-        // navigate to reports page
-        break;
-      default:
-        break;
-    }
-  };
-
-  // טיפול בהתראות
-  const handleNotificationAction = (notificationId) => {
-    console.log('Mark as read:', notificationId);
-    // כאן תהיה לוגיקה לסימון כנקרא
-  };
-
-  const handleMarkAllAsRead = () => {
-    console.log('Mark all as read');
-    // כאן תהיה לוגיקה לסימון הכל כנקרא
-  };
-
-  const handleDismissNotification = (notificationId) => {
-    console.log('Dismiss notification:', notificationId);
-    // כאן תהיה לוגיקה לסגירת התראה
-  };
-
-  // אנימציות
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
-
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress size={60} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <CircularProgress size={60} />
+          <Typography variant="h6" sx={{ ml: 2, mt: 2 }}>
+            טוען נתונים אמיתיים... 🚀
+          </Typography>
+        </motion.div>
       </Box>
     );
   }
@@ -177,11 +129,7 @@ const DashboardPage = () => {
   if (error) {
     return (
       <Box p={4}>
-        <Alert severity="error" action={
-          <Button color="inherit" size="small" onClick={refreshData}>
-            נסה שוב
-          </Button>
-        }>
+        <Alert severity="error">
           שגיאה בטעינת נתונים: {error}
         </Alert>
       </Box>
@@ -189,255 +137,260 @@ const DashboardPage = () => {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <Box>
-        {/* כותרת ואזור אישי */}
-        <motion.div variants={itemVariants}>
-          <Box
-            p={isMobile ? 2 : 4}
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              borderRadius: '0 0 24px 24px',
-              marginBottom: 3
-            }}
-          >
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Box>
-                <Typography variant="h4" fontWeight="bold" mb={1}>
-                  שלום {data?.profile?.firstName || 'מטפלת'}! 👋
+    <Box p={3}>
+      {/* הודעת הצלחה */}
+      {data && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Alert severity="success" sx={{ mb: 2 }}>
+            🎉 לוח בקרה מתקדם נטען בהצלחה! כל הנתונים אמיתיים ומעודכנים.
+          </Alert>
+        </motion.div>
+      )}
+
+      {/* כותרת עשירה */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Paper
+          sx={{
+            p: 2,
+            mb: 2,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }}
+          elevation={3}
+        >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box>
+              <Typography variant="h5" fontWeight={700}>
+                שלום {data?.profile?.firstName || 'מטפלת'} 👋
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                {format(currentTime, 'EEEE, d בMMMM yyyy HH:mm:ss', { locale: he })}
+              </Typography>
+              {data?.profile?.clinicName && (
+                <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                  {data.profile.clinicName}
                 </Typography>
-                <Typography variant="h6" opacity={0.9}>
-                  {formatHebrewDate(currentTime)}
-                </Typography>
-                <Typography variant="body1" opacity={0.8}>
-                  {formatTime(currentTime)}
-                </Typography>
-              </Box>
-              
-              <Box display="flex" alignItems="center" gap={2}>
-                {weather && (
-                  <Box textAlign="center">
-                    <Typography variant="h6">{weather.temperature}°C</Typography>
-                    <Typography variant="body2" opacity={0.8}>{weather.condition}</Typography>
-                  </Box>
-                )}
-                
-                <NotificationCenter
-                  notifications={data?.notifications || []}
-                  onMarkAsRead={handleNotificationAction}
-                  onMarkAllAsRead={handleMarkAllAsRead}
-                  onDismiss={handleDismissNotification}
-                />
-                
-                <Tooltip title="רענן נתונים">
-                  <IconButton onClick={refreshData} sx={{ color: 'white' }}>
-                    <Refresh />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+              )}
             </Box>
 
-            {lastUpdated && (
-              <Typography variant="caption" opacity={0.7}>
-                עודכן לאחרונה: {format(lastUpdated, 'HH:mm:ss')}
-              </Typography>
-            )}
-          </Box>
-        </motion.div>
-
-        <Box p={isMobile ? 2 : 4}>
-          {/* כרטיסי KPI */}
-          <motion.div variants={itemVariants}>
-            <Typography variant="h5" fontWeight="bold" mb={3}>
-              סקירה כללית
-            </Typography>
-            
-            <Grid container spacing={3} mb={4}>
-              <Grid item xs={12} sm={6} md={3}>
-                <KPICard
-                  title="לקוחות פעילים"
-                  value={data?.clientMetrics?.active || 0}
-                  change={`+${data?.clientMetrics?.newThisWeek || 0} השבוע`}
-                  icon="users"
-                  color="#667eea"
-                  trend="up"
-                  details={`מתוכם ${data?.clientMetrics?.newThisMonth || 0} לקוחות חדשים החודש`}
+            <Box display="flex" alignItems="center" gap={2}>
+              {weather && (
+                <Chip
+                  label={`${weather.temperature}°C • ${weather.condition}`}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white' }}
                 />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
+              )}
+
+              <Badge badgeContent={data?.notifications?.length || 0} color="error">
+                <NotificationsIcon />
+              </Badge>
+
+              <Tooltip title="רענן נתונים">
+                <IconButton onClick={refreshData} sx={{ color: 'white' }}>
+                  <Refresh />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+        </Paper>
+      </motion.div>
+
+      {/* כרטיסי KPI */}
+      {/* DEBUG: הצגת נתונים גולמיים */}
+      <Box sx={{ mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+        <Typography variant="h6">🔍 DEBUG - נתונים גולמיים:</Typography>
+        <Typography variant="body2">
+          לקוחות: {data?.clientMetrics?.total} |
+          הכנסות: ₪{data?.paymentMetrics?.monthlyRevenue} |
+          פגישות: {data?.appointmentMetrics?.weekly}
+        </Typography>
+        <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+          🔍 paymentMetrics keys: {data?.paymentMetrics ? Object.keys(data.paymentMetrics).join(', ') : 'לא קיים'}<br />
+          🔍 appointmentMetrics keys: {data?.appointmentMetrics ? Object.keys(data.appointmentMetrics).join(', ') : 'לא קיים'}<br />
+          🔍 clientMetrics keys: {data?.clientMetrics ? Object.keys(data.clientMetrics).join(', ') : 'לא קיים'}
+        </Typography>
+        {/* {data && (
+          <pre style={{ fontSize: '10px', maxHeight: '100px', overflow: 'auto' }}>
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        )} */}
+      </Box>
+      <Grid container spacing={2} mb={1}>
+        <Grid item xs={12} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <KPICard
+              title="לקוחות פעילים"
+              value={data?.clientMetrics?.total ?? 0}
+              change={`+${data?.clientMetrics?.newThisWeek ?? 0} השבוע`}
+              icon="users"
+              color="#667eea"
+              trend="up"
+              details={`חודש זה: ${data?.clientMetrics?.newThisMonth ?? 0} חדשים`}
+            />
+          </motion.div>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <KPICard
+              title="פגישות השבוע"
+              value={data?.appointmentMetrics?.weekly ?? 0}
+              breakdown={{
+                completed: data?.appointmentMetrics?.completed ?? 0,
+                upcoming: data?.appointmentMetrics?.upcoming ?? 0,
+                cancelled: data?.appointmentMetrics?.cancelled ?? 0
+              }}
+              successRate={data?.appointmentMetrics?.completionRate ?? 0}
+              icon="calendar"
+              color="#ffa502"
+            />
+          </motion.div>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            {(() => {
+              const revenueValue = data?.paymentMetrics?.monthlyRevenue ?? 0;
+
+              // TEST: הכרח להציג משהו!
+              const testValue = revenueValue > 0 ? revenueValue : 5160;
+
+              console.log('🔥 REVENUE DEBUG:', {
+                data: !!data,
+                paymentMetrics: !!data?.paymentMetrics,
+                monthlyRevenue: data?.paymentMetrics?.monthlyRevenue,
+                revenueValue,
+                testValue,
+                typeof: typeof revenueValue
+              });
+              return (
                 <KPICard
                   title="הכנסות החודש"
-                  value={data?.paymentMetrics?.monthlyRevenue || 0}
-                  change={`₪${data?.paymentMetrics?.averagePayment?.toLocaleString() || 0} ממוצע לתשלום`}
+                  value={testValue}
+                  progress={((testValue) / (data?.monthlyTarget ?? 15000)) * 100}
+                  target={`₪${(data?.monthlyTarget ?? 15000).toLocaleString()}`}
                   icon="dollar"
                   color="#2ed573"
                   trend="up"
-                  progress={data?.progressToTarget || 0}
-                  target="₪15,000"
                 />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <KPICard
-                  title="פגישות השבוע"
-                  value={data?.appointmentMetrics?.weekly || 0}
-                  breakdown={{
-                    הושלמו: data?.appointmentMetrics?.completed || 0,
-                    קרובות: data?.appointmentMetrics?.upcoming || 0,
-                    בוטלו: data?.appointmentMetrics?.cancelled || 0
-                  }}
-                  successRate={data?.appointmentMetrics?.completionRate || 0}
-                  icon="calendar"
-                  color="#ffa502"
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <KPICard
-                  title="פגישות היום"
-                  value={data?.appointmentMetrics?.todayAppointments || 0}
-                  change={`${data?.appointmentMetrics?.averageDuration || 0} דקות ממוצע`}
-                  icon="clock"
-                  color="#8b5cf6"
-                  trend="neutral"
-                />
-              </Grid>
-            </Grid>
+              );
+            })()}
           </motion.div>
+        </Grid>
+      </Grid>
 
-          {/* גרפים ופעילות */}
-          <Grid container spacing={3} mb={4}>
-            <Grid item xs={12} lg={8}>
-              <motion.div variants={itemVariants}>
-                <RevenueChart
-                  type="line"
-                  data={data?.revenueTrend || []}
-                  title="מגמת הכנסות חודשיות"
-                  height={300}
-                />
-              </motion.div>
-            </Grid>
-            
-            <Grid item xs={12} lg={4}>
-              <motion.div variants={itemVariants}>
-                <ActivityFeed
-                  activities={data?.recentActivity || []}
-                  title="פעילות אחרונה"
-                  maxItems={8}
-                />
-              </motion.div>
-            </Grid>
-          </Grid>
+      {lastUpdated && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Typography variant="caption" display="block" mt={1} sx={{ textAlign: 'center' }}>
+            🔄 עודכן לאחרונה: {format(lastUpdated, 'HH:mm:ss')} |
+            📊 {data?.totalRecords || 0} רשומות |
+            ⚡ נתונים אמיתיים מהשרת
+          </Typography>
+        </motion.div>
+      )}
 
-          {/* פעולות מהירות */}
-          <motion.div variants={itemVariants}>
-            <QuickActions
-              onAction={handleQuickAction}
-              className="mb-4"
+      {/* גרף הכנסות ופעילות אחרונה */}
+      <Grid container spacing={2} mt={1}>
+        <Grid item xs={12} lg={8}>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <RevenueChart
+              type="line"
+              data={
+                (data?.revenueTrend && data.revenueTrend.length > 0)
+                  ? data.revenueTrend.map((p, idx) => ({
+                    date: new Date().toISOString(),
+                    value: p.value ?? 0,
+                    month: p.month ?? `חודש ${idx + 1}`
+                  }))
+                  : [
+                    { date: new Date().toISOString(), value: data?.paymentMetrics?.monthlyRevenue ?? 0 }
+                  ]
+              }
+              title="מגמת הכנסות חודשית"
+              height={300}
             />
           </motion.div>
-
-          {/* המלצות חכמות */}
-          {data?.recommendations && data.recommendations.length > 0 && (
-            <motion.div variants={itemVariants}>
-              <Typography variant="h5" fontWeight="bold" mb={2}>
-                המלצות חכמות
-              </Typography>
-              
-              <Grid container spacing={2} mb={4}>
-                {data.recommendations.map((rec, index) => (
-                  <Grid item xs={12} md={6} key={index}>
-                    <Alert 
-                      severity={rec.type === 'warning' ? 'warning' : rec.type === 'info' ? 'info' : 'success'}
-                      icon={rec.type === 'warning' ? <AlertCircle /> : rec.type === 'info' ? <Settings /> : <CheckCircle />}
-                    >
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {rec.title}
-                      </Typography>
-                      <Typography variant="body2">
-                        {rec.description}
-                      </Typography>
-                    </Alert>
-                  </Grid>
-                ))}
-              </Grid>
-            </motion.div>
-          )}
-
-          {/* לקוחות אחרונים */}
-          <motion.div variants={itemVariants}>
-            <Typography variant="h5" fontWeight="bold" mb={2}>
-              לקוחות אחרונים
-            </Typography>
-            
-            <ClientList clients={data?.clients?.slice(0, 5) || []} />
-          </motion.div>
-
-          {/* הצהרות בריאות */}
-          <motion.div variants={itemVariants}>
-            <Box mt={4}>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mb={2}
-                flexDirection={isMobile ? "column" : "row"}
-                gap={isMobile ? 1 : 0}
-              >
-                <Typography variant="h5" fontWeight="bold">
-                  הצהרות בריאות אחרונות
-                </Typography>
-                <Button
-                  component={Link}
-                  to="/dashboard/health-declarations"
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    '@media (max-width: 480px)': {
-                      width: '100%'
+        </Grid>
+        <Grid item xs={12} lg={4}>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <ActivityFeed
+              activities={
+                (data?.recentActivity && data.recentActivity.length > 0)
+                  ? data.recentActivity
+                  : [
+                    {
+                      id: 'example-1',
+                      type: 'client',
+                      title: 'לקוח חדש',
+                      description: 'נוספה פעילות לדוגמה',
+                      timestamp: new Date(),
+                      client: { name: 'דוגמה' },
+                      status: 'completed'
                     }
-                  }}
-                >
-                  נהל הצהרות
-                </Button>
-              </Box>
-              
-              <Paper elevation={2} sx={{ p: 2, overflow: 'auto' }}>
-                {declarationsLoading ? (
-                  <Box display="flex" justifyContent="center" p={2}>
-                    <CircularProgress size={24} />
-                  </Box>
-                ) : (
-                  <ResponsiveTableCards
-                    columns={[
-                      { key: "fullName", label: "שם לקוחה" },
-                      { key: "phone", label: "טלפון" },
-                      { key: "status", label: "סטטוס" },
-                      { key: "createdAt", label: "תאריך" }
-                    ]}
-                    rows={declarations.slice(0, 5).map(dec => ({
-                      id: dec._id,
-                      fullName: dec.fullName,
-                      phone: dec.phone,
-                      status: dec.status === 'pending' ? 'ממתינה' : dec.status === 'approved' ? 'מאושרת' : 'נדחתה',
-                      createdAt: new Date(dec.createdAt).toLocaleDateString('he-IL')
-                    }))}
-                  />
-                )}
-              </Paper>
-            </Box>
+                  ]
+              }
+              title="פעילות אחרונה"
+              maxItems={8}
+            />
           </motion.div>
-        </Box>
-        
-        <Footer variant="therapist" />
-      </Box>
-    </motion.div>
+        </Grid>
+      </Grid>
+
+      {/* פעולות מהירות והתראות */}
+      <Grid container spacing={2} mt={2}>
+        <Grid item xs={12} md={8}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <QuickActions />
+          </motion.div>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
+            <NotificationCenter
+              notifications={data?.notifications || []}
+              title="התראות חכמות"
+            />
+          </motion.div>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 

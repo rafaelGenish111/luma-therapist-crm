@@ -12,24 +12,27 @@ const Topbar = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
-        <AppBar 
-            position="static" 
-            color="default" 
-            elevation={1} 
-            sx={{ 
+        <AppBar
+            position="static"
+            color="default"
+            elevation={1}
+            sx={{
                 zIndex: 1201,
+                width: '100%',
                 '@media (max-width: 768px)': {
                     paddingLeft: '60px' // Space for hamburger menu
                 }
             }}
         >
-            <Toolbar sx={{ 
+            <Toolbar sx={{
                 justifyContent: 'space-between',
+                width: '100%',
+                minWidth: 0,
                 '@media (max-width: 768px)': {
                     padding: '8px 16px'
                 }
             }}>
-                <Box display="flex" alignItems="center" gap={2} flex={1}>
+                <Box display="flex" alignItems="center" gap={2} flex={1} sx={{ minWidth: 0 }}>
                     {user?.profileImage ? (
                         <Avatar
                             src={user.profileImage}
@@ -44,8 +47,8 @@ const Topbar = () => {
                     ) : (
                         <Logo variant="small" />
                     )}
-                    <Typography 
-                        variant={isMobile ? "body1" : "h6"} 
+                    <Typography
+                        variant={isMobile ? "body1" : "h6"}
                         color="primary"
                         sx={{
                             '@media (max-width: 480px)': {
@@ -53,7 +56,7 @@ const Topbar = () => {
                             }
                         }}
                     >
-                        {isMobile 
+                        {isMobile
                             ? (user?.fullName ? `${user.fullName}` : 'לוח בקרה')
                             : (user?.fullName ? `${user.fullName} - לוח בקרה` : 'לוח בקרה - מטפלת')
                         }
@@ -61,9 +64,9 @@ const Topbar = () => {
                 </Box>
                 <Box>
                     <Tooltip title="מדריך התחלה מהירה" arrow>
-                        <IconButton 
-                            color="primary" 
-                            onClick={() => navigate('/help/quick-start')} 
+                        <IconButton
+                            color="primary"
+                            onClick={() => navigate('/help/quick-start')}
                             aria-label="עזרה"
                             sx={{
                                 '@media (max-width: 768px)': {

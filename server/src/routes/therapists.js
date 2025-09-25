@@ -126,15 +126,20 @@ router.get('/profile', auth, authorize(['manage_own_profile']), async (req, res)
             'Expires': '0'
         });
 
+        console.log('Fetching therapist profile for user:', req.user.id);
+
         const therapist = await Therapist.findById(req.user.id);
+        console.log('Therapist found:', !!therapist);
 
         if (!therapist) {
+            console.log('Therapist not found for user ID:', req.user.id);
             return res.status(404).json({
                 success: false,
                 error: 'מטפלת לא נמצאה'
             });
         }
 
+        console.log('Therapist data loaded successfully');
         res.json({
             success: true,
             data: therapist
@@ -192,6 +197,11 @@ router.put('/profile', auth, authorize(['manage_own_profile']), validateProfileU
                 }
             }
         });
+
+        // עדכון יעד ההכנסות החודשי אם נשלח
+        if (req.body.monthlyRevenueTarget !== undefined) {
+            therapist.monthlyRevenueTarget = req.body.monthlyRevenueTarget;
+        }
 
         await therapist.save();
 
@@ -477,6 +487,46 @@ router.get('/metrics/summary', auth, authorize(['manage_own_profile']), async (r
     } catch (error) {
         console.error('Metrics summary error:', error);
         res.status(500).json({ success: false, error: 'שגיאה בטעינת מונים' });
+    }
+});
+
+// @route   PUT /api/therapists/revenue-target
+// @desc    עדכון יעד ההכנסות החודשי
+// @access  Private
+router.put('/revenue-target', auth, authorize(['manage_own_profile']), [
+    body('monthlyRevenueTarget')
+        .isNumeric()
+        .withMessage('יעד ההכנסות חייב להיות מספר')
+        .isFloat({ min: 0, max: 1000000 })
+        .withMessage('יעד ההכנסות חייב להיות בין 0 ל-1,000,000')
+], handleValidationErrors, async (req, res) => {
+    try {
+        const { monthlyRevenueTarget } = req.body;
+
+        const therapist = await Therapist.findById(req.user.id);
+        if (!therapist) {
+            return res.status(404).json({
+                success: false,
+                error: 'מטפלת לא נמצאה'
+            });
+        }
+
+        therapist.monthlyRevenueTarget = monthlyRevenueTarget;
+        await therapist.save();
+
+        res.json({
+            success: true,
+            message: 'יעד ההכנסות החודשי עודכן בהצלחה',
+            data: {
+                monthlyRevenueTarget: therapist.monthlyRevenueTarget
+            }
+        });
+    } catch (error) {
+        console.error('Revenue target update error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'שגיאה בעדכון יעד ההכנסות'
+        });
     }
 });
 
