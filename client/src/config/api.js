@@ -2,7 +2,7 @@
 // Dynamic API URL based on environment
 const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000/api'
-  : `${window.location.origin}/api`;
+  : 'https://luma-therapist-crm-hnku.vercel.app/api';
 
 console.log('🔧 Current hostname:', window.location.hostname);
 console.log('🔧 Selected API_BASE_URL:', API_BASE_URL);
