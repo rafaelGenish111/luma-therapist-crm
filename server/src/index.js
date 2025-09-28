@@ -286,8 +286,8 @@ app.get('/health', (req, res) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-    res.json({ 
-        message: 'Luma Therapist CRM API', 
+    res.json({
+        message: 'Luma Therapist CRM API',
         status: 'running',
         endpoints: ['/api/test', '/health', '/api/auth/login']
     });
@@ -312,15 +312,15 @@ app.use(async (req, res, next) => {
             console.log('- MONGODB_URI:', !!process.env.MONGODB_URI);
             console.log('- JWT_SECRET:', !!process.env.JWT_SECRET);
             console.log('- NODE_ENV:', process.env.NODE_ENV);
-            
+
             await initializeApp();
             isInitialized = true;
             console.log('App initialized successfully');
         } catch (error) {
             console.error('Failed to initialize app:', error);
             console.error('Error stack:', error.stack);
-            return res.status(500).json({ 
-                error: 'Server initialization failed', 
+            return res.status(500).json({
+                error: 'Server initialization failed',
                 details: error.message,
                 stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             });
