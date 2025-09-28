@@ -163,6 +163,8 @@ const ProfilePage = () => {
             setSaving(true);
             setError('');
             setSuccess('');
+            console.log('ProfilePage - Starting save process...');
+
             // שלח את כל השדות כולל clinicImage, homeSummary, businessName
             const response = await updateTherapistProfile({
                 ...profile,
@@ -170,15 +172,22 @@ const ProfilePage = () => {
                 homeSummary: profile.homeSummary || '',
                 businessName: profile.businessName || ''
             });
+
+            console.log('ProfilePage - Save response:', response);
             setProfile(response.data);
             setEditMode(false);
             setSuccess('פרופיל עודכן בהצלחה');
             setPreviewClinicImage(null); // איפוס תצוגה מקדימה
+
             // עדכון המשתמש ב-AuthContext
             if (updateUser) {
+                console.log('ProfilePage - Updating user in AuthContext...');
                 updateUser(response.data);
             }
+
+            console.log('ProfilePage - Save completed successfully');
         } catch (error) {
+            console.error('ProfilePage - Save error:', error);
             setError(error.error || 'שגיאה בעדכון הפרופיל');
         } finally {
             setSaving(false);
@@ -199,15 +208,32 @@ const ProfilePage = () => {
             setError('');
             setSuccess('');
 
+            // בדיקת התחברות לפני העלאה
+            const token = localStorage.getItem('accessToken');
+            console.log('ProfilePage - Token exists:', !!token);
+            console.log('ProfilePage - User:', user);
+
+            if (!token) {
+                throw new Error('נדרש להתחבר מחדש למערכת');
+            }
+
             const response = await uploadProfileImage(fileToUpload);
+            console.log('Upload response in ProfilePage:', response);
+
+            // בדיקה שהתגובה תקינה
+            if (!response || !response.data) {
+                throw new Error('תגובה לא תקינה מהשרת');
+            }
+
             const updatedProfile = {
                 ...profile,
                 profileImage: response.data.profileImage,
-                profileImagePublicId: response.data.profileImagePublicId
+                profileImagePublicId: response.data.profileImagePublicId,
+                profileImageProvider: response.data.provider
             };
             setProfile(updatedProfile);
 
-            // עדכון המשתמש ב־AuthContext
+            // עדכון המשתמש ב־AuthContext (רק את השדות הקיימים)
             updateUser({
                 ...user,
                 profileImage: response.data.profileImage,
@@ -218,7 +244,14 @@ const ProfilePage = () => {
             setSelectedImage(null);
             setSuccess('תמונת פרופיל הועלתה בהצלחה');
         } catch (error) {
-            setError(error.error || 'שגיאה בהעלאת תמונה');
+            console.error('ProfilePage - Image upload error:', error);
+            if (error.message && error.message.includes('401')) {
+                setError('ההתחברות פגה. אנא התחבר מחדש');
+            } else if (error.message && error.message.includes('Unauthorized')) {
+                setError('ההתחברות פגה. אנא התחבר מחדש');
+            } else {
+                setError(error.message || 'שגיאה בהעלאת תמונה');
+            }
         } finally {
             setUploading(false);
         }
@@ -342,7 +375,13 @@ const ProfilePage = () => {
             setPreviewClinicImage(null);
         } catch (error) {
             console.error('Clinic image upload error:', error);
-            setError('שגיאה בהעלאת תמונה: ' + (error.message || 'שגיאה לא ידועה'));
+            if (error.message && error.message.includes('401')) {
+                setError('ההתחברות פגה. אנא התחבר מחדש');
+            } else if (error.message && error.message.includes('Unauthorized')) {
+                setError('ההתחברות פגה. אנא התחבר מחדש');
+            } else {
+                setError('שגיאה בהעלאת תמונה: ' + (error.message || 'שגיאה לא ידועה'));
+            }
 
             // ניקוי ה-preview URL במקרה של שגיאה
             if (previewClinicImage) {
@@ -476,7 +515,12 @@ const ProfilePage = () => {
                                     <CardContent sx={{ textAlign: 'center' }}>
                                         <Box position="relative" display="inline-block">
                                             <Avatar
-                                                src={profile.profileImage && !profile.profileImage.startsWith('blob:') ? profile.profileImage : undefined}
+                                                src={profile.profileImage &&
+                                                    !profile.profileImage.startsWith('blob:') ?
+                                                    (profile.profileImage.startsWith('/uploads/') ?
+                                                        `http://localhost:5000${profile.profileImage}` :
+                                                        profile.profileImage) :
+                                                    undefined}
                                                 sx={{ width: 150, height: 150, mb: 2 }}
                                             />
                                             {editMode && (

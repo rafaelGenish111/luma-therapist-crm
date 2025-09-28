@@ -62,16 +62,30 @@ export const setWebsiteActiveState = async (isActive) => {
 // העלאת תמונת פרופיל
 export const uploadProfileImage = async (imageFile) => {
     try {
+        console.log('Uploading profile image:', imageFile.name, imageFile.type, imageFile.size);
+
         const formData = new FormData();
         formData.append('image', imageFile);
 
-        const response = await api.post('/therapists/profile/image', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data;
+        console.log('FormData created, sending request...');
+        const token = localStorage.getItem('accessToken');
+        console.log('Token exists:', !!token);
+
+        const response = await api.post('/therapists/profile/image', formData);
+        console.log('Upload response:', response);
+        console.log('Upload response data:', response.data);
+
+        // השרת מחזיר: { success: true, data: { profileImage, profileImagePublicId, provider }, message }
+        if (response.success) {
+            return response; // החזרת התגובה המלאה
+        } else {
+            throw new Error(response.error || 'שגיאה בהעלאת תמונה');
+        }
     } catch (error) {
+        console.error('Upload error:', error);
+        console.error('Error response:', error.response);
+        console.error('Error status:', error.response?.status);
+        console.error('Error data:', error.response?.data);
         throw error.response?.data || error.message;
     }
 };

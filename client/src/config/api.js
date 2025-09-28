@@ -1,6 +1,6 @@
 // API Configuration
 // Dynamic API URL based on environment
-const API_BASE_URL = window.location.hostname === 'localhost' 
+const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000/api'
   : 'https://luma-therapist-crm.vercel.app/api';
 
@@ -23,13 +23,21 @@ class ApiClient {
 
     // הוספת Authorization header אם יש token
     const token = localStorage.getItem('accessToken');
+
+    // בדיקה אם זה FormData (להעלאת קבצים)
+    const isFormData = options.body instanceof FormData;
+
     const headers = {
-      'Content-Type': 'application/json',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
       ...options.headers,
     };
+
+    // רק אם זה לא FormData, נוסיף Content-Type
+    if (!isFormData && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -41,7 +49,8 @@ class ApiClient {
       ...options,
     };
 
-    if (config.body && typeof config.body === 'object') {
+    // רק אם זה לא FormData, נהפוך לJSON
+    if (config.body && typeof config.body === 'object' && !isFormData) {
       config.body = JSON.stringify(config.body);
     }
 
@@ -53,11 +62,30 @@ class ApiClient {
       if (!response.ok) {
         // טיפול בשגיאות 401 - מחיקת token וניתוב להתחברות
         if (response.status === 401) {
+          console.log('🔒 401 Unauthorized - Token expired or invalid');
           localStorage.removeItem('accessToken');
-          // אפשר להוסיף כאן ניתוב להתחברות
-          // window.location.href = '/login';
+          localStorage.removeItem('lastActivity');
+
+          // אם אנחנו לא בעמוד התחברות, נתן למשתמש אפשרות להתחבר מחדש
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+            if (confirm('ההתחברות פגה. האם תרצה להתחבר מחדש?')) {
+              window.location.href = '/login';
+            }
+          }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+        // ננסה לקבל הודעת שגיאה מהשרת
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // אם לא ניתן לקרוא JSON, נשתמש בהודעה הבסיסית
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();

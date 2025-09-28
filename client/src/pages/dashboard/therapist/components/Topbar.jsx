@@ -35,7 +35,9 @@ const Topbar = () => {
                 <Box display="flex" alignItems="center" gap={2} flex={1} sx={{ minWidth: 0 }}>
                     {user?.profileImage ? (
                         <Avatar
-                            src={user.profileImage}
+                            src={user.profileImage.startsWith('/uploads/') ?
+                                `http://localhost:5000${user.profileImage}` :
+                                user.profileImage}
                             alt={user.fullName || 'תמונת מטפלת'}
                             sx={{
                                 width: isMobile ? 35 : 45,

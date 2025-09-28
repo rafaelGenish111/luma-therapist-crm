@@ -42,13 +42,22 @@ const therapistSchema = new mongoose.Schema({
         validate: {
             validator: function (value) {
                 if (!value) return true;
-                return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(value);
+                // אפשר URL מלא (Cloudinary) או נתיב יחסי (מקומי)
+                return /^(https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$|\/uploads\/.+\.(jpg|jpeg|png|gif|webp)$)/i.test(value);
             },
             message: 'כתובת תמונת פרופיל לא תקינה'
         }
     },
     profileImagePublicId: {
         type: String
+    },
+    profileImageProvider: {
+        type: String,
+        enum: ['cloudinary', 'local'],
+        default: 'cloudinary'
+    },
+    profileImagePath: {
+        type: String // נתיב מקומי לתמונה במקרה של אחסון מקומי
     },
 
     // תיאור מקצועי ואישי

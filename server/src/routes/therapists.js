@@ -260,6 +260,76 @@ router.put('/calendly-link', auth, authorize(['manage_own_profile']), [
     }
 });
 
+// פונקציית עזר לטיפול בהעלאת תמונות עם גיבוי מקומי
+const uploadImageWithFallback = async (file, folder, options = {}) => {
+    const fs = require('fs');
+    const path = require('path');
+
+    // בדיקה אם Cloudinary מוגדר כראוי
+    const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_KEY !== 'your_api_key' &&
+        process.env.CLOUDINARY_API_SECRET &&
+        process.env.CLOUDINARY_API_SECRET !== 'your_api_secret';
+
+    if (isCloudinaryConfigured) {
+        try {
+            console.log('🌤️ Using Cloudinary for image upload');
+            const result = await cloudinary.uploader.upload(
+                `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+                {
+                    folder,
+                    ...options
+                }
+            );
+            return {
+                url: result.secure_url,
+                publicId: result.public_id,
+                provider: 'cloudinary'
+            };
+        } catch (cloudinaryError) {
+            console.error('Cloudinary upload failed, falling back to local storage:', cloudinaryError);
+            // המשך לגיבוי מקומי
+        }
+    }
+
+    // גיבוי מקומי
+    console.log('💾 Using local storage for image upload');
+
+    // יצירת תיקיית uploads אם לא קיימת
+    const uploadsDir = path.join(__dirname, '../../uploads');
+    const folderPath = path.join(uploadsDir, folder);
+
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+    }
+
+    // יצירת שם קובץ ייחודי
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const fileExtension = path.extname(file.originalname);
+    const filename = `${timestamp}_${randomString}${fileExtension}`;
+    const filepath = path.join(folderPath, filename);
+
+    // שמירת הקובץ
+    fs.writeFileSync(filepath, file.buffer);
+
+    // יצירת URL יחסי
+    const relativeUrl = `/uploads/${folder}/${filename}`;
+
+    return {
+        url: relativeUrl,
+        publicId: filename,
+        provider: 'local',
+        filepath: filepath
+    };
+};
+
 // @route   POST /api/therapists/profile/image
 // @desc    העלאת תמונת פרופיל
 // @access  Private
@@ -281,45 +351,72 @@ router.post('/profile/image', auth, authorize(['manage_own_profile']), upload.si
             });
         }
 
-        // מחיקת תמונת פרופיל קיימת מ-Cloudinary
+        // מחיקת תמונת פרופיל קיימת
         if (therapist.profileImagePublicId) {
             try {
-                await cloudinary.uploader.destroy(therapist.profileImagePublicId);
+                // מחיקה מ-Cloudinary אם זה Cloudinary
+                if (therapist.profileImageProvider === 'cloudinary') {
+                    await cloudinary.uploader.destroy(therapist.profileImagePublicId);
+                }
+                // מחיקה מקומית אם זה קובץ מקומי
+                else if (therapist.profileImageProvider === 'local' && therapist.profileImagePath) {
+                    const fs = require('fs');
+                    if (fs.existsSync(therapist.profileImagePath)) {
+                        fs.unlinkSync(therapist.profileImagePath);
+                    }
+                }
             } catch (error) {
                 console.error('Error deleting old profile image:', error);
             }
         }
 
         // העלאת תמונה חדשה
-        const result = await cloudinary.uploader.upload(
-            `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
-            {
-                folder: `therapists/${req.user.id}/profile`,
-                transformation: [
-                    { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-                    { quality: 'auto' }
-                ]
-            }
-        );
+        let uploadResult;
+        try {
+            uploadResult = await uploadImageWithFallback(
+                req.file,
+                `therapists/${req.user.id}/profile`,
+                {
+                    transformation: [
+                        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+                        { quality: 'auto' }
+                    ]
+                }
+            );
+        } catch (uploadError) {
+            console.error('Image upload error:', uploadError);
+            return res.status(500).json({
+                success: false,
+                error: 'שגיאה בהעלאת התמונה: ' + uploadError.message
+            });
+        }
 
         // עדכון הפרופיל
-        therapist.profileImage = result.secure_url;
-        therapist.profileImagePublicId = result.public_id;
+        therapist.profileImage = uploadResult.url;
+        therapist.profileImagePublicId = uploadResult.publicId;
+        therapist.profileImageProvider = uploadResult.provider;
+        if (uploadResult.filepath) {
+            therapist.profileImagePath = uploadResult.filepath;
+        }
+
         await therapist.save();
+
+        console.log(`✅ Profile image uploaded successfully using ${uploadResult.provider}:`, uploadResult.url);
 
         res.json({
             success: true,
             data: {
-                profileImage: result.secure_url,
-                profileImagePublicId: result.public_id
+                profileImage: uploadResult.url,
+                profileImagePublicId: uploadResult.publicId,
+                provider: uploadResult.provider
             },
-            message: 'תמונת פרופיל הועלתה בהצלחה'
+            message: `תמונת פרופיל הועלתה בהצלחה באמצעות ${uploadResult.provider === 'cloudinary' ? 'Cloudinary' : 'אחסון מקומי'}`
         });
     } catch (error) {
         console.error('Profile image upload error:', error);
         res.status(500).json({
             success: false,
-            error: 'שגיאה בהעלאת תמונת פרופיל'
+            error: 'שגיאה בהעלאת תמונת פרופיל: ' + error.message
         });
     }
 });
@@ -338,18 +435,30 @@ router.delete('/profile/image', auth, authorize(['manage_own_profile']), async (
             });
         }
 
-        // מחיקת תמונה מ-Cloudinary
+        // מחיקת תמונה (Cloudinary או מקומי)
         if (therapist.profileImagePublicId) {
             try {
-                await cloudinary.uploader.destroy(therapist.profileImagePublicId);
+                // מחיקה מ-Cloudinary אם זה Cloudinary
+                if (therapist.profileImageProvider === 'cloudinary') {
+                    await cloudinary.uploader.destroy(therapist.profileImagePublicId);
+                }
+                // מחיקה מקומית אם זה קובץ מקומי
+                else if (therapist.profileImageProvider === 'local' && therapist.profileImagePath) {
+                    const fs = require('fs');
+                    if (fs.existsSync(therapist.profileImagePath)) {
+                        fs.unlinkSync(therapist.profileImagePath);
+                    }
+                }
             } catch (error) {
-                console.error('Error deleting profile image from Cloudinary:', error);
+                console.error('Error deleting profile image:', error);
             }
         }
 
         // מחיקת הקישורים מהפרופיל
         therapist.profileImage = null;
         therapist.profileImagePublicId = null;
+        therapist.profileImageProvider = 'cloudinary';
+        therapist.profileImagePath = null;
         await therapist.save();
 
         res.json({
