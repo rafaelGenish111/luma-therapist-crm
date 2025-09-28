@@ -68,8 +68,10 @@ const corsOptions = {
                 process.env.CLIENT_URL,
                 process.env.FRONTEND_URL,
                 'https://luma-therapist-crm-frontend.vercel.app',
-                'https://luma-therapist-crm.vercel.app'
-            ]
+                'https://luma-therapist-crm.vercel.app',
+                'https://luma-therapist-crm-frontend-git-main-rafaelgenish111s-projects.vercel.app',
+                'https://luma-therapist-crm-git-main-rafaelgenish111s-projects.vercel.app'
+            ].filter(Boolean) // מסנן undefined values
             : [
                 'http://localhost:8000',
                 'http://localhost:3000',

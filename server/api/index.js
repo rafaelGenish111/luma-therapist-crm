@@ -1,2 +1,4 @@
-// Import the full server application for Vercel deployment
-module.exports = require('../src/index.js');
+// Vercel API handler
+const app = require('../src/index');
+
+module.exports = app;
