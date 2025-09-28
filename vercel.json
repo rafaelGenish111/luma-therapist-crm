@@ -5,18 +5,19 @@
       "src": "client/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "client/dist"
+        "distDir": "client/dist",
+        "buildCommand": "cd client && npm install && npm run build"
       }
     },
     {
-      "src": "server/api/index.js",
+      "src": "server/src/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "server/api/index.js"
+      "dest": "server/src/index.js"
     },
     {
       "src": "/(.*)",
@@ -27,8 +28,9 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "server/api/index.js": {
+    "server/src/index.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "installCommand": "npm install --prefix client && npm install --prefix server"
 }
