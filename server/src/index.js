@@ -273,7 +273,23 @@ app.get('/api/test', (req, res) => {
         status: 'ok',
         message: 'Server is working',
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
+        mongodb: !!process.env.MONGODB_URI,
+        jwt: !!process.env.JWT_SECRET
+    });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Luma Therapist CRM API', 
+        status: 'running',
+        endpoints: ['/api/test', '/health', '/api/auth/login']
     });
 });
 
@@ -284,20 +300,30 @@ app.use(async (req, res, next) => {
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Vercel:', process.env.VERCEL);
 
-    // Skip initialization for test endpoint
-    if (req.url === '/api/test') {
+    // Skip initialization for test endpoints
+    if (req.url === '/api/test' || req.url === '/health' || req.url === '/') {
         return next();
     }
 
     if (!isInitialized) {
         try {
             console.log('Initializing app for first time...');
+            console.log('Environment variables check:');
+            console.log('- MONGODB_URI:', !!process.env.MONGODB_URI);
+            console.log('- JWT_SECRET:', !!process.env.JWT_SECRET);
+            console.log('- NODE_ENV:', process.env.NODE_ENV);
+            
             await initializeApp();
             isInitialized = true;
             console.log('App initialized successfully');
         } catch (error) {
             console.error('Failed to initialize app:', error);
-            return res.status(500).json({ error: 'Server initialization failed', details: error.message });
+            console.error('Error stack:', error.stack);
+            return res.status(500).json({ 
+                error: 'Server initialization failed', 
+                details: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
         }
     }
     next();
