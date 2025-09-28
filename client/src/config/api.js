@@ -2,7 +2,7 @@
 // Dynamic API URL based on environment
 const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000/api'
-  : 'http://localhost:5000/api'; // זמנית - שרת מקומי
+  : 'https://luma-therapist-crm.vercel.app/api';
 
 console.log('🔧 Current hostname:', window.location.hostname);
 console.log('🔧 Selected API_BASE_URL:', API_BASE_URL);
