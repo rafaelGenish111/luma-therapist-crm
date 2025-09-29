@@ -78,15 +78,16 @@ export const AuthProvider = ({ children }) => {
         }
         const fetchUser = async () => {
             try {
-                const res = await api.profile();
-                setUser(res.data?.user || null);
-                if (!res.data?.user) {
+                const res = await api.get('/therapists/profile');
+                setUser(res.data?.data?.user || null);
+                if (!res.data?.data?.user) {
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('lastActivity');
                 } else {
                     localStorage.setItem('lastActivity', Date.now().toString());
                 }
             } catch (err) {
+                console.error('Failed to fetch user profile:', err);
                 setUser(null);
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('lastActivity');
@@ -104,7 +105,7 @@ export const AuthProvider = ({ children }) => {
             const res = await api.post('/auth/login', { email, password });
             console.log('Raw response:', res);
             console.log('Login response:', res.data);
-            
+
             if (res.data?.success) {
                 console.log('Login successful');
                 setUser(res.data.data.user);
@@ -112,12 +113,12 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('accessToken', res.data.data.accessToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
             }
-            
+
             return res.data;
         } catch (error) {
             console.error('Login error:', error);
             console.error('Error response:', error.response?.data);
-            
+
             return {
                 success: false,
                 error: error.response?.data?.error || error.message || 'שגיאה בהתחברות'
@@ -171,15 +172,15 @@ export const AuthProvider = ({ children }) => {
     // רענון טוקן
     const refresh = async () => {
         try {
-            const res = await api.refreshToken();
-            if (res?.success && res?.data?.accessToken) {
-                const newToken = res.data.accessToken;
+            const res = await api.post('/auth/refresh');
+            if (res.data?.success && res.data?.data?.accessToken) {
+                const newToken = res.data.data.accessToken;
                 setAccessToken(newToken);
                 localStorage.setItem('accessToken', newToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
                 // למשוך את המשתמש מחדש
-                const me = await api.profile();
-                setUser(me.data?.user || null);
+                const me = await api.get('/therapists/profile');
+                setUser(me.data?.data?.user || null);
                 return true;
             }
         } catch {
