@@ -57,27 +57,37 @@ app.use(compression());
 app.use(morgan('combined'));
 app.use(validateRequest);
 
-// עדכון CORS לתמיכה בפרודקשן
+// CORS Configuration
 const allowedOrigins = process.env.CORS_ORIGIN 
-    ? process.env.CORS_ORIGIN.split(',')
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
     : ['http://localhost:8000', 'http://localhost:5000'];
 
 app.use(cors({
     origin: function (origin, callback) {
-        // אפשר בקשות ללא origin (כמו mobile apps או curl)
+        // אפשר בקשות ללא origin (mobile apps, curl)
         if (!origin) return callback(null, true);
         
         if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
             callback(null, true);
         } else {
-            console.log('Blocked origin:', origin);
+            console.log('❌ Blocked origin:', origin);
+            console.log('✅ Allowed origins:', allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    exposedHeaders: ['set-cookie']
+    allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Cache-Control',
+        'X-File-Name'
+    ],
+    exposedHeaders: ['set-cookie'],
+    maxAge: 86400 // 24 hours - cache preflight requests
 }));
 
 
