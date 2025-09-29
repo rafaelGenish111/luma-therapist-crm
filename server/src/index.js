@@ -51,6 +51,11 @@ const scheduledTasks = require('./services/scheduledTasks');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for Vercel deployment
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Security Middleware
 app.use(securityHeaders);
 app.use(compression());
@@ -58,7 +63,7 @@ app.use(morgan('combined'));
 app.use(validateRequest);
 
 // CORS Configuration
-const allowedOrigins = process.env.CORS_ORIGIN 
+const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
     : ['http://localhost:8000', 'http://localhost:5000'];
 
@@ -66,7 +71,7 @@ app.use(cors({
     origin: function (origin, callback) {
         // אפשר בקשות ללא origin (mobile apps, curl)
         if (!origin) return callback(null, true);
-        
+
         if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
             callback(null, true);
         } else {
@@ -78,8 +83,8 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
-        'Content-Type', 
-        'Authorization', 
+        'Content-Type',
+        'Authorization',
         'X-Requested-With',
         'Accept',
         'Origin',
