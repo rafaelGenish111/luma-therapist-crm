@@ -264,8 +264,9 @@ router.post('/register', registerLimiter, validateRegistration, handleValidation
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
         });
         res.status(201).json({ success: true, message: 'המשתמש נרשם בהצלחה', he: 'המשתמש נרשם בהצלחה', data: { user: { id: user._id, email: user.email, firstName: user.firstName, lastName: user.lastName, userType: user.userType, isEmailVerified: user.isEmailVerified, isProfileComplete: user.isProfileComplete }, accessToken } });
 
@@ -353,8 +354,9 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
         });
 
         res.json({
@@ -438,8 +440,9 @@ router.post('/refresh', async (req, res) => {
         res.cookie('refreshToken', newRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
         });
 
         res.json({
