@@ -99,28 +99,30 @@ export const AuthProvider = ({ children }) => {
 
     // התחברות
     const login = async (email, password) => {
-        console.log('Login function called with:', { email, password });
-        const res = await api.login({ email, password });
-        console.log('Raw response:', res);
-        console.log('Login response:', res);
-        console.log('res.success:', res.success);
-        if (res.success) {
-            console.log('Inside success block');
-            console.log('Setting user:', res.data?.user);
-            console.log('Setting accessToken:', res.data?.accessToken);
-            setUser(res.data?.user);
-            setAccessToken(res.data?.accessToken);
-            console.log('User set to:', res.data?.user);
-            console.log('User role:', res.data?.user?.role);
-            console.log('User userType:', res.data?.user?.userType);
-            console.log('About to save to localStorage');
-            localStorage.setItem('accessToken', res.data?.accessToken);
-            localStorage.setItem('lastActivity', Date.now().toString());
-            console.log('accessToken saved to localStorage:', localStorage.getItem('accessToken'));
-        } else {
-            console.log('Login failed, success is false');
+        try {
+            console.log('Login function called with:', { email, password });
+            const res = await api.post('/auth/login', { email, password });
+            console.log('Raw response:', res);
+            console.log('Login response:', res.data);
+            
+            if (res.data?.success) {
+                console.log('Login successful');
+                setUser(res.data.data.user);
+                setAccessToken(res.data.data.accessToken);
+                localStorage.setItem('accessToken', res.data.data.accessToken);
+                localStorage.setItem('lastActivity', Date.now().toString());
+            }
+            
+            return res.data;
+        } catch (error) {
+            console.error('Login error:', error);
+            console.error('Error response:', error.response?.data);
+            
+            return {
+                success: false,
+                error: error.response?.data?.error || error.message || 'שגיאה בהתחברות'
+            };
         }
-        return res.data;
     };
 
     // הרשמה
