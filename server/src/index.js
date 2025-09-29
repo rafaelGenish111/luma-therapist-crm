@@ -7,6 +7,14 @@ const { rateLimit } = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
+// CRITICAL DEBUG - DO NOT REMOVE
+console.log('===========================================');
+console.log('ENVIRONMENT DEBUG:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length || 0);
+console.log('MONGODB_URI first 50 chars:', process.env.MONGODB_URI?.substring(0, 50) || 'MISSING!');
+console.log('PORT:', process.env.PORT);
+console.log('===========================================');
 // הגדרת Cloudinary
 const cloudinary = require('cloudinary').v2;
 cloudinary.config({
