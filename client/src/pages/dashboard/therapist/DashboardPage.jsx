@@ -36,7 +36,7 @@ console.log('🔍 DashboardPage: useDashboardData imported successfully');
 console.log('🔍 useDashboardData function:', typeof useDashboardData);
 
 // API services
-import api, { clientsApi, appointmentsApi, therapistsApi } from '../../../services/api';
+import api from '../../../services/api';
 import healthDeclarationService from '../../../services/healthDeclarationService';
 import { Link } from 'react-router-dom';
 

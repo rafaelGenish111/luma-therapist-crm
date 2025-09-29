@@ -52,7 +52,7 @@ import Footer from '../../../components/common/Footer';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 
 // API services
-import api, { clientsApi, articlesApi, galleryApi, therapistsApi } from '../../../services/api';
+import api from '../../../services/api';
 import healthDeclarationService from '../../../services/healthDeclarationService';
 import { Link } from 'react-router-dom';
 

@@ -5,7 +5,7 @@ import ClientList from './components/ClientList';
 import ClientForm from './components/ClientForm';
 import ClientDetails from './components/ClientDetails';
 import AppointmentForm from './components/AppointmentForm';
-import api, { clientsApi } from '../../../services/api';
+import api from '../../../services/api';
 
 const ClientsPage = () => {
     const [clients, setClients] = useState([]);
@@ -26,7 +26,7 @@ const ClientsPage = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await clientsApi.getAll();
+            const res = await api.get('/clients');
             setClients(res.data || []);
         } catch (err) {
             setError('שגיאה בטעינת לקוחות');
@@ -82,11 +82,11 @@ const ClientsPage = () => {
             if (editClient) {
                 // עדכון
                 console.log('Updating client:', editClient._id || editClient.id);
-                await clientsApi.update(editClient._id || editClient.id, payload);
+                await api.put(`/clients/${editClient._id || editClient.id}`, payload);
             } else {
                 // הוספה
                 console.log('Creating new client');
-                await clientsApi.create(payload);
+                await api.post('/clients', payload);
             }
             setOpen(false);
             fetchClients();
@@ -105,7 +105,7 @@ const ClientsPage = () => {
     const handleDelete = async (client) => {
         if (!window.confirm('האם למחוק את הלקוח?')) return;
         try {
-            await clientsApi.delete(client._id || client.id);
+            await api.delete(`/clients/${client._id || client.id}`);
             fetchClients();
         } catch (err) {
             setError('שגיאה במחיקת לקוח');

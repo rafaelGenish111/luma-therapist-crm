@@ -1,11 +1,7 @@
 console.log('🚀 useDashboardData.js file loaded!');
 
 import { useState, useEffect, useCallback } from 'react';
-import api, {
-  clientsApi,
-  appointmentsApi,
-  therapistsApi
-} from '../services/api';
+import api from '../services/api';
 
 // פונקציות עזר לחישובי תאריכים
 const isThisWeek = (date) => {
@@ -330,13 +326,13 @@ export const useDashboardData = () => {
 
         // טעינה ישירה של נתונים
         console.log('📊 Loading clients...');
-        const clientsResponse = await clientsApi.getAll().catch(err => {
+        const clientsResponse = await api.get('/clients').catch(err => {
           console.error('❌ Clients API error:', err);
           return { data: [] };
         });
 
         console.log('📊 Loading appointments...');
-        const appointmentsResponse = await appointmentsApi.getAll().catch(err => {
+        const appointmentsResponse = await api.get('/appointments').catch(err => {
           console.error('❌ Appointments API error:', err);
           return { data: [] };
         });
@@ -537,7 +533,7 @@ export const useDashboardData = () => {
       console.log('👤 Fetching therapist profile...');
       let profile = {};
       try {
-        const profileResponse = await therapistsApi.getProfile();
+        const profileResponse = await api.get('/therapists/profile');
         console.log('👤 Profile response raw:', profileResponse);
         console.log('👤 Profile response data:', profileResponse.data);
 

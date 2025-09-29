@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 
 import { useThemeSettings } from '../../../context/ThemeContext';
-import { therapistsApi } from '../../../services/api';
+import api from '../../../services/api';
 
 const SettingsPage = () => {
     const [tab, setTab] = useState(0);
@@ -49,7 +49,7 @@ const SettingsPage = () => {
                 console.log('🔄 Loading revenue target from server...');
                 console.log('🔄 Current monthlyRevenueTarget state:', monthlyRevenueTarget);
 
-                const response = await therapistsApi.getProfile();
+                const response = await api.get('/therapists/profile');
                 console.log('📊 Profile response:', response);
                 console.log('📊 Profile response status:', response.status);
                 console.log('📊 Profile data:', response.data);
@@ -97,7 +97,7 @@ const SettingsPage = () => {
             }
 
             console.log('📤 Sending update request to server...');
-            const response = await therapistsApi.updateRevenueTarget(target);
+            const response = await api.put('/therapists/profile/revenue-target', { target });
             console.log('📤 Update response:', response);
 
             setSuccess('יעד ההכנסות החודשי עודכן בהצלחה!');

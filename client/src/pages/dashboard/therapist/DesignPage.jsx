@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Input, MenuItem, Paper, Alert, Circ
 
 import { getOwnTheme, updateOwnTheme } from '../../../services/therapistService';
 import WebsitePreview from '../../website/WebsitePreview';
-import api, { therapistsApi } from '../../../services/api';
+import api from '../../../services/api';
 
 const fontOptions = [
     'Heebo', 'Assistant', 'Rubik', 'Open Sans', 'Alef', 'Arimo', 'David Libre', 'Varela Round', 'Secular One', 'Arial', 'Tahoma'

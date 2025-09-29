@@ -1,11 +1,11 @@
-import api, { clientsApi } from './api';
+import api from './api';
 
 const clientService = {
-    getAll: () => clientsApi.getAll(),
-    getClient: (clientId) => clientsApi.getById(clientId),
-    createClient: (clientData) => clientsApi.create(clientData),
-    updateClient: (clientId, clientData) => clientsApi.update(clientId, clientData),
-    deleteClient: (clientId) => clientsApi.delete(clientId),
+    getAll: () => api.get('/clients'),
+    getClient: (clientId) => api.get(`/clients/${clientId}`),
+    createClient: (clientData) => api.post('/clients', clientData),
+    updateClient: (clientId, clientData) => api.put(`/clients/${clientId}`, clientData),
+    deleteClient: (clientId) => api.delete(`/clients/${clientId}`),
 
     // Additional client-related functions
     addInteraction: (clientId, interactionData) => api.post(`/clients/${clientId}/interactions`, interactionData),
