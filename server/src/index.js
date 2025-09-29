@@ -58,57 +58,30 @@ app.use(morgan('combined'));
 app.use(validateRequest);
 
 // עדכון CORS לתמיכה בפרודקשן
-const corsOptions = {
+const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',')
+    : ['http://localhost:8000', 'http://localhost:5000'];
+
+app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
+        // אפשר בקשות ללא origin (כמו mobile apps או curl)
         if (!origin) return callback(null, true);
-
-        const allowedOrigins = process.env.NODE_ENV === 'production'
-            ? [
-                process.env.CLIENT_URL,
-                process.env.FRONTEND_URL,
-                'https://luma-therapist-crm-frontend.vercel.app',
-                'https://luma-therapist-crm.vercel.app',
-                'https://luma-therapist-crm-frontend-git-main-rafaelgenish111s-projects.vercel.app',
-                'https://luma-therapist-crm-git-main-rafaelgenish111s-projects.vercel.app'
-            ].filter(Boolean) // מסנן undefined values
-            : [
-                'http://localhost:8000',
-                'http://localhost:3000',
-                'http://127.0.0.1:8000',
-                'http://127.0.0.1:3000'
-            ];
-
-        console.log('CORS check - Origin:', origin);
-        console.log('CORS check - Allowed origins:', allowedOrigins);
-        console.log('CORS check - NODE_ENV:', process.env.NODE_ENV);
-
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            console.log('CORS allowed:', origin);
+        
+        if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
             callback(null, true);
         } else {
-            console.log('CORS blocked origin:', origin);
+            console.log('Blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires'],
-    optionsSuccessStatus: 200
-};
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['set-cookie']
+}));
 
-app.use(cors(corsOptions));
 
-// Handle preflight requests manually
-app.options('*', (req, res) => {
-    console.log('OPTIONS request for:', req.url);
-    console.log('Origin:', req.headers.origin);
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma, Expires');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.status(200).end();
-});
+app.options('*', cors());
 
 // Rate limiting
 const limiter = rateLimit({
