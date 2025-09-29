@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
         }
         const fetchUser = async () => {
             try {
-                const res = await authApi.profile();
+                const res = await api.profile();
                 setUser(res.data?.user || null);
                 if (!res.data?.user) {
                     localStorage.removeItem('accessToken');
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     // התחברות
     const login = async (email, password) => {
         console.log('Login function called with:', { email, password });
-        const res = await authApi.login({ email, password });
+        const res = await api.login({ email, password });
         console.log('Raw response:', res);
         console.log('Login response:', res);
         console.log('res.success:', res.success);
@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }) => {
     // הרשמה
     const register = async (data) => {
         try {
-            const res = await authApi.register(data);
+            const res = await api.register(data);
             console.log('Register response:', res);
             if (res.success) {
                 console.log('Setting user:', res.data?.user);
@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }) => {
         setShowSessionWarning(false);
 
         try {
-            await authApi.logout();
+            await api.logout();
         } catch (error) {
             console.log('Logout error:', error);
         }
@@ -169,14 +169,14 @@ export const AuthProvider = ({ children }) => {
     // רענון טוקן
     const refresh = async () => {
         try {
-            const res = await authApi.refreshToken();
+            const res = await api.refreshToken();
             if (res?.success && res?.data?.accessToken) {
                 const newToken = res.data.accessToken;
                 setAccessToken(newToken);
                 localStorage.setItem('accessToken', newToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
                 // למשוך את המשתמש מחדש
-                const me = await authApi.profile();
+                const me = await api.profile();
                 setUser(me.data?.user || null);
                 return true;
             }
