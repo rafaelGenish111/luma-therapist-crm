@@ -223,14 +223,22 @@ const initializeApp = async () => {
 if (require.main === module || process.env.NODE_ENV === 'development') {
     const startServer = async () => {
         try {
-            await initializeApp();
+            console.log('🔄 Starting server...');
+            console.log('📊 Environment:', process.env.NODE_ENV || 'development');
+            console.log('🔌 MongoDB URI exists:', !!process.env.MONGODB_URI);
+            
+            // Wait for MongoDB connection with timeout
+            console.log('⏳ Connecting to MongoDB...');
+            await connectDB();
+            console.log('✅ MongoDB connected successfully');
+
+            // הפעלת עבודות מתוזמנות
+            scheduledTasks.startAll();
 
             const server = app.listen(PORT, '0.0.0.0', () => {
                 console.log(`🚀 Server running on port ${PORT}`);
                 console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(`🌐 Access from other devices: http://192.168.150.133:${PORT}`);
-                }
+                console.log('⏰ Scheduled tasks are running');
             });
 
             // Graceful shutdown
@@ -247,8 +255,30 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
             process.on('SIGINT', gracefulShutdown);
 
         } catch (error) {
-            console.error('❌ Failed to start server:', error);
-            process.exit(1);
+            console.error('❌ Failed to start server:', error.message);
+            console.error('Stack:', error.stack);
+            
+            // In production, try to start anyway (Vercel will handle restart)
+            if (process.env.NODE_ENV === 'production') {
+                console.log('⚠️ Starting server without MongoDB in production mode');
+                const server = app.listen(PORT, '0.0.0.0', () => {
+                    console.log(`🚀 Server running on port ${PORT} (MongoDB connection failed)`);
+                });
+                
+                // Graceful shutdown for production
+                const gracefulShutdown = () => {
+                    console.log('🛑 Shutting down gracefully...');
+                    server.close(() => {
+                        console.log('💤 Server closed');
+                        process.exit(0);
+                    });
+                };
+
+                process.on('SIGTERM', gracefulShutdown);
+                process.on('SIGINT', gracefulShutdown);
+            } else {
+                process.exit(1);
+            }
         }
     };
 
