@@ -79,8 +79,8 @@ export const AuthProvider = ({ children }) => {
         const fetchUser = async () => {
             try {
                 const res = await api.get('/therapists/profile');
-                setUser(res.data?.data?.user || null);
-                if (!res.data?.data?.user) {
+                setUser(res.data?.data || null);
+                if (!res.data?.data) {
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('lastActivity');
                 } else {
@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('lastActivity', Date.now().toString());
                 // למשוך את המשתמש מחדש
                 const me = await api.get('/therapists/profile');
-                setUser(me.data?.data?.user || null);
+                setUser(me.data?.data || null);
                 return true;
             }
         } catch {
