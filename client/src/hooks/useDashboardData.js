@@ -343,9 +343,9 @@ export const useDashboardData = () => {
           return { data: [] };
         });
 
-        const clients = clientsResponse.data || [];
-        const appointments = appointmentsResponse.data || [];
-        const payments = paymentsResponse.data || [];
+        const clients = clientsResponse?.data || [];
+        const appointments = appointmentsResponse?.data || [];
+        const payments = paymentsResponse?.data || [];
 
         console.log('📊 Direct data loaded:', { clients: clients.length, appointments: appointments.length, payments: payments.length });
 
@@ -419,31 +419,31 @@ export const useDashboardData = () => {
         const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
         const clientMetrics = {
-          total: clients.length,
-          active: clients.filter(c => c.status === 'active').length,
-          newThisWeek: clients.filter(c => new Date(c.createdAt) >= oneWeekAgo).length,
-          newThisMonth: clients.filter(c => new Date(c.createdAt) >= oneMonthAgo).length
+          total: clients?.length || 0,
+          active: clients?.filter(c => c.status === 'active').length || 0,
+          newThisWeek: clients?.filter(c => new Date(c.createdAt) >= oneWeekAgo).length || 0,
+          newThisMonth: clients?.filter(c => new Date(c.createdAt) >= oneMonthAgo).length || 0
         };
 
         const appointmentMetrics = {
-          total: appointments.length,
-          weekly: appointments.filter(a => new Date(a.date) >= oneWeekAgo).length,
-          monthly: appointments.filter(a => new Date(a.date) >= oneMonthAgo).length,
-          completed: appointments.filter(a => a.status === 'completed').length,
-          cancelled: appointments.filter(a => a.status === 'cancelled').length,
-          upcoming: appointments.filter(a => a.status === 'scheduled' && new Date(a.date) > now).length,
-          completionRate: appointments.length > 0 ? (appointments.filter(a => a.status === 'completed').length / appointments.length) * 100 : 0
+          total: appointments?.length || 0,
+          weekly: appointments?.filter(a => new Date(a.date) >= oneWeekAgo).length || 0,
+          monthly: appointments?.filter(a => new Date(a.date) >= oneMonthAgo).length || 0,
+          completed: appointments?.filter(a => a.status === 'completed').length || 0,
+          cancelled: appointments?.filter(a => a.status === 'cancelled').length || 0,
+          upcoming: appointments?.filter(a => a.status === 'scheduled' && new Date(a.date) > now).length || 0,
+          completionRate: appointments?.length > 0 ? (appointments.filter(a => a.status === 'completed').length / appointments.length) * 100 : 0
         };
 
-        const monthlyPayments = payments.filter(p =>
+        const monthlyPayments = payments?.filter(p =>
           p.status === 'paid' && new Date(p.createdAt) >= oneMonthAgo
-        );
+        ) || [];
 
         const paymentMetrics = {
-          total: payments.length,
+          total: payments?.length || 0,
           monthlyRevenue: monthlyPayments.reduce((sum, p) => sum + (p.amount || 0), 0),
           monthlyCount: monthlyPayments.length,
-          averagePayment: payments.length > 0 ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) / payments.length : 0
+          averagePayment: payments?.length > 0 ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) / payments.length : 0
         };
 
         // חישוב מגמת הכנסות

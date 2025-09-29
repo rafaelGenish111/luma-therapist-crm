@@ -6,6 +6,7 @@ const Client = require('../models/Client');
 const Appointment = require('../models/Appointment');
 const Payment = require('../models/Payment');
 const Charge = require('../models/Charge');
+const Therapist = require('../models/Therapist');
 
 // GET /api/dashboard/stats - סטטיסטיקות לוח בקרה
 router.get('/stats', auth, authorize(['therapist', 'admin']), async (req, res) => {
