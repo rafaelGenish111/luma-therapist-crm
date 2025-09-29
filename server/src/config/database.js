@@ -3,47 +3,28 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
     try {
         const mongoURI = process.env.MONGODB_URI || process.env.MONGODB_URI_PROD;
-
-        console.log('🔄 Attempting MongoDB connection...');
-        console.log('📊 NODE_ENV:', process.env.NODE_ENV);
-        console.log('🔑 MONGODB_URI exists:', !!mongoURI);
-
+        
         if (!mongoURI) {
-            throw new Error('❌ MONGODB_URI is not defined in environment variables');
+            console.error('❌ MONGODB_URI is not defined');
+            throw new Error('MONGODB_URI is not defined in environment variables');
         }
 
-        // Log first 30 chars of URI for debugging (hide password)
-        const uriPrefix = mongoURI.substring(0, 30);
-        console.log('📍 URI prefix:', uriPrefix + '...');
-
+        console.log('🔄 Connecting to MongoDB...');
+        console.log('📍 URI prefix:', mongoURI.substring(0, 30) + '...');
+        
         const conn = await mongoose.connect(mongoURI, {
-            serverSelectionTimeoutMS: 30000, // 30 seconds
+            serverSelectionTimeoutMS: 30000, // 30 seconds instead of 10
             socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000, // added this
         });
 
         console.log('✅ MongoDB Connected:', conn.connection.host);
-        console.log('📦 Database name:', conn.connection.name);
-
-        // Handle connection events
-        mongoose.connection.on('error', (err) => {
-            console.error('❌ MongoDB connection error:', err.message);
-        });
-
-        mongoose.connection.on('disconnected', () => {
-            console.log('🔌 MongoDB disconnected');
-        });
-
-        // Graceful shutdown
-        process.on('SIGINT', async () => {
-            await mongoose.connection.close();
-            console.log('📦 MongoDB connection closed through app termination');
-            process.exit(0);
-        });
+        console.log('📦 Database:', conn.connection.name);
 
         return conn;
     } catch (error) {
-        console.error('❌ Error connecting to MongoDB:', error.message);
-        console.error('📋 Full error:', error);
+        console.error('❌ MongoDB connection failed:', error.message);
+        console.error('Full error:', error);
         throw error;
     }
 };
