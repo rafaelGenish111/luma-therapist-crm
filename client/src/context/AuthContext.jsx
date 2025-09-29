@@ -112,9 +112,16 @@ export const AuthProvider = ({ children }) => {
                 setAccessToken(res.data.data.accessToken);
                 localStorage.setItem('accessToken', res.data.data.accessToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
+                return {
+                    success: true,
+                    data: res.data.data
+                };
+            } else {
+                return {
+                    success: false,
+                    error: res.data?.error || 'שגיאה בהתחברות'
+                };
             }
-
-            return res.data;
         } catch (error) {
             console.error('Login error:', error);
             console.error('Error response:', error.response?.data);
@@ -129,24 +136,36 @@ export const AuthProvider = ({ children }) => {
     // הרשמה
     const register = async (data) => {
         try {
-            const res = await api.register(data);
+            const res = await api.post('/auth/register', data);
             console.log('Register response:', res);
-            if (res.success) {
-                console.log('Setting user:', res.data?.user);
-                console.log('Setting accessToken:', res.data?.accessToken);
-                setUser(res.data?.user);
-                setAccessToken(res.data?.accessToken);
-                localStorage.setItem('accessToken', res.data?.accessToken);
+            if (res.data?.success) {
+                console.log('Setting user:', res.data.data?.user);
+                console.log('Setting accessToken:', res.data.data?.accessToken);
+                setUser(res.data.data?.user);
+                setAccessToken(res.data.data?.accessToken);
+                localStorage.setItem('accessToken', res.data.data?.accessToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
                 console.log('accessToken saved to localStorage:', localStorage.getItem('accessToken'));
+                return {
+                    success: true,
+                    data: res.data.data
+                };
+            } else {
+                return {
+                    success: false,
+                    error: res.data?.error || 'שגיאה בהרשמה'
+                };
             }
-            return res;
         } catch (err) {
+            console.error('Register error:', err);
             // נחזיר את הודעת השגיאה המפורטת מהשרת (כולל details)
             if (err.response && err.response.data) {
-                return err.response.data;
+                return {
+                    success: false,
+                    error: err.response.data.error || 'שגיאה בהרשמה'
+                };
             }
-            return { success: false, error: 'שגיאה לא ידועה', details: [] };
+            return { success: false, error: 'שגיאה בהרשמה' };
         }
     };
 
@@ -158,7 +177,7 @@ export const AuthProvider = ({ children }) => {
         setShowSessionWarning(false);
 
         try {
-            await api.logout();
+            await api.post('/auth/logout');
         } catch (error) {
             console.log('Logout error:', error);
         }
