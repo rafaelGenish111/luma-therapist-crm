@@ -1,5 +1,5 @@
 // client/src/services/campaignService.js
-import { campaignsApi } from './api';
+import api from './api';
 
 class CampaignService {
     // קבלת כל הקמפיינים
@@ -13,37 +13,37 @@ class CampaignService {
         if (params.limit) searchParams.append('limit', params.limit);
 
         const url = `/campaigns${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-        return await campaignsApi.getAll();
+        return await api.get(url);
     }
 
     // קבלת קמפיין ספציפי
     async getById(id) {
-        return await campaignsApi.getById(id);
+        return await api.get(`/campaigns/${id}`);
     }
 
     // יצירת קמפיין חדש
     async create(campaignData) {
-        return await campaignsApi.create(campaignData);
+        return await api.post('/campaigns', campaignData);
     }
 
     // עדכון קמפיין
     async update(id, campaignData) {
-        return await campaignsApi.update(id, campaignData);
+        return await api.put(`/campaigns/${id}`, campaignData);
     }
 
     // מחיקת קמפיין
     async delete(id) {
-        return await campaignsApi.delete(id);
+        return await api.delete(`/campaigns/${id}`);
     }
 
     // שליחת קמפיין
     async send(id) {
-        return await campaignsApi.send(id);
+        return await api.post(`/campaigns/${id}/send`);
     }
 
     // קבלת סטטיסטיקות קמפיין
     async getStats(id) {
-        return await campaignsApi.getStats(id);
+        return await api.get(`/campaigns/${id}/stats`);
     }
 
     // Templates Management
@@ -53,22 +53,22 @@ class CampaignService {
         const url = category
             ? `/campaigns/templates/list?category=${category}`
             : '/campaigns/templates/list';
-        return await campaignsApi.getAll();
+        return await api.get(url);
     }
 
     // יצירת תבנית חדשה
     async createTemplate(templateData) {
-        return await campaignsApi.createTemplate(templateData);
+        return await api.post('/campaigns/templates', templateData);
     }
 
     // עדכון תבנית
     async updateTemplate(id, templateData) {
-        return await campaignsApi.updateTemplate(id, templateData);
+        return await api.put(`/campaigns/templates/${id}`, templateData);
     }
 
     // מחיקת תבנית
     async deleteTemplate(id) {
-        return await campaignsApi.deleteTemplate(id);
+        return await api.delete(`/campaigns/templates/${id}`);
     }
 
     // Client Lists Management
@@ -83,12 +83,12 @@ class CampaignService {
         if (filters.tags) searchParams.append('tags', filters.tags);
 
         const url = `/campaigns/client-lists/all${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-        return await campaignsApi.getAll();
+        return await api.get(url);
     }
 
     // ייצוא רשימת לקוחות
     async exportClientList(clientIds = [], format = 'csv') {
-        return await campaignsApi.exportClientList({
+        return await api.post('/campaigns/client-lists/export', {
             clientIds,
             format
         });
@@ -100,7 +100,7 @@ class CampaignService {
         formData.append('file', file);
         formData.append('format', format);
 
-        return await campaignsApi.importClientList(formData, {
+        return await api.post('/campaigns/client-lists/import', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
