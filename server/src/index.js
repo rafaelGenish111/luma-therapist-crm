@@ -226,7 +226,7 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
             console.log('🔄 Starting server...');
             console.log('📊 Environment:', process.env.NODE_ENV || 'development');
             console.log('🔌 MongoDB URI exists:', !!process.env.MONGODB_URI);
-            
+
             // Wait for MongoDB connection with timeout
             console.log('⏳ Connecting to MongoDB...');
             await connectDB();
@@ -257,14 +257,14 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
         } catch (error) {
             console.error('❌ Failed to start server:', error.message);
             console.error('Stack:', error.stack);
-            
+
             // In production, try to start anyway (Vercel will handle restart)
             if (process.env.NODE_ENV === 'production') {
                 console.log('⚠️ Starting server without MongoDB in production mode');
                 const server = app.listen(PORT, '0.0.0.0', () => {
                     console.log(`🚀 Server running on port ${PORT} (MongoDB connection failed)`);
                 });
-                
+
                 // Graceful shutdown for production
                 const gracefulShutdown = () => {
                     console.log('🛑 Shutting down gracefully...');
