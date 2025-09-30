@@ -20,7 +20,9 @@ const connectDB = async () => {
             bufferCommands: false,
             maxPoolSize: 10,
             serverSelectionTimeoutMS: 60000, // 60 שניות
-            socketTimeoutMS: 45000,
+            socketTimeoutMS: 75000, // 75 שניות
+            connectTimeoutMS: 60000, // 60 שניות
+            heartbeatFrequencyMS: 10000, // בדיקת חיבור כל 10 שניות
         };
 
         console.log('📦 Creating new MongoDB connection...');

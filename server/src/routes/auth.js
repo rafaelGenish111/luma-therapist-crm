@@ -289,17 +289,27 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
         const { email, password } = req.body;
         console.log('Login function called with:', { email, password });
         
-        // וודא שMongoDB מחובר
+        // ✅ חדש: וודא שMongoDB מחובר
         const mongoose = require('mongoose');
+        const connectDB = require('../config/database');
+        
+        // בדוק אם מחובר, אם לא - התחבר
         if (mongoose.connection.readyState !== 1) {
-            console.error('MongoDB not connected! State:', mongoose.connection.readyState);
-            return res.status(503).json({ 
-                success: false, 
-                error: 'Database connection not ready',
-                he: 'החיבור למסד הנתונים לא מוכן'
-            });
+            console.log('MongoDB not connected, connecting now...');
+            try {
+                await connectDB();
+                console.log('MongoDB connected successfully');
+            } catch (dbError) {
+                console.error('Failed to connect to MongoDB:', dbError);
+                return res.status(503).json({ 
+                    success: false, 
+                    error: 'שירות מסד הנתונים לא זמין',
+                    he: 'שירות מסד הנתונים לא זמין'
+                });
+            }
+        } else {
+            console.log('MongoDB already connected');
         }
-        console.log('MongoDB connected, proceeding with login');
         
         // Find user by email with priority: Therapist -> Client -> User, validate password per candidate
         const lookup = [

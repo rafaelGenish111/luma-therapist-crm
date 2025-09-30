@@ -126,6 +126,24 @@ app.use(cookieParser());
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Middleware להבטחת חיבור MongoDB בכל request
+app.use(async (req, res, next) => {
+    const mongoose = require('mongoose');
+    
+    // אם לא מחובר, התחבר עכשיו
+    if (mongoose.connection.readyState !== 1) {
+        console.log('MongoDB not connected in middleware, connecting...');
+        try {
+            await connectDB();
+            console.log('MongoDB connected via middleware');
+        } catch (err) {
+            console.error('Failed to connect to MongoDB in middleware:', err);
+            // אל תחזיר error, תן ל-route handler לטפל בזה
+        }
+    }
+    next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/calendly', calendlyOAuthRoutes);
@@ -171,7 +189,7 @@ app.get('/api/health', (req, res) => {
 // MongoDB Connection Status
 app.get('/api/db-status', async (req, res) => {
     const mongoose = require('mongoose');
-    
+
     const status = {
         state: mongoose.connection.readyState,
         stateName: ['disconnected', 'connected', 'connecting', 'disconnecting'][mongoose.connection.readyState],
@@ -179,14 +197,14 @@ app.get('/api/db-status', async (req, res) => {
         name: mongoose.connection.name || 'not connected',
         mongooseVersion: mongoose.version
     };
-    
+
     res.json({
         success: true,
         mongodb: status,
         env: {
             hasMongoUri: !!process.env.MONGODB_URI,
-            mongoUriStart: process.env.MONGODB_URI ? 
-                process.env.MONGODB_URI.substring(0, 20) + '...' : 
+            mongoUriStart: process.env.MONGODB_URI ?
+                process.env.MONGODB_URI.substring(0, 20) + '...' :
                 'NOT SET'
         }
     });
