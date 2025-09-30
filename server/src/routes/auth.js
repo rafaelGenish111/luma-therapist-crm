@@ -422,11 +422,15 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
 
 // @route   POST /api/auth/refresh
 // @desc    Refresh access token
-// @access  Public
+// @access  Public (requires refresh token in cookie)
 router.post('/refresh', async (req, res) => {
     try {
-        const { refreshToken } = req.cookies;
-
+        // קבל refresh token מה-cookies
+        const refreshToken = req.cookies.refreshToken;
+        
+        console.log('🔄 Refresh token request');
+        console.log('Has refresh token cookie:', !!refreshToken);
+        
         if (!refreshToken) {
             return res.status(401).json({
                 success: false,
@@ -435,46 +439,52 @@ router.post('/refresh', async (req, res) => {
             });
         }
 
-        // Verify refresh token
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-        console.log('Decoded JWT:', decoded);
-
-        // Check if user exists
-        let user = await User.findById(decoded.userId).select('-password');
-        console.log('User:', user);
-        if (!user) {
-            user = await Client.findById(decoded.userId).select('-password');
-            console.log('Client:', user);
-        }
-        if (!user) {
-            user = await Therapist.findById(decoded.userId).select('-password');
-            console.log('Therapist:', user);
-        }
-        if (!user) {
-            return res.status(401).json({ success: false, error: 'User not found' });
-        }
-        console.log('User from DB:', user);
-
-        // Check if user is active
-        if (!user.isActive) {
+        // אמת את ה-refresh token
+        const jwt = require('jsonwebtoken');
+        let decoded;
+        
+        try {
+            decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+            console.log('✅ Refresh token valid, userId:', decoded.userId);
+        } catch (err) {
+            console.error('❌ Invalid refresh token:', err.message);
             return res.status(401).json({
                 success: false,
-                error: 'החשבון מושבת',
-                he: 'החשבון מושבת'
+                error: 'Refresh token לא תקין',
+                he: 'Refresh token לא תקין'
             });
         }
 
-        // Generate new tokens
-        const { accessToken, refreshToken: newRefreshToken } = generateTokens(user._id);
+        // וודא חיבור MongoDB
+        const mongoose = require('mongoose');
+        const connectDB = require('../config/database');
+        
+        if (mongoose.connection.readyState !== 1) {
+            await connectDB();
+        }
 
-        // Set new refresh token
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000,
-            domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
-        });
+        // מצא את המשתמש
+        const User = require('../models/User');
+        const Client = require('../models/Client');
+        const Therapist = require('../models/Therapist');
+        
+        let user = await Therapist.findById(decoded.userId).select('-password');
+        if (!user) user = await Client.findById(decoded.userId).select('-password');
+        if (!user) user = await User.findById(decoded.userId).select('-password');
+
+        if (!user) {
+            console.error('❌ User not found for refresh');
+            return res.status(401).json({
+                success: false,
+                error: 'משתמש לא נמצא',
+                he: 'משתמש לא נמצא'
+            });
+        }
+
+        // צור access token חדש
+        const { accessToken } = generateTokens(user._id);
+
+        console.log('✅ New access token generated');
 
         res.json({
             success: true,
@@ -482,11 +492,11 @@ router.post('/refresh', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Token refresh error:', error);
-        res.status(401).json({
+        console.error('💥 Refresh token error:', error);
+        res.status(500).json({
             success: false,
-            error: 'Refresh token לא תקין',
-            he: 'Refresh token לא תקין'
+            error: 'שגיאה ברענון token',
+            he: 'שגיאה ברענון token'
         });
     }
 });
