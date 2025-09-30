@@ -1,32 +1,49 @@
 const mongoose = require('mongoose');
 
+// Global cache for mongoose connection
+let cached = global.mongoose || { conn: null, promise: null };
+
+if (!global.mongoose) {
+    global.mongoose = cached;
+}
+
 const connectDB = async () => {
-    try {
-        const mongoURI = process.env.MONGODB_URI || process.env.MONGODB_URI_PROD;
-        
-        if (!mongoURI) {
-            console.error('❌ MONGODB_URI is not defined');
-            throw new Error('MONGODB_URI is not defined in environment variables');
-        }
-
-        console.log('🔄 Connecting to MongoDB...');
-        console.log('📍 URI prefix:', mongoURI.substring(0, 30) + '...');
-        
-        const conn = await mongoose.connect(mongoURI, {
-            serverSelectionTimeoutMS: 30000, // 30 seconds instead of 10
-            socketTimeoutMS: 45000,
-            connectTimeoutMS: 30000, // added this
-        });
-
-        console.log('✅ MongoDB Connected:', conn.connection.host);
-        console.log('📦 Database:', conn.connection.name);
-
-        return conn;
-    } catch (error) {
-        console.error('❌ MongoDB connection failed:', error.message);
-        console.error('Full error:', error);
-         throw error; 
+    // אם כבר מחוברים, החזר את החיבור הקיים
+    if (cached.conn) {
+        console.log('📦 Using cached MongoDB connection');
+        return cached.conn;
     }
+
+    // אם אין promise, צור חיבור חדש
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands: false,
+            maxPoolSize: 10,
+            serverSelectionTimeoutMS: 30000, // 30 seconds
+            socketTimeoutMS: 45000,
+        };
+
+        console.log('📦 Creating new MongoDB connection...');
+        cached.promise = mongoose.connect(process.env.MONGODB_URI, opts)
+            .then((mongoose) => {
+                console.log(`📦 MongoDB Connected: ${mongoose.connection.host}`);
+                return mongoose;
+            })
+            .catch((error) => {
+                console.error('❌ MongoDB connection error:', error);
+                cached.promise = null; // Reset on error
+                throw error;
+            });
+    }
+
+    try {
+        cached.conn = await cached.promise;
+    } catch (e) {
+        cached.promise = null;
+        throw e;
+    }
+
+    return cached.conn;
 };
 
 module.exports = connectDB;
