@@ -366,7 +366,6 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
 
         // בדוק סיסמה
         console.log('🔑 Checking password...');
-        const bcrypt = require('bcryptjs');
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
