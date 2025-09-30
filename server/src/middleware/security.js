@@ -38,6 +38,13 @@ const authLimiter = createRateLimiter(
     'יותר מדי ניסיונות התחברות. נסה שוב בעוד 15 דקות.'
 );
 
+// הגדל את ה-timeout של Express עצמו
+const setLongTimeout = (req, res, next) => {
+    req.setTimeout(60000); // 60 שניות
+    res.setTimeout(60000);
+    next();
+};
+
 // Very strict rate limiting for password reset
 const passwordResetLimiter = createRateLimiter(
     60 * 60 * 1000, // 1 hour
@@ -170,5 +177,6 @@ module.exports = {
     auditLog,
     validateIPWhitelist,
     validateRequest,
-    createRateLimiter
+    createRateLimiter,
+    setLongTimeout
 };

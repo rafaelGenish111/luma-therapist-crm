@@ -19,7 +19,7 @@ const connectDB = async () => {
         const opts = {
             bufferCommands: false,
             maxPoolSize: 10,
-            serverSelectionTimeoutMS: 30000, // 30 seconds
+            serverSelectionTimeoutMS: 60000, // 60 שניות
             socketTimeoutMS: 45000,
         };
 

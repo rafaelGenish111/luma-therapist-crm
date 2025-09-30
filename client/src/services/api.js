@@ -16,7 +16,7 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 10000 // 10 שניות timeout
+    timeout: 60000 // 60 שניות timeout
 });
 
 // Request interceptor - הוספת token לכל בקשה

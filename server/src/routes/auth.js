@@ -288,6 +288,19 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
     try {
         const { email, password } = req.body;
         console.log('Login function called with:', { email, password });
+        
+        // וודא שMongoDB מחובר
+        const mongoose = require('mongoose');
+        if (mongoose.connection.readyState !== 1) {
+            console.error('MongoDB not connected! State:', mongoose.connection.readyState);
+            return res.status(503).json({ 
+                success: false, 
+                error: 'Database connection not ready',
+                he: 'החיבור למסד הנתונים לא מוכן'
+            });
+        }
+        console.log('MongoDB connected, proceeding with login');
+        
         // Find user by email with priority: Therapist -> Client -> User, validate password per candidate
         const lookup = [
             () => Therapist.findOne({ email }).select('+password'),

@@ -24,6 +24,8 @@ cloudinary.config({
 });
 
 const connectDB = require('./config/database');
+
+// Routes imports
 const authRoutes = require('./routes/auth');
 const therapistRoutes = require('./routes/therapists');
 const therapistCalendlyRoutes = require('./routes/therapistCalendly');
@@ -42,7 +44,7 @@ const treatmentTypeRoutes = require('./routes/treatmentTypes');
 const importantInfoRoutes = require('./routes/importantInfo');
 const geoRoutes = require('./routes/geo');
 const errorHandler = require('./middleware/errorHandler');
-const { generalLimiter, securityHeaders, validateRequest } = require('./middleware/security');
+const { generalLimiter, securityHeaders, validateRequest, setLongTimeout } = require('./middleware/security');
 const healthDeclarationsRouter = require('./routes/healthDeclarations');
 const healthDeclarationTemplatesPublic = require('./routes/healthDeclarationTemplates');
 const galleryRoutes = require('./routes/gallery');
@@ -58,6 +60,9 @@ const scheduledTasks = require('./services/scheduledTasks');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// הגדל timeouts
+app.use(setLongTimeout);
 
 // Trust proxy for Vercel deployment
 if (process.env.NODE_ENV === 'production') {
@@ -160,6 +165,30 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
         version: '1.0.0'
+    });
+});
+
+// MongoDB Connection Status
+app.get('/api/db-status', async (req, res) => {
+    const mongoose = require('mongoose');
+    
+    const status = {
+        state: mongoose.connection.readyState,
+        stateName: ['disconnected', 'connected', 'connecting', 'disconnecting'][mongoose.connection.readyState],
+        host: mongoose.connection.host || 'not connected',
+        name: mongoose.connection.name || 'not connected',
+        mongooseVersion: mongoose.version
+    };
+    
+    res.json({
+        success: true,
+        mongodb: status,
+        env: {
+            hasMongoUri: !!process.env.MONGODB_URI,
+            mongoUriStart: process.env.MONGODB_URI ? 
+                process.env.MONGODB_URI.substring(0, 20) + '...' : 
+                'NOT SET'
+        }
     });
 });
 
