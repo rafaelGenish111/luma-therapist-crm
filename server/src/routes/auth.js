@@ -287,122 +287,135 @@ router.post('/register', registerLimiter, validateRegistration, handleValidation
 router.post('/login', authLimiter, validateLogin, handleValidationErrors, async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log('Login function called with:', { email, password });
+        console.log('🔐 Login attempt for:', email);
         
-        // ✅ חדש: וודא שMongoDB מחובר
+        // ✅ קריטי: וודא חיבור לפני כל פעולה
         const mongoose = require('mongoose');
         const connectDB = require('../config/database');
         
-        // בדוק אם מחובר, אם לא - התחבר
         if (mongoose.connection.readyState !== 1) {
-            console.log('MongoDB not connected, connecting now...');
-            try {
-                await connectDB();
-                console.log('MongoDB connected successfully');
-            } catch (dbError) {
-                console.error('Failed to connect to MongoDB:', dbError);
-                return res.status(503).json({ 
-                    success: false, 
-                    error: 'שירות מסד הנתונים לא זמין',
-                    he: 'שירות מסד הנתונים לא זמין'
-                });
-            }
-        } else {
-            console.log('MongoDB already connected');
+            console.log('⚠️ MongoDB not connected, connecting now...');
+            await connectDB();
+            // חכה שנייה נוספת לוודא שהחיבור יציב
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
-        // Find user by email with priority: Therapist -> Client -> User, validate password per candidate
-        const lookup = [
-            () => Therapist.findOne({ email }).select('+password'),
-            () => Client.findOne({ email }).select('+password'),
-            () => User.findOne({ email }).select('+password')
-        ];
+        console.log('✅ MongoDB ready, searching for user...');
+        
+        // חפש משתמש עם timeout מפורש
+        const Therapist = require('../models/Therapist');
+        const Client = require('../models/Client');
+        const User = require('../models/User');
+        
         let user = null;
-        for (const finder of lookup) {
-            const candidate = await finder();
-            if (!candidate) continue;
-            if (candidate.isActive === false) {
-                return res.status(401).json({ success: false, error: 'החשבון מושבת', he: 'החשבון מושבת' });
-            }
-            if (candidate.password && typeof candidate.password === 'string') {
-                const ok = await bcrypt.compare(password, candidate.password);
-                if (ok) { user = candidate; break; }
-                // increment attempts on wrong password
-                candidate.loginAttempts = (candidate.loginAttempts || 0) + 1;
-                if (candidate.loginAttempts >= 5) {
-                    candidate.lockUntil = Date.now() + 30 * 60 * 1000;
-                }
-                try { await candidate.save(); } catch (e) { }
-            }
+        
+        // נסה therapist
+        try {
+            console.log('🔍 Checking Therapist collection...');
+            user = await Therapist.findOne({ email })
+                .select('+password')
+                .maxTimeMS(10000) // timeout של 10 שניות
+                .exec();
+            if (user) console.log('✅ Found in Therapist');
+        } catch (err) {
+            console.error('❌ Therapist search failed:', err.message);
         }
+        
+        // אם לא מצאנו, נסה client
         if (!user) {
-            return res.status(401).json({ success: false, error: 'פרטי התחברות שגויים', he: 'פרטי התחברות שגויים' });
+            try {
+                console.log('🔍 Checking Client collection...');
+                user = await Client.findOne({ email })
+                    .select('+password')
+                    .maxTimeMS(10000)
+                    .exec();
+                if (user) console.log('✅ Found in Client');
+            } catch (err) {
+                console.error('❌ Client search failed:', err.message);
+            }
         }
-
-        // Check if user is active
-        if (!user.isActive) {
-            return res.status(401).json({
-                success: false,
-                error: 'החשבון מושבת',
-                he: 'החשבון מושבת'
+        
+        // אם עדיין לא מצאנו, נסה user
+        if (!user) {
+            try {
+                console.log('🔍 Checking User collection...');
+                user = await User.findOne({ email })
+                    .select('+password')
+                    .maxTimeMS(10000)
+                    .exec();
+                if (user) console.log('✅ Found in User');
+            } catch (err) {
+                console.error('❌ User search failed:', err.message);
+            }
+        }
+        
+        if (!user) {
+            console.log('❌ User not found');
+            return res.status(401).json({ 
+                success: false, 
+                error: 'אימייל או סיסמה שגויים', 
+                he: 'אימייל או סיסמה שגויים' 
             });
         }
 
-        // at this point password is valid for selected user
-
-        // חסימת התחברות למטפלת שאינה מאושרת
-        if ((user.userType || '').toUpperCase() === 'THERAPIST' && user.isApproved === false) {
-            return res.status(403).json({ success: false, error: 'החשבון ממתין לאישור מנהל', he: 'החשבון ממתין לאישור מנהל' });
-        }
-
-        // Check if account is locked
-        if (user.lockUntil && user.lockUntil > Date.now()) {
-            return res.status(423).json({
-                success: false,
-                error: 'החשבון נחסם זמנית עקב ניסיונות התחברות כושלים',
-                he: 'החשבון נחסם זמנית עקב ניסיונות התחברות כושלים'
+        // בדוק אם החשבון פעיל
+        if (user.isActive === false) {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'החשבון מושבת', 
+                he: 'החשבון מושבת' 
             });
         }
+        
+        // בדוק סיסמה
+        console.log('🔑 Checking password...');
+        const bcrypt = require('bcryptjs');
+        const isMatch = await bcrypt.compare(password, user.password);
+        
+        if (!isMatch) {
+            console.log('❌ Password mismatch');
+            return res.status(401).json({ 
+                success: false, 
+                error: 'אימייל או סיסמה שגויים', 
+                he: 'אימייל או סיסמה שגויים' 
+            });
+        }
+        
+        console.log('✅ Password match, generating tokens...');
 
-        // Reset login attempts on successful login
-        user.loginAttempts = 0;
-        user.lockUntil = null;
-        user.lastLogin = Date.now();
-        await user.save();
-
-        // Generate tokens
+        // צור tokens
+        const { generateTokens } = require('../utils/jwt');
         const { accessToken, refreshToken } = generateTokens(user._id);
-
-        // Set refresh token in HTTP-only cookie
+        
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 30 * 24 * 60 * 60 * 1000,
-            domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000
         });
-
-        res.json({
-            success: true,
-            message: 'התחברות מוצלחת',
-            he: 'התחברות מוצלחת',
-            data: {
-                user: {
-                    id: user._id,
-                    email: user.email,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    role: user.role || user.userType,
-                    userType: user.userType,
-                    isEmailVerified: user.isEmailVerified,
-                    isProfileComplete: user.isProfileComplete
-                },
-                accessToken
-            }
+        
+        console.log('✅ Login successful');
+        
+        res.json({ 
+            success: true, 
+            message: 'התחברות הצליחה', 
+            he: 'התחברות הצליחה', 
+            data: { 
+                user: { 
+                    id: user._id, 
+                    email: user.email, 
+                    firstName: user.firstName, 
+                    lastName: user.lastName, 
+                    userType: user.userType, 
+                    isEmailVerified: user.isEmailVerified, 
+                    isProfileComplete: user.isProfileComplete 
+                }, 
+                accessToken 
+            } 
         });
 
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('💥 Login error:', error);
         res.status(500).json({
             success: false,
             error: 'שגיאה בהתחברות',

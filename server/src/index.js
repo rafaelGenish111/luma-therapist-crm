@@ -126,22 +126,10 @@ app.use(cookieParser());
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Middleware להבטחת חיבור MongoDB בכל request
-app.use(async (req, res, next) => {
-    const mongoose = require('mongoose');
-    
-    // אם לא מחובר, התחבר עכשיו
-    if (mongoose.connection.readyState !== 1) {
-        console.log('MongoDB not connected in middleware, connecting...');
-        try {
-            await connectDB();
-            console.log('MongoDB connected via middleware');
-        } catch (err) {
-            console.error('Failed to connect to MongoDB in middleware:', err);
-            // אל תחזיר error, תן ל-route handler לטפל בזה
-        }
-    }
-    next();
+// התחבר פעם אחת בהתחלה
+connectDB().catch(err => {
+    console.error('❌ Initial MongoDB connection failed:', err);
+    // אל תעצור את השרת - זה serverless, הוא ינסה שוב בפעם הבאה
 });
 
 // Routes
