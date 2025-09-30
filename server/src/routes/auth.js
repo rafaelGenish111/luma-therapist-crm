@@ -303,9 +303,6 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
         console.log('✅ MongoDB ready, searching for user...');
         
         // חפש משתמש עם timeout מפורש
-        const Therapist = require('../models/Therapist');
-        const Client = require('../models/Client');
-        const User = require('../models/User');
         
         let user = null;
         
@@ -384,7 +381,6 @@ router.post('/login', authLimiter, validateLogin, handleValidationErrors, async 
         console.log('✅ Password match, generating tokens...');
 
         // צור tokens
-        const { generateTokens } = require('../utils/jwt');
         const { accessToken, refreshToken } = generateTokens(user._id);
         
         res.cookie('refreshToken', refreshToken, {
