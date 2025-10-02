@@ -343,9 +343,9 @@ export const useDashboardData = () => {
           return { data: [] };
         });
 
-        const clients = clientsResponse?.data || [];
-        const appointments = appointmentsResponse?.data || [];
-        const payments = paymentsResponse?.data || [];
+        const clients = clientsResponse?.data?.data || [];
+        const appointments = appointmentsResponse?.data?.data || [];
+        const payments = paymentsResponse?.data?.data || [];
 
         console.log('📊 Direct data loaded:', { clients: clients.length, appointments: appointments.length, payments: payments.length });
 

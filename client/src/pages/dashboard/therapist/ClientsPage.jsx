@@ -27,8 +27,10 @@ const ClientsPage = () => {
         setError('');
         try {
             const res = await api.get('/clients');
-            setClients(res.data || []);
+            console.log('Clients response:', res.data);
+            setClients(res.data?.data || []);
         } catch (err) {
+            console.error('Error fetching clients:', err);
             setError('שגיאה בטעינת לקוחות');
             setClients([]);
         } finally {
