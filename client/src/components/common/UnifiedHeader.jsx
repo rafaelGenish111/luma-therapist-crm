@@ -75,15 +75,15 @@ const UnifiedHeader = () => {
                     position: 'relative',
                     minWidth: isHeaderExpanded
                         ? (isMobile ? '90vw' : '500px')
-                        : (isMobile ? '50px' : '160px'),
+                        : (isMobile ? '60px' : '160px'),
                     maxWidth: isHeaderExpanded
                         ? (isMobile ? '90vw' : '500px')
-                        : (isMobile ? '50px' : '160px'),
+                        : (isMobile ? '60px' : '160px'),
                     height: isHeaderExpanded
-                        ? (isMobile ? '50px' : '60px')
+                        ? (isMobile ? 'auto' : '60px')
                         : (isMobile ? '50px' : '60px'),
                     padding: isHeaderExpanded
-                        ? (isMobile ? '8px 16px' : '12px 24px')
+                        ? (isMobile ? '16px' : '12px 24px')
                         : (isMobile ? '8px 16px' : '12px 24px')
                 }}
                 onClick={isMobile ? handleMobileToggle : handleHeaderToggle}
@@ -170,14 +170,16 @@ const UnifiedHeader = () => {
                 {/* Navigation Section - Appears on Expansion */}
                 <div style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: isMobile ? 'flex-start' : 'center',
                     justifyContent: 'space-between',
                     width: '100%',
                     height: '100%',
                     transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                     opacity: isHeaderExpanded ? 1 : 0,
                     transform: isHeaderExpanded ? 'translateY(0)' : 'translateY(-10px)',
-                    padding: isHeaderExpanded ? '0 16px' : '0'
+                    padding: isHeaderExpanded ? (isMobile ? '0' : '0 16px') : '0',
+                    flexDirection: isMobile && isHeaderExpanded ? 'column' : 'row',
+                    gap: isMobile && isHeaderExpanded ? '16px' : '0'
                 }}>
 
                     {/* Logo in Expanded State */}
@@ -245,7 +247,9 @@ const UnifiedHeader = () => {
                         display: 'flex',
                         gap: isMobile ? '8px' : '12px',
                         alignItems: 'center',
-                        flexWrap: 'nowrap'
+                        flexWrap: isMobile ? 'wrap' : 'nowrap',
+                        justifyContent: isMobile ? 'center' : 'flex-start',
+                        width: isMobile ? '100%' : 'auto'
                     }}>
                         {navigationItems.map((item, index) => (
                             <button
@@ -260,12 +264,12 @@ const UnifiedHeader = () => {
                                     color: isActiveRoute(item.path)
                                         ? professionalTokens.colors.primaryLight
                                         : 'rgba(255, 255, 255, 0.8)',
-                                    fontSize: isMobile ? '12px' : '14px',
+                                    fontSize: isMobile ? '14px' : '14px',
                                     fontWeight: isActiveRoute(item.path)
                                         ? professionalTokens.typography.fontWeight.semibold
                                         : professionalTokens.typography.fontWeight.medium,
                                     cursor: 'pointer',
-                                    padding: isMobile ? '6px 12px' : '8px 16px',
+                                    padding: isMobile ? '12px 16px' : '8px 16px',
                                     borderRadius: professionalTokens.borderRadius.md,
                                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                                     position: 'relative',
@@ -312,14 +316,14 @@ const UnifiedHeader = () => {
                                 background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
                                 border: 'none',
                                 color: 'white',
-                                fontSize: isMobile ? '12px' : '14px',
+                                fontSize: isMobile ? '14px' : '14px',
                                 fontWeight: professionalTokens.typography.fontWeight.semibold,
                                 cursor: 'pointer',
-                                padding: isMobile ? '8px 16px' : '10px 20px',
+                                padding: isMobile ? '12px 20px' : '10px 20px',
                                 borderRadius: professionalTokens.borderRadius.md,
                                 transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                                 boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
-                                marginLeft: isMobile ? '8px' : '16px'
+                                marginLeft: isMobile ? '0' : '16px'
                             }}
                             onMouseEnter={(e) => {
                                 e.target.style.transform = 'translateY(-2px)';
