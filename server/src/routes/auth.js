@@ -134,19 +134,36 @@ const handleValidationErrors = (req, res, next) => {
 
 // Helper function to generate JWT tokens
 const generateTokens = (userId) => {
-    const accessToken = jwt.sign(
-        { userId },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE }
-    );
-
-    const refreshToken = jwt.sign(
-        { userId },
-        process.env.JWT_REFRESH_SECRET,
-        { expiresIn: process.env.JWT_REFRESH_EXPIRE }
-    );
-
-    return { accessToken, refreshToken };
+    // ערכי default במקרה שמשתני הסביבה חסרים
+    const accessTokenExpiry = process.env.JWT_EXPIRE || '7d';
+    const refreshTokenExpiry = process.env.JWT_REFRESH_EXPIRE || '30d';
+    const jwtSecret = process.env.JWT_SECRET;
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+    
+    if (!jwtSecret) {
+        throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+    
+    console.log('Generating tokens with expiry:', { accessTokenExpiry, refreshTokenExpiry });
+    
+    try {
+        const accessToken = jwt.sign(
+            { userId },
+            jwtSecret,
+            { expiresIn: accessTokenExpiry }
+        );
+        
+        const refreshToken = jwt.sign(
+            { userId },
+            jwtRefreshSecret,
+            { expiresIn: refreshTokenExpiry }
+        );
+        
+        return { accessToken, refreshToken };
+    } catch (error) {
+        console.error('Error generating tokens:', error);
+        throw error;
+    }
 };
 
 // Helper function to send verification email
