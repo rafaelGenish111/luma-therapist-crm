@@ -64,6 +64,16 @@ const validateRegistration = [
         .matches(/^((\+972|972)-?|0)?5\d{8}$/)
         .withMessage('מספר טלפון ישראלי לא תקין'),
     body('userType')
+        .trim()
+        .notEmpty()
+        .withMessage('סוג משתמש הוא שדה חובה')
+        .customSanitizer(value => {
+            // נרמל לאותיות גדולות
+            if (typeof value === 'string') {
+                return value.toUpperCase().trim();
+            }
+            return value;
+        })
         .isIn(['THERAPIST', 'CLIENT'])
         .withMessage('סוג משתמש חייב להיות therapist או client'),
     body('dateOfBirth')
