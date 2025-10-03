@@ -574,13 +574,15 @@ export const useDashboardData = () => {
   // טעינה ראשונית
   useEffect(() => {
     refreshData();
-  }, [refreshData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ← רק פעם אחת במאונט
 
-  // רענון אוטומטי כל 5 דקות (לא כל דקה כדי למנוע טעינה מתמשכת)
+  // רענון אוטומטי כל 5 דקות
   useEffect(() => {
-    const interval = setInterval(refreshData, 5 * 60 * 1000); // 5 דקות
+    const interval = setInterval(refreshData, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [refreshData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ← רק פעם אחת במאונט
 
   return {
     data,
