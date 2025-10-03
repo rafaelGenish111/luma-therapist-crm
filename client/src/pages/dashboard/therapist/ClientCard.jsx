@@ -70,7 +70,9 @@ export default function ClientCard() {
             setLoading(true);
             setError('');
             const response = await clientService.getClient(clientId);
-            setClient(response.data);
+            console.log('Client response:', response.data);
+            // השרת מחזיר { success: true, data: client }, לכן נגש ל-data.data
+            setClient(response.data?.data || response.data);
         } catch (err) {
             console.error('Error loading client:', err);
             setError('שגיאה בטעינת פרטי הלקוח');

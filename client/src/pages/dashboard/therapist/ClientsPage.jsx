@@ -89,6 +89,8 @@ const ClientsPage = () => {
                 // הוספה
                 console.log('Creating new client');
                 await api.post('/clients', payload);
+                // ניקוי cache של הדשבורד כדי שהמספרים יתעדכנו
+                localStorage.removeItem('dashboard_data_cache');
             }
             setOpen(false);
             fetchClients();
@@ -108,6 +110,8 @@ const ClientsPage = () => {
         if (!window.confirm('האם למחוק את הלקוח?')) return;
         try {
             await api.delete(`/clients/${client._id || client.id}`);
+            // ניקוי cache של הדשבורד כדי שהמספרים יתעדכנו
+            localStorage.removeItem('dashboard_data_cache');
             fetchClients();
         } catch (err) {
             setError('שגיאה במחיקת לקוח');

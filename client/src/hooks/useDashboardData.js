@@ -297,8 +297,8 @@ export const useDashboardData = () => {
 
       // Client-side cache
       const CACHE_KEY = 'dashboard_data_cache';
-      const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
-      
+      const CACHE_DURATION = 1 * 60 * 1000; // 1 minute - מופחת כדי להראות נתונים עדכניים יותר
+
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         try {
@@ -580,15 +580,15 @@ export const useDashboardData = () => {
       console.log('✅ Client metrics:', finalData.clientMetrics);
       console.log('✅ Payment metrics:', finalData.paymentMetrics);
       console.log('✅ Appointment metrics:', finalData.appointmentMetrics);
-      
+
       // Save to cache
       localStorage.setItem(CACHE_KEY, JSON.stringify({
         data: finalData,
         timestamp: Date.now()
       }));
-      
+
       console.log(`⏱️ Dashboard loaded in ${Date.now() - startTime}ms`);
-      
+
       setData(finalData);
       setLastUpdated(new Date());
       console.log('✅ Data set successfully, loading set to false');

@@ -114,6 +114,8 @@ export default function PersonalInfoTab({ client, onClientUpdate }) {
             const cleanedData = clientService.cleanClientFormData(formData);
 
             await clientService.updateClient(client._id, cleanedData);
+            // ניקוי cache של הדשבורד כדי שהמספרים יתעדכנו
+            localStorage.removeItem('dashboard_data_cache');
             setSuccess('פרטי הלקוח עודכנו בהצלחה');
             setIsEditing(false);
             onClientUpdate();
