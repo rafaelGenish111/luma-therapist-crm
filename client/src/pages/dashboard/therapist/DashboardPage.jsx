@@ -49,7 +49,6 @@ const DashboardPage = () => {
 
   const [declarations, setDeclarations] = useState([]);
   const [declarationsLoading, setDeclarationsLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState(null);
 
   const theme = useTheme();
@@ -72,14 +71,6 @@ const DashboardPage = () => {
     console.log('💰 Monthly revenue type:', typeof data.paymentMetrics.monthlyRevenue);
   }
 
-  // עדכון זמן בזמן אמת
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // טעינת הצהרות בריאות
   useEffect(() => {
@@ -172,7 +163,7 @@ const DashboardPage = () => {
                 שלום {data?.profile?.firstName || 'מטפלת'} 👋
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {format(currentTime, 'EEEE, d בMMMM yyyy HH:mm:ss', { locale: he })}
+                {format(new Date(), 'EEEE, d בMMMM yyyy HH:mm:ss', { locale: he })}
               </Typography>
               {data?.profile?.clinicName && (
                 <Typography variant="caption" sx={{ opacity: 0.8 }}>
