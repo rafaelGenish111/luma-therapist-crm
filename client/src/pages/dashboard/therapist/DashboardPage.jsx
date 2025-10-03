@@ -102,17 +102,20 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ ml: 2, mt: 2 }}>
-            טוען נתונים אמיתיים... 🚀
-          </Typography>
-        </motion.div>
+      <Box 
+        display="flex" 
+        flexDirection="column" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="70vh"
+      >
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          טוען נתונים...
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          הטעינה הראשונה עשויה לקחת מספר שניות
+        </Typography>
       </Box>
     );
   }

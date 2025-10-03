@@ -295,7 +295,29 @@ export const useDashboardData = () => {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Starting dashboard data refresh...');
+      // Client-side cache
+      const CACHE_KEY = 'dashboard_data_cache';
+      const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+      
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const { data: cachedData, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_DURATION) {
+            console.log('📦 Using cached dashboard data');
+            setData(cachedData);
+            setLastUpdated(new Date(timestamp));
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn('Failed to parse cache:', e);
+          localStorage.removeItem(CACHE_KEY);
+        }
+      }
+
+      console.log('🔄 Fetching fresh dashboard data...');
+      const startTime = Date.now();
       console.log('🔄 Current state:', { data, loading, error });
 
       // ננסה לטעון מה-endpoint החדש, אם לא עובד נטען ישירות
@@ -558,6 +580,15 @@ export const useDashboardData = () => {
       console.log('✅ Client metrics:', finalData.clientMetrics);
       console.log('✅ Payment metrics:', finalData.paymentMetrics);
       console.log('✅ Appointment metrics:', finalData.appointmentMetrics);
+      
+      // Save to cache
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        data: finalData,
+        timestamp: Date.now()
+      }));
+      
+      console.log(`⏱️ Dashboard loaded in ${Date.now() - startTime}ms`);
+      
       setData(finalData);
       setLastUpdated(new Date());
       console.log('✅ Data set successfully, loading set to false');
@@ -583,6 +614,14 @@ export const useDashboardData = () => {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // ← רק פעם אחת במאונט
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clear cache on unmount if needed
+      // localStorage.removeItem('dashboard_data_cache');
+    };
+  }, []);
 
   return {
     data,
