@@ -58,7 +58,16 @@ const calendlyRoutes = require('./routes/calendly');
 const therapistAdminRoutes = require('./routes/therapistAdmin');
 const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const dashboardRoutes = require('./routes/dashboard');
-const scheduledTasks = require('./services/scheduledTasks');
+
+// Import scheduled tasks only in non-serverless environment
+let scheduledTasks = null;
+if (!process.env.VERCEL) {
+    try {
+        scheduledTasks = require('./services/scheduledTasks');
+    } catch (error) {
+        console.log('⚠️ Failed to load scheduled tasks:', error.message);
+    }
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -249,7 +258,7 @@ const initializeApp = async () => {
             console.log('📦 Database connected successfully');
 
             // הפעלת עבודות מתוזמנות רק אם לא ב-Vercel
-            if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+            if (scheduledTasks && (process.env.NODE_ENV !== 'production' || !process.env.VERCEL)) {
                 try {
                     scheduledTasks.startAll();
                     console.log('⏰ Scheduled tasks started');
@@ -280,7 +289,9 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
             console.log('✅ MongoDB connected successfully');
 
             // הפעלת עבודות מתוזמנות
-            scheduledTasks.startAll();
+            if (scheduledTasks) {
+                scheduledTasks.startAll();
+            }
 
             const server = app.listen(PORT, '0.0.0.0', () => {
                 console.log(`🚀 Server running on port ${PORT}`);
