@@ -91,6 +91,50 @@ cp server/env.example server/.env
 MONGODB_URI=mongodb://localhost:27017/wellness-platform
 JWT_SECRET=your-secret-key
 STRIPE_SECRET_KEY=your-stripe-secret
+
+# הגדרת Google Calendar OAuth
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+GOOGLE_REDIRECT_URI=http://localhost:5000/api/calendar/google/callback
+FRONTEND_URL=http://localhost:3000
+ENCRYPTION_KEY=your_32_character_encryption_key_here
+```
+
+### הגדרת Google Calendar OAuth
+
+כדי להפעיל את תכונת הסנכרון עם Google Calendar, יש להגדיר OAuth credentials:
+
+1. **לך ל-Google Cloud Console**
+   - בקר ב: https://console.cloud.google.com/
+
+2. **צור פרויקט חדש**
+   - לחץ על "New Project"
+   - תן שם לפרויקט (לדוגמה: "luma-therapist-crm")
+
+3. **אפשר את Google Calendar API**
+   - לך ל-"APIs & Services" > "Library"
+   - חפש "Google Calendar API"
+   - לחץ על "Enable"
+
+4. **צור OAuth 2.0 credentials**
+   - לך ל-"APIs & Services" > "Credentials"
+   - לחץ על "Create Credentials" > "OAuth client ID"
+   - בחר "Web application"
+   - הוסף Authorized redirect URIs:
+     - `http://localhost:5000/api/calendar/google/callback` (פיתוח)
+     - `https://your-domain.com/api/calendar/google/callback` (פרודקשן)
+
+5. **העתק את ה-credentials**
+   - העתק את Client ID ו-Client Secret
+   - הוסף אותם לקובץ `.env` שלך
+
+6. **הגדר את משתני הסביבה**
+```bash
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+GOOGLE_REDIRECT_URI=http://localhost:5000/api/calendar/google/callback
+FRONTEND_URL=http://localhost:3000
+ENCRYPTION_KEY=your_32_character_encryption_key_here
 ```
 
 4. **הפעלת הפרויקט**

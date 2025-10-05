@@ -615,6 +615,27 @@ const therapistSchema = new mongoose.Schema({
         default: 'THERAPIST'
     },
 
+    // חיבור Google Calendar
+    googleCalendarConnected: {
+        type: Boolean,
+        default: false
+    },
+
+    calendarSettings: {
+        showClientNames: {
+            type: Boolean,
+            default: false
+        },
+        defaultAppointmentColor: {
+            type: String,
+            default: '#4A90E2'
+        },
+        autoConfirmBookings: {
+            type: Boolean,
+            default: false
+        }
+    },
+
     // סטטיסטיקות
     stats: {
         totalClients: { type: Number, default: 0 },
