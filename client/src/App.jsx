@@ -40,6 +40,9 @@ import ImportantInfoPage from './pages/dashboard/therapist/ImportantInfoPage'
 import AccessibilityStatement from './pages/AccessibilityStatement'
 import DesignPage from './pages/dashboard/therapist/DesignPage'
 import CampaignsPage from './pages/dashboard/therapist/CampaignsPage';
+// Calendar Pages
+import CalendarPage from './pages/Dashboard/CalendarPage';
+import CalendarSettings from './pages/Dashboard/CalendarSettings';
 // import WebsiteBuilderPage from './pages/dashboard/WebsiteBuilderPage'
 // import SettingsPage from './pages/dashboard/SettingsPage'
 // import ProfilePage from './pages/dashboard/ProfilePage'
@@ -103,6 +106,8 @@ const App = () => {
                         }
                     >
                         <Route index element={<DashboardPage />} />
+                        <Route path="calendar" element={<CalendarPage />} />
+                        <Route path="calendar/settings" element={<CalendarSettings />} />
                         <Route path="clients" element={<ClientsPage />} />
                         <Route path="clients/:clientId" element={<ClientCard />} />
                         <Route path="appointments" element={<AppointmentsPage />} />

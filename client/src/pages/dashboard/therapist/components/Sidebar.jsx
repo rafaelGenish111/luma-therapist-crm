@@ -5,12 +5,14 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import EmailIcon from '@mui/icons-material/Email';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { useAuth } from '../../../../context/AuthContext';
 import FeatureGate from '../../../../components/FeatureGate';
 import Logo from '../../../../components/common/Logo';
 
 const links = [
     { to: '/dashboard', label: 'לוח בקרה', title: 'סקירה כללית של הפעילות ומדדים' },
+    { to: '/dashboard/calendar', label: 'יומן', title: 'ניהול יומן ופגישות', icon: <CalendarTodayIcon /> },
     { to: '/dashboard/appointments', label: 'תורים', title: 'ניהול תורים ופגישות' },
     { to: '/dashboard/clients', label: 'לקוחות', title: 'ניהול פרטי לקוחות' },
     { to: '/dashboard/campaigns', label: 'קמפיינים', title: 'יצירה וניהול קמפיינים שיווקיים', icon: <EmailIcon /> },

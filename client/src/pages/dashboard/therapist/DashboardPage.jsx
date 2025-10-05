@@ -21,6 +21,7 @@ import RevenueChart from '../../../components/dashboard/RevenueChart';
 import ActivityFeed from '../../../components/dashboard/ActivityFeed';
 import QuickActions from '../../../components/dashboard/QuickActions';
 import NotificationCenter from '../../../components/dashboard/NotificationCenter';
+import UpcomingAppointments from '../../../components/Dashboard/UpcomingAppointments';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 
@@ -362,16 +363,16 @@ const DashboardPage = () => {
 
       {/* פעולות מהירות והתראות */}
       <Grid container spacing={2} mt={2}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <QuickActions />
+            <UpcomingAppointments />
           </motion.div>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -381,6 +382,19 @@ const DashboardPage = () => {
               notifications={data?.notifications || []}
               title="התראות חכמות"
             />
+          </motion.div>
+        </Grid>
+      </Grid>
+
+      {/* פעולות מהירות */}
+      <Grid container spacing={2} mt={2}>
+        <Grid item xs={12}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <QuickActions />
           </motion.div>
         </Grid>
       </Grid>
