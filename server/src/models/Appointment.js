@@ -341,24 +341,24 @@ appointmentSchema.index({ startTime: 1, endTime: 1 });
 appointmentSchema.index({ status: 1, createdAt: 1 });
 
 // Text search index for notes and search functionality
-appointmentSchema.index({ 
-    notes: 'text', 
+appointmentSchema.index({
+    notes: 'text',
     privateNotes: 'text',
-    cancellationReason: 'text' 
+    cancellationReason: 'text'
 });
 
 // Partial indexes for better performance
 appointmentSchema.index(
-    { therapistId: 1, startTime: 1 }, 
-    { 
+    { therapistId: 1, startTime: 1 },
+    {
         partialFilterExpression: { status: { $in: ['confirmed', 'pending'] } },
         name: 'active_appointments_index'
     }
 );
 
 appointmentSchema.index(
-    { googleEventId: 1 }, 
-    { 
+    { googleEventId: 1 },
+    {
         partialFilterExpression: { googleEventId: { $exists: true } },
         name: 'google_synced_appointments_index'
     }
@@ -366,8 +366,8 @@ appointmentSchema.index(
 
 // TTL index for automatic cleanup of old cancelled appointments
 appointmentSchema.index(
-    { createdAt: 1 }, 
-    { 
+    { createdAt: 1 },
+    {
         partialFilterExpression: { status: 'cancelled' },
         expireAfterSeconds: 90 * 24 * 60 * 60, // 90 days
         name: 'cancelled_appointments_ttl'

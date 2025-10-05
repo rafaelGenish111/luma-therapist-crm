@@ -1,5 +1,5 @@
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
+const xss = require('xss');
 const helmet = require('helmet');
 const cors = require('cors');
 
@@ -22,26 +22,49 @@ const sanitizeMiddleware = (app) => {
   }));
 
   // Prevent XSS attacks
-  app.use(xss({
-    whiteList: {
-      // Allow certain HTML tags for rich text content
-      p: [],
-      br: [],
-      strong: [],
-      em: [],
-      ul: [],
-      ol: [],
-      li: [],
-      h1: [],
-      h2: [],
-      h3: [],
-      h4: [],
-      h5: [],
-      h6: []
-    },
-    stripIgnoreTag: true,
-    stripIgnoreTagBody: ['script']
-  }));
+  app.use((req, res, next) => {
+    const sanitizeObject = (obj) => {
+      if (typeof obj === 'string') {
+        return xss(obj, {
+          whiteList: {
+            p: [],
+            br: [],
+            strong: [],
+            em: [],
+            ul: [],
+            ol: [],
+            li: [],
+            h1: [],
+            h2: [],
+            h3: [],
+            h4: [],
+            h5: [],
+            h6: []
+          },
+          stripIgnoreTag: true,
+          stripIgnoreTagBody: ['script']
+        });
+      }
+      if (typeof obj === 'object' && obj !== null) {
+        for (const key in obj) {
+          obj[key] = sanitizeObject(obj[key]);
+        }
+      }
+      return obj;
+    };
+
+    if (req.body) {
+      req.body = sanitizeObject(req.body);
+    }
+    if (req.query) {
+      req.query = sanitizeObject(req.query);
+    }
+    if (req.params) {
+      req.params = sanitizeObject(req.params);
+    }
+
+    next();
+  });
 };
 
 /**
