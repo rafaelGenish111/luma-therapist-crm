@@ -14,7 +14,7 @@
         "axios": "^1.6.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.0.0",
-        "date-fns": "^3.0.0",
+        "date-fns": "^2.30.0",
         "formik": "^2.4.5",
         "framer-motion": "^10.18.0",
         "immer": "^10.0.3",
