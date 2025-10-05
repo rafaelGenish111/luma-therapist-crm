@@ -1,6 +1,32 @@
 const winston = require('winston');
 
 // Create logger instance
+const transports = [];
+
+// In serverless/Vercel environment, only use console
+if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    transports.push(new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json()
+        )
+    }));
+} else {
+    // In development, use file logs
+    transports.push(
+        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'logs/combined.log' })
+    );
+    
+    // Add console for development
+    transports.push(new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple()
+        )
+    }));
+}
+
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
     format: winston.format.combine(
@@ -9,23 +35,8 @@ const logger = winston.createLogger({
         winston.format.json()
     ),
     defaultMeta: { service: 'payment-service' },
-    transports: [
-        // Write all logs with importance level of `error` or less to `error.log`
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-        // Write all logs with importance level of `info` or less to `combined.log`
-        new winston.transports.File({ filename: 'logs/combined.log' })
-    ]
+    transports
 });
-
-// If we're not in production, log to the console as well
-if (process.env.NODE_ENV !== 'production') {
-    logger.add(new winston.transports.Console({
-        format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-        )
-    }));
-}
 
 // Redact sensitive information
 const redactSensitiveData = (data) => {
