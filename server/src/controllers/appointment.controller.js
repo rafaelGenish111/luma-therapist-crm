@@ -37,7 +37,7 @@ class AppointmentController {
             // סינון לפי תאריך
             if (startDate || endDate) {
                 query.$or = [];
-                
+
                 if (startDate) {
                     query.$or.push({
                         startTime: { $gte: new Date(startDate) }
@@ -46,7 +46,7 @@ class AppointmentController {
                         date: { $gte: new Date(startDate) }
                     });
                 }
-                
+
                 if (endDate) {
                     if (query.$or) {
                         query.$or.forEach(condition => {
@@ -129,8 +129,8 @@ class AppointmentController {
                 _id: id,
                 therapistId
             })
-            .populate('clientId', 'firstName lastName email phone')
-            .populate('client', 'firstName lastName email phone');
+                .populate('clientId', 'firstName lastName email phone')
+                .populate('client', 'firstName lastName email phone');
 
             if (!appointment) {
                 return res.status(404).json({
@@ -261,7 +261,7 @@ class AppointmentController {
             // בדיקת התנגשויות אם שונה הזמן
             if (updateData.startTime || updateData.endTime || updateData.duration) {
                 const newStartTime = updateData.startTime || appointment.startTime;
-                const newEndTime = updateData.endTime || 
+                const newEndTime = updateData.endTime ||
                     moment(newStartTime).add(updateData.duration || appointment.duration, 'minutes').toDate();
 
                 const conflicts = await this.checkConflicts({
@@ -286,7 +286,7 @@ class AppointmentController {
                 updateData,
                 { new: true }
             ).populate('clientId', 'firstName lastName email phone')
-             .populate('client', 'firstName lastName email phone');
+                .populate('client', 'firstName lastName email phone');
 
             // סנכרון ל-Google Calendar
             if (appointment.googleEventId) {
@@ -515,13 +515,13 @@ class AppointmentController {
 
             const appointment = await Appointment.findOneAndUpdate(
                 { _id: id, therapistId },
-                { 
+                {
                     status: 'confirmed',
                     confirmedAt: new Date()
                 },
                 { new: true }
             ).populate('clientId', 'firstName lastName email phone')
-             .populate('client', 'firstName lastName email phone');
+                .populate('client', 'firstName lastName email phone');
 
             if (!appointment) {
                 return res.status(404).json({
@@ -573,7 +573,7 @@ class AppointmentController {
                 },
                 { new: true }
             ).populate('clientId', 'firstName lastName email phone')
-             .populate('client', 'firstName lastName email phone');
+                .populate('client', 'firstName lastName email phone');
 
             if (!appointment) {
                 return res.status(404).json({
@@ -625,7 +625,7 @@ class AppointmentController {
                 },
                 { new: true }
             ).populate('clientId', 'firstName lastName email phone')
-             .populate('client', 'firstName lastName email phone');
+                .populate('client', 'firstName lastName email phone');
 
             if (!appointment) {
                 return res.status(404).json({
@@ -671,7 +671,7 @@ class AppointmentController {
                 _id: id,
                 therapistId
             }).populate('clientId', 'firstName lastName email phone')
-              .populate('client', 'firstName lastName email phone');
+                .populate('client', 'firstName lastName email phone');
 
             if (!appointment) {
                 return res.status(404).json({
@@ -766,7 +766,7 @@ class AppointmentController {
      */
     async checkAvailability(therapistId, startTime, endTime) {
         const availability = await TherapistAvailability.findOne({ therapistId });
-        
+
         if (!availability) {
             return true; // אם אין הגדרות זמינות, נניח שזמין
         }
@@ -781,7 +781,7 @@ class AppointmentController {
         const startTimeStr = moment(startTime).format('HH:mm');
         const endTimeStr = moment(endTime).format('HH:mm');
 
-        return daySchedule.timeSlots.some(slot => 
+        return daySchedule.timeSlots.some(slot =>
             startTimeStr >= slot.startTime && endTimeStr <= slot.endTime
         );
     }
@@ -796,7 +796,7 @@ class AppointmentController {
 
         while (currentDate.isBefore(endMoment)) {
             dates.push(currentDate.toDate());
-            
+
             switch (frequency) {
                 case 'daily':
                     currentDate.add(1, 'day');

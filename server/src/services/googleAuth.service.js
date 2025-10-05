@@ -7,7 +7,7 @@ class GoogleAuthService {
     constructor() {
         this.oauth2Client = null;
         this.encryptionKey = process.env.ENCRYPTION_KEY;
-        
+
         if (!this.encryptionKey) {
             throw new Error('ENCRYPTION_KEY is required for Google OAuth');
         }
@@ -87,7 +87,7 @@ class GoogleAuthService {
             }
 
             const { tokens } = await this.oauth2Client.getToken(code);
-            
+
             if (!tokens.access_token || !tokens.refresh_token) {
                 throw new Error('Missing required tokens from Google');
             }
@@ -126,7 +126,7 @@ class GoogleAuthService {
             });
 
             const { credentials } = await this.oauth2Client.refreshAccessToken();
-            
+
             if (!credentials.access_token) {
                 throw new Error('Failed to refresh access token');
             }
@@ -146,13 +146,13 @@ class GoogleAuthService {
             };
         } catch (error) {
             console.error('Error refreshing access token:', error);
-            
+
             // אם refresh token לא תקין, נצטרך לנתק את החיבור
             if (error.message.includes('invalid_grant')) {
                 await this.disconnectTherapist(therapistId);
                 throw new Error('Refresh token expired - reconnection required');
             }
-            
+
             throw new Error('Failed to refresh access token');
         }
     }
@@ -267,7 +267,7 @@ class GoogleAuthService {
     async getTokensFromDatabase(therapistId) {
         try {
             const syncRecord = await GoogleCalendarSync.findOne({ therapistId }).select('+googleAccessToken +googleRefreshToken');
-            
+
             if (!syncRecord) {
                 return null;
             }
@@ -333,7 +333,7 @@ class GoogleAuthService {
         const timestamp = Date.now();
         const randomString = Math.random().toString(36).substring(2);
         const data = `${therapistId}:${timestamp}:${randomString}`;
-        
+
         return crypto.AES.encrypt(data, this.encryptionKey).toString();
     }
 
@@ -346,15 +346,15 @@ class GoogleAuthService {
         try {
             const bytes = crypto.AES.decrypt(stateToken, this.encryptionKey);
             const decryptedData = bytes.toString(crypto.enc.Utf8);
-            
+
             const [therapistId, timestamp, randomString] = decryptedData.split(':');
-            
+
             // בדיקה שהטוקן לא ישן מדי (5 דקות)
             const tokenAge = Date.now() - parseInt(timestamp);
             if (tokenAge > 5 * 60 * 1000) {
                 return null;
             }
-            
+
             return therapistId;
         } catch (error) {
             console.error('Error verifying state token:', error);

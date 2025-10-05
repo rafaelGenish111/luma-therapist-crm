@@ -41,8 +41,8 @@ class GoogleCalendarService {
                 throw new Error('Appointment not found');
             }
 
-            const syncRecord = await GoogleCalendarSync.findOne({ 
-                therapistId: appointment.therapistId._id 
+            const syncRecord = await GoogleCalendarSync.findOne({
+                therapistId: appointment.therapistId._id
             });
 
             if (!syncRecord || !syncRecord.syncEnabled) {
@@ -77,12 +77,12 @@ class GoogleCalendarService {
             return result;
         } catch (error) {
             console.error('Error syncing appointment to Google:', error);
-            
+
             // שמירת שגיאה
             await this.saveSyncError(appointment.therapistId._id, error.message);
-            
-            return { 
-                success: false, 
+
+            return {
+                success: false,
                 error: error.message,
                 reason: 'Sync failed'
             };
@@ -108,7 +108,7 @@ class GoogleCalendarService {
             const endDate = moment().add(1, 'year').toISOString();
 
             const events = await this.getEventsByDateRange(this.calendar, startDate, endDate);
-            
+
             const stats = {
                 synced: 0,
                 created: 0,
@@ -154,7 +154,7 @@ class GoogleCalendarService {
     async createGoogleEvent(appointment, calendar) {
         try {
             const event = this.buildGoogleEventObject(appointment);
-            
+
             const response = await calendar.events.insert({
                 calendarId: 'primary',
                 resource: event,
@@ -185,7 +185,7 @@ class GoogleCalendarService {
     async updateGoogleEvent(googleEventId, appointment, calendar) {
         try {
             const event = this.buildGoogleEventObject(appointment);
-            
+
             const response = await calendar.events.update({
                 calendarId: 'primary',
                 eventId: googleEventId,
@@ -200,12 +200,12 @@ class GoogleCalendarService {
             };
         } catch (error) {
             console.error('Error updating Google event:', error);
-            
+
             // אם ה-event נמחק ב-Google, נצטרך ליצור חדש
             if (error.message.includes('Not Found')) {
                 return await this.createGoogleEvent(appointment, calendar);
             }
-            
+
             return {
                 success: false,
                 error: error.message
@@ -230,12 +230,12 @@ class GoogleCalendarService {
             return { success: true };
         } catch (error) {
             console.error('Error deleting Google event:', error);
-            
+
             // אם ה-event כבר נמחק, זה בסדר
             if (error.message.includes('Not Found')) {
                 return { success: true };
             }
-            
+
             return {
                 success: false,
                 error: error.message
@@ -536,7 +536,7 @@ class GoogleCalendarService {
     async clearOldSyncErrors(therapistId) {
         try {
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            
+
             await GoogleCalendarSync.findOneAndUpdate(
                 { therapistId },
                 {

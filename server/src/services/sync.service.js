@@ -34,8 +34,8 @@ class SyncService {
                 };
             }
 
-            const syncRecord = await GoogleCalendarSync.findOne({ 
-                therapistId: appointment.therapistId._id 
+            const syncRecord = await GoogleCalendarSync.findOne({
+                therapistId: appointment.therapistId._id
             });
 
             if (!syncRecord || !syncRecord.syncEnabled) {
@@ -65,12 +65,12 @@ class SyncService {
             return result;
         } catch (error) {
             console.error('Error in syncAppointmentToGoogle:', error);
-            
+
             // שמירת שגיאה
             if (appointment?.therapistId?._id) {
                 await this.saveSyncError(appointment.therapistId._id, error.message, 'appointment_sync');
             }
-            
+
             return {
                 success: false,
                 error: error.message,
@@ -87,7 +87,7 @@ class SyncService {
     async syncFromGoogleToLocal(therapistId) {
         try {
             const syncRecord = await GoogleCalendarSync.findOne({ therapistId });
-            
+
             if (!syncRecord || !syncRecord.syncEnabled) {
                 throw new Error('Google Calendar sync not enabled');
             }
@@ -201,8 +201,8 @@ class SyncService {
                 return;
             }
 
-            const syncRecord = await GoogleCalendarSync.findOne({ 
-                therapistId: appointment.therapistId._id 
+            const syncRecord = await GoogleCalendarSync.findOne({
+                therapistId: appointment.therapistId._id
             });
 
             if (!syncRecord || !syncRecord.syncEnabled) {
@@ -216,7 +216,7 @@ class SyncService {
                 case 'updated':
                     await this.syncAppointmentToGoogle(appointmentId);
                     break;
-                
+
                 case 'deleted':
                     if (appointment.googleEventId) {
                         await googleCalendarService.deleteGoogleEvent(appointment.googleEventId);
@@ -239,7 +239,7 @@ class SyncService {
     async renewWebhook(therapistId) {
         try {
             const syncRecord = await GoogleCalendarSync.findOne({ therapistId });
-            
+
             if (!syncRecord) {
                 throw new Error('Sync record not found');
             }
@@ -348,7 +348,7 @@ class SyncService {
             for (const syncRecord of connectedTherapists) {
                 try {
                     const result = await this.renewWebhook(syncRecord.therapistId);
-                    
+
                     if (result.success) {
                         if (result.message === 'Webhook renewed successfully') {
                             results.renewed++;
@@ -469,7 +469,7 @@ class SyncService {
     async clearOldSyncErrors(therapistId, daysOld = 7) {
         try {
             const cutoffDate = moment().subtract(daysOld, 'days').toDate();
-            
+
             await GoogleCalendarSync.findOneAndUpdate(
                 { therapistId },
                 {
@@ -493,7 +493,7 @@ class SyncService {
     async getSyncStats(therapistId) {
         try {
             const syncRecord = await GoogleCalendarSync.findOne({ therapistId });
-            
+
             if (!syncRecord) {
                 return {
                     connected: false,

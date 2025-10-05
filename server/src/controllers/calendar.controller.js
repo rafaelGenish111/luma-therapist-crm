@@ -8,7 +8,7 @@ const Therapist = require('../models/Therapist');
  * טיפול בכל הפעולות הקשורות ל-Google Calendar
  */
 class CalendarController {
-    
+
     /**
      * התחלת תהליך OAuth עם Google
      * GET /api/calendar/google/auth
@@ -16,7 +16,7 @@ class CalendarController {
     async initiateGoogleAuth(req, res) {
         try {
             const therapistId = req.user.id; // מהטוקן JWT
-            
+
             if (!therapistId) {
                 return res.status(401).json({
                     success: false,
@@ -34,7 +34,7 @@ class CalendarController {
             }
 
             const authUrl = await googleAuthService.getAuthUrl(therapistId);
-            
+
             res.json({
                 success: true,
                 authUrl,
@@ -69,7 +69,7 @@ class CalendarController {
 
             // קבלת טוקנים
             const tokens = await googleAuthService.getTokensFromCode(code, state);
-            
+
             // שמירת טוקנים בדאטה בייס
             await googleAuthService.saveTokensToDatabase(tokens.therapistId, tokens);
 
@@ -146,7 +146,7 @@ class CalendarController {
             }
 
             const syncRecord = await GoogleCalendarSync.findOne({ therapistId });
-            
+
             if (!syncRecord) {
                 return res.json({
                     success: true,
@@ -246,7 +246,7 @@ class CalendarController {
                 default:
                     // סנכרון דו-כיווני
                     const fromGoogleStats = await googleCalendarService.syncFromGoogleToLocal(therapistId);
-                    
+
                     const appointmentsToSync = await require('../models/Appointment').find({
                         therapistId,
                         googleCalendarSynced: false,
@@ -334,15 +334,15 @@ class CalendarController {
             }
 
             const updateData = {};
-            
+
             if (syncDirection !== undefined) {
                 updateData.syncDirection = syncDirection;
             }
-            
+
             if (privacyLevel !== undefined) {
                 updateData.privacyLevel = privacyLevel;
             }
-            
+
             if (syncEnabled !== undefined) {
                 updateData.syncEnabled = syncEnabled;
             }

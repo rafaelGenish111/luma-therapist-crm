@@ -153,12 +153,12 @@ class AvailabilityController {
                         current.toDate(),
                         parseInt(duration)
                     );
-                    
+
                     slots.push({
                         date: current.format('YYYY-MM-DD'),
                         slots: daySlots
                     });
-                    
+
                     current.add(1, 'day');
                 }
             }
@@ -216,7 +216,7 @@ class AvailabilityController {
             if (isRecurring && recurringPattern) {
                 // יצירת זמנים חסומים חוזרים
                 const dates = this.calculateRecurringDates(start, recurringPattern.frequency, new Date(recurringPattern.endDate));
-                
+
                 for (const date of dates) {
                     const blockedTime = await BlockedTime.create({
                         therapistId,
@@ -394,7 +394,7 @@ class AvailabilityController {
         }
 
         const daySchedule = availability.weeklySchedule.find(schedule => schedule.dayOfWeek === dayOfWeek);
-        
+
         if (!daySchedule || !daySchedule.isAvailable) {
             return []; // יום לא זמין
         }
@@ -507,7 +507,7 @@ class AvailabilityController {
 
         while (currentDate.isSameOrBefore(endMoment)) {
             dates.push(currentDate.toDate());
-            
+
             switch (frequency) {
                 case 'daily':
                     currentDate.add(1, 'day');
@@ -551,7 +551,7 @@ class AvailabilityController {
 
             // כאן יהיה קריאה ל-Google Calendar API
             // const result = await googleCalendarService.createGoogleEvent(event, calendar);
-            
+
             // עדכון metadata עם Google Event ID
             if (!blockedTime.metadata) {
                 blockedTime.metadata = {};

@@ -69,11 +69,11 @@ class SyncJobs {
         const job = cron.schedule('*/10 * * * *', async () => {
             try {
                 console.log('Starting periodic sync job...');
-                
+
                 const results = await syncService.periodicSyncAllTherapists();
-                
+
                 console.log(`Periodic sync completed: ${results.successful}/${results.totalTherapists} therapists synced successfully`);
-                
+
                 if (results.failed > 0) {
                     console.error(`Periodic sync failed for ${results.failed} therapists:`, results.errors);
                 }
@@ -98,11 +98,11 @@ class SyncJobs {
         const job = cron.schedule('0 2 * * *', async () => {
             try {
                 console.log('Starting webhook renewal job...');
-                
+
                 const results = await syncService.renewAllWebhooks();
-                
+
                 console.log(`Webhook renewal completed: ${results.renewed} renewed, ${results.skipped} skipped, ${results.failed} failed`);
-                
+
                 if (results.failed > 0) {
                     console.error(`Webhook renewal failed for ${results.failed} therapists:`, results.errors);
                 }
@@ -127,11 +127,11 @@ class SyncJobs {
         const job = cron.schedule('0 * * * *', async () => {
             try {
                 console.log('Starting failed sync retry job...');
-                
+
                 const results = await syncService.retryFailedSyncs(3);
-                
+
                 console.log(`Failed sync retry completed: ${results.successful}/${results.retried} appointments synced successfully`);
-                
+
                 if (results.stillFailed > 0) {
                     console.error(`Still ${results.stillFailed} appointments failed to sync after retry`);
                 }
@@ -156,7 +156,7 @@ class SyncJobs {
         const job = cron.schedule('0 3 * * *', async () => {
             try {
                 console.log('Starting cleanup job...');
-                
+
                 // ניקוי שגיאות ישנות לכל המטפלות
                 const connectedTherapists = await GoogleCalendarSync.find({
                     syncEnabled: true
@@ -263,26 +263,26 @@ class SyncJobs {
                 case 'periodicSync':
                     await syncService.periodicSyncAllTherapists();
                     break;
-                
+
                 case 'webhookRenewal':
                     await syncService.renewAllWebhooks();
                     break;
-                
+
                 case 'failedSyncRetry':
                     await syncService.retryFailedSyncs();
                     break;
-                
+
                 case 'cleanup':
                     // ניקוי שגיאות ישנות
                     const connectedTherapists = await GoogleCalendarSync.find({
                         syncEnabled: true
                     });
-                    
+
                     for (const syncRecord of connectedTherapists) {
                         await syncService.clearOldSyncErrors(syncRecord.therapistId, 7);
                     }
                     break;
-                
+
                 default:
                     throw new Error(`Unknown job: ${jobName}`);
             }
