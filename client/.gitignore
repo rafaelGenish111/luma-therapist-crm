@@ -33,3 +33,4 @@ dist-ssr
 
 # Testing
 coverage
+.vercel

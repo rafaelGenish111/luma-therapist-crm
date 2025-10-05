@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>התראה למטפלת</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            direction: rtl;
+            text-align: right;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, {{therapist.primaryColor}} 0%, {{therapist.secondaryColor}} 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .notification-type {
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border-right: 4px solid #2196f3;
+            text-align: center;
+        }
+        .notification-type h2 {
+            margin: 0;
+            color: #1976d2;
+            font-size: 20px;
+        }
+        .client-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-right: 4px solid {{therapist.primaryColor}};
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+            min-width: 120px;
+        }
+        .detail-value {
+            color: #333;
+            flex: 1;
+            text-align: left;
+        }
+        .appointment-details {
+            background-color: #fff3e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-right: 4px solid #ff9800;
+        }
+        .appointment-details h3 {
+            margin: 0 0 15px 0;
+            color: #f57c00;
+            font-size: 16px;
+        }
+        .notes-section {
+            background-color: #f3e5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border-right: 4px solid #9c27b0;
+        }
+        .notes-section h3 {
+            margin: 0 0 10px 0;
+            color: #7b1fa2;
+            font-size: 16px;
+        }
+        .actions {
+            margin: 30px 0;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 5px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: {{therapist.primaryColor}};
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: {{therapist.primaryColor}};
+            text-decoration: none;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .urgent-notice {
+            background-color: #ffebee;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border-right: 4px solid #f44336;
+        }
+        .urgent-notice h3 {
+            margin: 0 0 10px 0;
+            color: #d32f2f;
+            font-size: 16px;
+        }
+        .dashboard-link {
+            background-color: #e8f5e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border-right: 4px solid #4caf50;
+            text-align: center;
+        }
+        .dashboard-link h3 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+            font-size: 16px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px 15px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-label {
+                margin-bottom: 5px;
+            }
+            .btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            {{#if therapist.logo}}
+            <img src="{{therapist.logo}}" alt="{{therapist.name}}" class="logo">
+            {{/if}}
+            <h1>התראה למטפלת</h1>
+            <p>{{therapist.name}}</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                שלום {{therapist.name}},
+            </div>
+
+            <!-- Notification Type -->
+            <div class="notification-type">
+                <h2>{{notificationTypeText}}</h2>
+            </div>
+
+            <!-- Client Details -->
+            <div class="client-details">
+                <h3 style="margin: 0 0 15px 0; color: {{therapist.primaryColor}};">פרטי הלקוח</h3>
+                <div class="detail-row">
+                    <span class="detail-label">שם מלא:</span>
+                    <span class="detail-value">{{client.firstName}} {{client.lastName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">אימייל:</span>
+                    <span class="detail-value">{{client.email}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">טלפון:</span>
+                    <span class="detail-value">{{client.phone}}</span>
+                </div>
+                {{#if client.isGuest}}
+                <div class="detail-row">
+                    <span class="detail-label">סוג לקוח:</span>
+                    <span class="detail-value">לקוח אורח</span>
+                </div>
+                {{else}}
+                <div class="detail-row">
+                    <span class="detail-label">סוג לקוח:</span>
+                    <span class="detail-value">לקוח רשום</span>
+                </div>
+                {{/if}}
+            </div>
+
+            <!-- Appointment Details -->
+            <div class="appointment-details">
+                <h3>פרטי הפגישה</h3>
+                <div class="detail-row">
+                    <span class="detail-label">שירות:</span>
+                    <span class="detail-value">{{appointment.serviceType}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">תאריך:</span>
+                    <span class="detail-value">{{appointment.startTimeFormatted}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">שעה:</span>
+                    <span class="detail-value">{{appointment.timeFormatted}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">משך:</span>
+                    <span class="detail-value">{{appointment.duration}} דקות</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">מיקום:</span>
+                    <span class="detail-value">{{appointment.location}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">מחיר:</span>
+                    <span class="detail-value">₪{{appointment.paymentAmount}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">סטטוס:</span>
+                    <span class="detail-value">{{appointment.status}}</span>
+                </div>
+                {{#if appointment.confirmationCode}}
+                <div class="detail-row">
+                    <span class="detail-label">קוד אישור:</span>
+                    <span class="detail-value">{{appointment.confirmationCode}}</span>
+                </div>
+                {{/if}}
+            </div>
+
+            <!-- Client Notes -->
+            {{#if appointment.notes}}
+            <div class="notes-section">
+                <h3>הערות הלקוח</h3>
+                <p>{{appointment.notes}}</p>
+            </div>
+            {{/if}}
+
+            <!-- Cancellation Reason (for cancellation notifications) -->
+            {{#if (eq notificationType 'cancellation')}}
+            {{#if appointment.cancellationReason}}
+            <div class="notes-section">
+                <h3>סיבת הביטול</h3>
+                <p>{{appointment.cancellationReason}}</p>
+            </div>
+            {{/if}}
+            {{/if}}
+
+            <!-- Reschedule Information (for reschedule notifications) -->
+            {{#if (eq notificationType 'reschedule')}}
+            {{#if oldAppointmentTime}}
+            <div class="notes-section">
+                <h3>שינוי תאריך</h3>
+                <p><strong>תאריך קודם:</strong> {{oldAppointmentTime}}</p>
+                <p><strong>תאריך חדש:</strong> {{appointment.startTimeFormatted}}</p>
+            </div>
+            {{/if}}
+            {{/if}}
+
+            <!-- Urgent Notice for New Bookings -->
+            {{#if (eq notificationType 'new_booking')}}
+            <div class="urgent-notice">
+                <h3>⚠️ פגישה חדשה דורשת אישור</h3>
+                <p>לקוח חדש קבע פגישה. אנא אשרו או דחו את הפגישה בהקדם האפשרי.</p>
+            </div>
+            {{/if}}
+
+            <!-- Dashboard Link -->
+            <div class="dashboard-link">
+                <h3>ניהול הפגישה</h3>
+                <p>ניתן לנהל את הפגישה דרך הדשבורד שלכם</p>
+                <a href="{{dashboardUrl}}/appointments/{{appointment._id}}" class="btn btn-primary">
+                    פתח בדשבורד
+                </a>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="{{dashboardUrl}}/appointments" class="btn btn-primary">
+                    כל הפגישות
+                </a>
+                <a href="{{dashboardUrl}}/calendar" class="btn btn-secondary">
+                    יומן
+                </a>
+                {{#if (eq notificationType 'new_booking')}}
+                <a href="{{dashboardUrl}}/appointments/{{appointment._id}}/confirm" class="btn btn-primary">
+                    אשר פגישה
+                </a>
+                {{/if}}
+            </div>
+
+            <!-- Additional Information -->
+            <div style="background-color: #e3f2fd; border-radius: 8px; padding: 15px; margin: 20px 0; border-right: 4px solid #2196f3;">
+                <h3 style="margin: 0 0 10px 0; color: #1976d2; font-size: 16px;">מידע נוסף</h3>
+                <ul>
+                    {{#if (eq notificationType 'new_booking')}}
+                    <li>הפגישה ממתינה לאישור שלכם</li>
+                    <li>ניתן לראות את כל הפרטים בדשבורד</li>
+                    <li>אם יש שאלות, צרו קשר עם הלקוח</li>
+                    {{else if (eq notificationType 'cancellation')}}
+                    <li>הפגישה בוטלה על ידי הלקוח</li>
+                    <li>ניתן לקבוע פגישה חלופית</li>
+                    <li>בדקו את מדיניות ההחזר</li>
+                    {{else if (eq notificationType 'reschedule')}}
+                    <li>התאריך שונה על ידי הלקוח</li>
+                    <li>ודאו שהתאריך החדש מתאים לכם</li>
+                    <li>עדכנו את היומן שלכם</li>
+                    {{/if}}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>תודה על השימוש במערכת!</p>
+            <p>
+                <a href="{{dashboardUrl}}">דשבורד</a> | 
+                <a href="{{dashboardUrl}}/appointments">פגישות</a> | 
+                <a href="{{dashboardUrl}}/settings">הגדרות</a>
+            </p>
+            <p style="font-size: 12px; margin-top: 20px;">
+                אימייל זה נשלח אוטומטית. אנא אל תשיב עליו ישירות.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -20,13 +20,13 @@ const crypto = require('crypto');
 // @access  Public
 exports.getTherapistInfo = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    
+
     // Try to find by ID first, then by slug
     let therapist = await Therapist.findById(id);
     if (!therapist) {
         therapist = await Therapist.findOne({ slug: id });
     }
-    
+
     if (!therapist) {
         return res.status(404).json({
             success: false,
@@ -61,7 +61,7 @@ exports.getTherapistInfo = asyncHandler(async (req, res) => {
 // @access  Public
 exports.getAvailableServices = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    
+
     const therapist = await Therapist.findById(id);
     if (!therapist) {
         return res.status(404).json({
@@ -338,12 +338,12 @@ exports.createBooking = asyncHandler(async (req, res) => {
     }
 
     let client;
-    
+
     // Handle client creation or finding
     if (createAccount) {
         // Check if client already exists
         let existingClient = await Client.findOne({ email: clientInfo.email });
-        
+
         if (existingClient) {
             client = existingClient;
         } else {
@@ -712,7 +712,7 @@ const generateConfirmationCode = () => {
 
 const getServicePrice = (serviceType, therapist) => {
     const basePrice = therapist.defaultPrice || 300;
-    
+
     switch (serviceType) {
         case 'individual':
             return basePrice;

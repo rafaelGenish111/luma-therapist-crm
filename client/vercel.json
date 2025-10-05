@@ -10,9 +10,9 @@
         }
     ],
     "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "https://YOUR_SERVER_VERCEL_URL/$1",
+    {
+      "src": "/api/(.*)",
+      "dest": "https://luma-therapist-crm-hnku.vercel.app/api/$1",
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",

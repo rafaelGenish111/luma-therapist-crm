@@ -52,7 +52,7 @@ import axios from 'axios';
 const BookingConfirmation = () => {
   const { confirmationCode } = useParams();
   const navigate = useNavigate();
-  
+
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -85,13 +85,13 @@ const BookingConfirmation = () => {
       await axios.post(`/api/booking/${confirmationCode}/cancel`, {
         reason: cancelReason
       });
-      
+
       setAppointment(prev => ({
         ...prev,
         status: 'cancelled',
         cancellationReason: cancelReason
       }));
-      
+
       setShowCancelDialog(false);
       setCancelReason('');
     } catch (err) {
@@ -110,10 +110,10 @@ const BookingConfirmation = () => {
 
     const startDate = new Date(appointment.startTime);
     const endDate = new Date(appointment.endTime);
-    
+
     // Google Calendar
     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(appointment.serviceType)}&dates=${format(startDate, 'yyyyMMddTHHmmss')}/${format(endDate, 'yyyyMMddTHHmmss')}&details=${encodeURIComponent(appointment.notes || '')}&location=${encodeURIComponent(appointment.location || '')}`;
-    
+
     // iCal format
     const icalContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -210,14 +210,14 @@ END:VCALENDAR`;
         >
           חזרה לעמוד הבית
         </Button>
-        
+
         <Box display="flex" alignItems="center" gap={2} mb={2}>
           <CheckCircle color="success" sx={{ fontSize: 40 }} />
           <Typography variant="h4">
             הזמנה נוצרה בהצלחה!
           </Typography>
         </Box>
-        
+
         <Typography variant="body1" color="text.secondary">
           קוד אישור: <strong>{confirmationCode}</strong>
         </Typography>
@@ -230,78 +230,78 @@ END:VCALENDAR`;
             <Typography variant="h5">
               פרטי הפגישה
             </Typography>
-            <Chip 
-              label={getStatusText(appointment.status)} 
+            <Chip
+              label={getStatusText(appointment.status)}
               color={getStatusColor(appointment.status)}
             />
           </Box>
-          
+
           <List>
             <ListItem>
               <ListItemIcon><Person /></ListItemIcon>
-              <ListItemText 
-                primary="מטפלת" 
-                secondary={appointment.therapist?.name} 
+              <ListItemText
+                primary="מטפלת"
+                secondary={appointment.therapist?.name}
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><Schedule /></ListItemIcon>
-              <ListItemText 
-                primary="שירות" 
-                secondary={appointment.serviceType} 
+              <ListItemText
+                primary="שירות"
+                secondary={appointment.serviceType}
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><CalendarToday /></ListItemIcon>
-              <ListItemText 
-                primary="תאריך ושעה" 
-                secondary={format(new Date(appointment.startTime), 'dd/MM/yyyy HH:mm', { locale: he })} 
+              <ListItemText
+                primary="תאריך ושעה"
+                secondary={format(new Date(appointment.startTime), 'dd/MM/yyyy HH:mm', { locale: he })}
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><AccessTime /></ListItemIcon>
-              <ListItemText 
-                primary="משך" 
-                secondary={`${appointment.duration} דקות`} 
+              <ListItemText
+                primary="משך"
+                secondary={`${appointment.duration} דקות`}
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><LocationOn /></ListItemIcon>
-              <ListItemText 
-                primary="מיקום" 
-                secondary={appointment.location === 'online' ? 'מפגש מקוון' : appointment.location} 
+              <ListItemText
+                primary="מיקום"
+                secondary={appointment.location === 'online' ? 'מפגש מקוון' : appointment.location}
               />
             </ListItem>
             {appointment.meetingUrl && (
               <ListItem>
                 <ListItemIcon><Share /></ListItemIcon>
-                <ListItemText 
-                  primary="קישור למפגש" 
+                <ListItemText
+                  primary="קישור למפגש"
                   secondary={
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="outlined"
                       size="small"
                       onClick={() => window.open(appointment.meetingUrl, '_blank')}
                     >
                       הצג קישור
                     </Button>
-                  } 
+                  }
                 />
               </ListItem>
             )}
             <ListItem>
               <ListItemIcon><Payment /></ListItemIcon>
-              <ListItemText 
-                primary="מחיר" 
-                secondary={`₪${appointment.paymentAmount}`} 
+              <ListItemText
+                primary="מחיר"
+                secondary={`₪${appointment.paymentAmount}`}
               />
             </ListItem>
             {appointment.notes && (
               <ListItem>
                 <ListItemIcon><Info /></ListItemIcon>
-                <ListItemText 
-                  primary="הערות" 
-                  secondary={appointment.notes} 
+                <ListItemText
+                  primary="הערות"
+                  secondary={appointment.notes}
                 />
               </ListItem>
             )}
@@ -318,23 +318,23 @@ END:VCALENDAR`;
           <List>
             <ListItem>
               <ListItemIcon><Person /></ListItemIcon>
-              <ListItemText 
-                primary="שם" 
-                secondary={appointment.client?.name} 
+              <ListItemText
+                primary="שם"
+                secondary={appointment.client?.name}
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><Email /></ListItemIcon>
-              <ListItemText 
-                primary="אימייל" 
-                secondary={appointment.client?.email} 
+              <ListItemText
+                primary="אימייל"
+                secondary={appointment.client?.email}
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><Phone /></ListItemIcon>
-              <ListItemText 
-                primary="טלפון" 
-                secondary={appointment.client?.phone} 
+              <ListItemText
+                primary="טלפון"
+                secondary={appointment.client?.phone}
               />
             </ListItem>
           </List>
@@ -406,23 +406,23 @@ END:VCALENDAR`;
           <List>
             <ListItem>
               <ListItemIcon><Info /></ListItemIcon>
-              <ListItemText 
-                primary="הגעה לפגישה" 
-                secondary="אנא הגיעו 5-10 דקות לפני השעה הנקובה" 
+              <ListItemText
+                primary="הגעה לפגישה"
+                secondary="אנא הגיעו 5-10 דקות לפני השעה הנקובה"
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><Warning /></ListItemIcon>
-              <ListItemText 
-                primary="ביטול פגישה" 
-                secondary="ניתן לבטל פגישה עד 24 שעות לפני השעה הנקובה" 
+              <ListItemText
+                primary="ביטול פגישה"
+                secondary="ניתן לבטל פגישה עד 24 שעות לפני השעה הנקובה"
               />
             </ListItem>
             <ListItem>
               <ListItemIcon><Email /></ListItemIcon>
-              <ListItemText 
-                primary="אימייל אישור" 
-                secondary="נשלח אימייל אישור עם כל הפרטים לכתובת שלכם" 
+              <ListItemText
+                primary="אימייל אישור"
+                secondary="נשלח אימייל אישור עם כל הפרטים לכתובת שלכם"
               />
             </ListItem>
           </List>
@@ -437,21 +437,21 @@ END:VCALENDAR`;
           </Typography>
           <List>
             <ListItem>
-              <ListItemText 
-                primary="איך אני יכול לשנות את הפגישה?" 
-                secondary="לחצו על 'שנה תאריך' או צרו קשר עם המטפלת" 
+              <ListItemText
+                primary="איך אני יכול לשנות את הפגישה?"
+                secondary="לחצו על 'שנה תאריך' או צרו קשר עם המטפלת"
               />
             </ListItem>
             <ListItem>
-              <ListItemText 
-                primary="מה קורה אם אני מאחר?" 
-                secondary="אנא צרו קשר עם המטפלת בהקדם האפשרי" 
+              <ListItemText
+                primary="מה קורה אם אני מאחר?"
+                secondary="אנא צרו קשר עם המטפלת בהקדם האפשרי"
               />
             </ListItem>
             <ListItem>
-              <ListItemText 
-                primary="איך אני יכול לבטל?" 
-                secondary="לחצו על 'בטל פגישה' או צרו קשר עם המטפלת" 
+              <ListItemText
+                primary="איך אני יכול לבטל?"
+                secondary="לחצו על 'בטל פגישה' או צרו קשר עם המטפלת"
               />
             </ListItem>
           </List>
@@ -479,7 +479,7 @@ END:VCALENDAR`;
           <Button onClick={() => setShowCancelDialog(false)}>
             ביטול
           </Button>
-          <Button 
+          <Button
             onClick={handleCancelAppointment}
             color="error"
             disabled={cancelling}

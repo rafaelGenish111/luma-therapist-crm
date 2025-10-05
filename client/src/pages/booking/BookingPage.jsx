@@ -177,7 +177,7 @@ const BookingPage = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      
+
       const bookingPayload = {
         therapistId,
         serviceType: selectedService.type,
@@ -189,13 +189,13 @@ const BookingPage = () => {
       };
 
       const response = await axios.post('/api/booking/create', bookingPayload);
-      
+
       setBookingData(response.data);
       setShowConfirmation(true);
-      
+
       // Navigate to confirmation page
       navigate(`/booking/confirmation/${response.data.confirmationCode}`);
-      
+
     } catch (err) {
       setError(err.response?.data?.error || 'שגיאה ביצירת ההזמנה');
       console.error('Error creating booking:', err);
@@ -212,8 +212,8 @@ const BookingPage = () => {
       <Grid container spacing={3}>
         {services.map((service) => (
           <Grid item xs={12} sm={6} md={4} key={service.id}>
-            <Card 
-              sx={{ 
+            <Card
+              sx={{
                 cursor: 'pointer',
                 border: selectedService?.id === service.id ? 2 : 1,
                 borderColor: selectedService?.id === service.id ? 'primary.main' : 'divider',
@@ -235,10 +235,10 @@ const BookingPage = () => {
                   {service.description}
                 </Typography>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Chip 
-                    label={`${service.duration} דקות`} 
-                    size="small" 
-                    color="primary" 
+                  <Chip
+                    label={`${service.duration} דקות`}
+                    size="small"
+                    color="primary"
                   />
                   <Typography variant="h6" color="primary">
                     ₪{service.price}
@@ -257,7 +257,7 @@ const BookingPage = () => {
       <Typography variant="h5" gutterBottom>
         בחר תאריך ושעה
       </Typography>
-      
+
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
@@ -275,7 +275,7 @@ const BookingPage = () => {
             />
           </LocalizationProvider>
         </Grid>
-        
+
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
             שעות זמינות
@@ -316,14 +316,14 @@ const BookingPage = () => {
       <Typography variant="h5" gutterBottom>
         פרטי לקוח
       </Typography>
-      
+
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             label="שם מלא"
             value={clientInfo.name}
-            onChange={(e) => setClientInfo({...clientInfo, name: e.target.value})}
+            onChange={(e) => setClientInfo({ ...clientInfo, name: e.target.value })}
             required
           />
         </Grid>
@@ -333,7 +333,7 @@ const BookingPage = () => {
             label="אימייל"
             type="email"
             value={clientInfo.email}
-            onChange={(e) => setClientInfo({...clientInfo, email: e.target.value})}
+            onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
             required
           />
         </Grid>
@@ -342,7 +342,7 @@ const BookingPage = () => {
             fullWidth
             label="טלפון"
             value={clientInfo.phone}
-            onChange={(e) => setClientInfo({...clientInfo, phone: e.target.value})}
+            onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
             required
           />
         </Grid>
@@ -353,7 +353,7 @@ const BookingPage = () => {
             multiline
             rows={3}
             value={clientInfo.notes}
-            onChange={(e) => setClientInfo({...clientInfo, notes: e.target.value})}
+            onChange={(e) => setClientInfo({ ...clientInfo, notes: e.target.value })}
           />
         </Grid>
         <Grid item xs={12}>
@@ -361,7 +361,7 @@ const BookingPage = () => {
             control={
               <Checkbox
                 checked={clientInfo.createAccount}
-                onChange={(e) => setClientInfo({...clientInfo, createAccount: e.target.checked})}
+                onChange={(e) => setClientInfo({ ...clientInfo, createAccount: e.target.checked })}
               />
             }
             label="אני רוצה ליצור חשבון לקוח לניהול פגישות עתידיות"
@@ -376,7 +376,7 @@ const BookingPage = () => {
       <Typography variant="h5" gutterBottom>
         תשלום
       </Typography>
-      
+
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           סיכום הזמנה
@@ -388,7 +388,7 @@ const BookingPage = () => {
         <Box display="flex" justifyContent="space-between" mb={1}>
           <Typography>תאריך ושעה</Typography>
           <Typography>
-            {selectedDate && selectedSlot && 
+            {selectedDate && selectedSlot &&
               `${format(selectedDate, 'dd/MM/yyyy')} בשעה ${selectedSlot.startTime}`
             }
           </Typography>
@@ -419,7 +419,7 @@ const BookingPage = () => {
       <Typography variant="h5" gutterBottom>
         אישור הזמנה
       </Typography>
-      
+
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           פרטי הפגישה
@@ -431,33 +431,33 @@ const BookingPage = () => {
           </ListItem>
           <ListItem>
             <ListItemIcon><Schedule /></ListItemIcon>
-            <ListItemText 
-              primary="שירות" 
-              secondary={selectedService?.name} 
+            <ListItemText
+              primary="שירות"
+              secondary={selectedService?.name}
             />
           </ListItem>
           <ListItem>
             <ListItemIcon><CalendarToday /></ListItemIcon>
-            <ListItemText 
-              primary="תאריך ושעה" 
+            <ListItemText
+              primary="תאריך ושעה"
               secondary={
-                selectedDate && selectedSlot && 
+                selectedDate && selectedSlot &&
                 `${format(selectedDate, 'dd/MM/yyyy')} בשעה ${selectedSlot.startTime}`
-              } 
+              }
             />
           </ListItem>
           <ListItem>
             <ListItemIcon><AccessTime /></ListItemIcon>
-            <ListItemText 
-              primary="משך" 
-              secondary={`${selectedService?.duration} דקות`} 
+            <ListItemText
+              primary="משך"
+              secondary={`${selectedService?.duration} דקות`}
             />
           </ListItem>
           <ListItem>
             <ListItemIcon><Payment /></ListItemIcon>
-            <ListItemText 
-              primary="מחיר" 
-              secondary={`₪${selectedService?.price}`} 
+            <ListItemText
+              primary="מחיר"
+              secondary={`₪${selectedService?.price}`}
             />
           </ListItem>
         </List>
@@ -552,7 +552,7 @@ const BookingPage = () => {
           >
             חזרה
           </Button>
-          
+
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Grid container spacing={3} alignItems="center">
@@ -576,9 +576,9 @@ const BookingPage = () => {
                     <Typography variant="body2">
                       ({therapist?.reviewCount || 0} ביקורות)
                     </Typography>
-                    <Chip 
-                      label={therapist?.timezone || 'Asia/Jerusalem'} 
-                      size="small" 
+                    <Chip
+                      label={therapist?.timezone || 'Asia/Jerusalem'}
+                      size="small"
                       icon={<Language />}
                     />
                   </Box>
@@ -611,7 +611,7 @@ const BookingPage = () => {
           >
             חזרה
           </Button>
-          
+
           <Button
             variant="contained"
             onClick={handleNext}

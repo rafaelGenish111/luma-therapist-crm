@@ -55,7 +55,7 @@ import axios from 'axios';
 const ManageBooking = () => {
   const { confirmationCode } = useParams();
   const navigate = useNavigate();
-  
+
   const [step, setStep] = useState('auth'); // 'auth', 'manage'
   const [email, setEmail] = useState('');
   const [appointment, setAppointment] = useState(null);
@@ -74,11 +74,11 @@ const ManageBooking = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await axios.post(`/api/booking/${confirmationCode}/auth`, {
         email
       });
-      
+
       setAppointment(response.data);
       setStep('manage');
     } catch (err) {
@@ -112,15 +112,15 @@ const ManageBooking = () => {
 
     try {
       setProcessing(true);
-      
+
       const newStartTime = `${format(newDate, 'yyyy-MM-dd')}T${format(newTime, 'HH:mm')}:00`;
       const newEndTime = `${format(newDate, 'yyyy-MM-dd')}T${format(addMinutes(newTime, appointment.duration), 'HH:mm')}:00`;
-      
+
       const response = await axios.post(`/api/booking/${confirmationCode}/reschedule`, {
         newStartTime,
         newEndTime
       });
-      
+
       setAppointment(response.data);
       setShowRescheduleDialog(false);
       setNewDate(null);
@@ -135,17 +135,17 @@ const ManageBooking = () => {
   const handleCancel = async () => {
     try {
       setProcessing(true);
-      
+
       await axios.post(`/api/booking/${confirmationCode}/cancel`, {
         reason: cancelReason
       });
-      
+
       setAppointment(prev => ({
         ...prev,
         status: 'cancelled',
         cancellationReason: cancelReason
       }));
-      
+
       setShowCancelDialog(false);
       setCancelReason('');
     } catch (err) {
@@ -212,7 +212,7 @@ const ManageBooking = () => {
           >
             חזרה לעמוד הבית
           </Button>
-          
+
           <Typography variant="h4" gutterBottom>
             ניהול הזמנה
           </Typography>
@@ -231,11 +231,11 @@ const ManageBooking = () => {
                   הזדהות לניהול הזמנה
                 </Typography>
               </Box>
-              
+
               <Typography paragraph>
                 אנא הזינו את כתובת האימייל ששימשה ליצירת ההזמנה כדי לגשת לפרטים ולנהל את הפגישה.
               </Typography>
-              
+
               <Box component="form" onSubmit={handleAuth}>
                 <TextField
                   fullWidth
@@ -246,13 +246,13 @@ const ManageBooking = () => {
                   required
                   sx={{ mb: 3 }}
                 />
-                
+
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>
                     {error}
                   </Alert>
                 )}
-                
+
                 <Button
                   type="submit"
                   variant="contained"
@@ -276,12 +276,12 @@ const ManageBooking = () => {
                   <Typography variant="h5">
                     פרטי הפגישה
                   </Typography>
-                  <Chip 
-                    label={getStatusText(appointment.status)} 
+                  <Chip
+                    label={getStatusText(appointment.status)}
                     color={getStatusColor(appointment.status)}
                   />
                 </Box>
-                
+
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">
@@ -341,7 +341,7 @@ const ManageBooking = () => {
                 <Typography variant="h6" gutterBottom>
                   פעולות זמינות
                 </Typography>
-                
+
                 <Grid container spacing={2}>
                   {canReschedule() && (
                     <Grid item xs={12} sm={6}>
@@ -355,7 +355,7 @@ const ManageBooking = () => {
                       </Button>
                     </Grid>
                   )}
-                  
+
                   {canCancel() && (
                     <Grid item xs={12} sm={6}>
                       <Button
@@ -369,7 +369,7 @@ const ManageBooking = () => {
                       </Button>
                     </Grid>
                   )}
-                  
+
                   <Grid item xs={12} sm={6}>
                     <Button
                       fullWidth
@@ -381,7 +381,7 @@ const ManageBooking = () => {
                     </Button>
                   </Grid>
                 </Grid>
-                
+
                 {!canReschedule() && !canCancel() && (
                   <Alert severity="info" sx={{ mt: 2 }}>
                     לא ניתן לשנות או לבטל פגישה פחות מ-24 שעות לפני השעה הנקובה
@@ -438,8 +438,8 @@ const ManageBooking = () => {
         )}
 
         {/* Reschedule Dialog */}
-        <Dialog 
-          open={showRescheduleDialog} 
+        <Dialog
+          open={showRescheduleDialog}
           onClose={() => setShowRescheduleDialog(false)}
           maxWidth="sm"
           fullWidth
@@ -472,7 +472,7 @@ const ManageBooking = () => {
                 />
               </Grid>
             </Grid>
-            
+
             {newDate && availableSlots.length > 0 && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2" gutterBottom>
@@ -503,7 +503,7 @@ const ManageBooking = () => {
             <Button onClick={() => setShowRescheduleDialog(false)}>
               ביטול
             </Button>
-            <Button 
+            <Button
               onClick={handleReschedule}
               variant="contained"
               disabled={!newDate || !newTime || processing}
@@ -520,7 +520,7 @@ const ManageBooking = () => {
             <Alert severity="warning" sx={{ mb: 2 }}>
               האם אתם בטוחים שברצונכם לבטל את הפגישה? פעולה זו לא ניתנת לביטול.
             </Alert>
-            
+
             <TextField
               fullWidth
               label="סיבת הביטול"
@@ -535,7 +535,7 @@ const ManageBooking = () => {
             <Button onClick={() => setShowCancelDialog(false)}>
               ביטול
             </Button>
-            <Button 
+            <Button
               onClick={handleCancel}
               color="error"
               variant="contained"
