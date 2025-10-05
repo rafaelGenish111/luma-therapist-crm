@@ -5,26 +5,38 @@ export const getTherapistProfile = async () => {
     try {
         const response = await api.get('/therapists/profile');
         console.log('Raw API response:', response);
-        console.log('Response type:', typeof response);
-        console.log('Response success:', response.success);
         console.log('Response data:', response.data);
 
+        // axios מחזיר את הנתונים ב-response.data
+        const apiData = response.data;
+
         // אם התגובה לא מוצלחת
-        if (!response.success) {
-            console.log('API returned success: false, error:', response.error);
-            throw new Error(response.error || 'שגיאה בטעינת פרופיל');
+        if (apiData && !apiData.success) {
+            console.log('API returned success: false, error:', apiData.error);
+            throw new Error(apiData.error || 'שגיאה בטעינת פרופיל');
         }
 
         console.log('API returned success: true, checking data...');
 
+        // טיפול בפורמטים שונים של תגובה
+        let profileData = null;
+
+        if (apiData?.data) {
+            // פורמט: { success: true, data: {...} }
+            profileData = apiData.data;
+        } else if (apiData && typeof apiData === 'object' && !apiData.success) {
+            // פורמט: הנתונים ישירות
+            profileData = apiData;
+        }
+
         // אם אין נתונים או שהם ריקים
-        if (!response.data || (Array.isArray(response.data) && response.data.length === 0)) {
+        if (!profileData || (Array.isArray(profileData) && profileData.length === 0)) {
             console.log('No profile data found');
             return null;
         }
 
-        console.log('Profile data found, returning:', response.data);
-        return response.data; // response הוא {success: true, data: {...}}
+        console.log('Profile data found, returning:', profileData);
+        return profileData;
     } catch (error) {
         console.error('getTherapistProfile error:', error);
         console.error('Error response:', error.response);
@@ -43,8 +55,19 @@ export const getTherapistProfile = async () => {
 export const updateTherapistProfile = async (profileData) => {
     try {
         const response = await api.put('/therapists/profile', profileData);
+        console.log('Update profile response:', response);
+
+        // axios מחזיר את הנתונים ב-response.data
+        const apiData = response.data;
+
+        // אם התגובה מוצלחת, החזר את הנתונים
+        if (apiData?.success) {
+            return apiData; // מחזיר את כל האובייקט כולל success ו-data
+        }
+
         return response.data;
     } catch (error) {
+        console.error('Update profile error:', error);
         throw error.response?.data || error.message;
     }
 };

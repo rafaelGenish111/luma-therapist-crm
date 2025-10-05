@@ -1,121 +1,132 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-    // קשרים
+    therapistId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Therapist',
+        required: true
+    },
     clientId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Client',
-        required: [true, 'לקוח הוא שדה חובה'],
-        index: true
+        required: true
     },
-    appointmentId: {
+    sessionId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Appointment'
+        ref: 'Appointment',
+        required: false
     },
-
-    // פרטי התשלום
     amount: {
         type: Number,
-        required: [true, 'סכום הוא שדה חובה'],
-        min: [0, 'סכום לא יכול להיות שלילי']
+        required: true,
+        min: 0.01
     },
     currency: {
         type: String,
-        default: 'ILS'
-    },
-    method: {
-        type: String,
-        enum: ['card', 'cash', 'transfer', 'simulated'],
-        required: [true, 'שיטת תשלום היא שדה חובה']
+        default: 'ILS',
+        enum: ['ILS'],
+        required: true
     },
     status: {
         type: String,
-        enum: ['pending', 'paid', 'failed', 'refunded'],
+        enum: ['pending', 'paid', 'failed', 'expired', 'canceled'],
         default: 'pending',
-        index: true
+        required: true
     },
-
-    // פרטי עסקה
-    transactionId: {
-        type: String
+    paymentMethod: {
+        type: String,
+        enum: ['credit', 'bit', 'paybox', 'gpay', 'apay'],
+        required: false
     },
-    invoiceId: {
-        type: String
+    paymentLinkId: {
+        type: String,
+        required: true,
+        unique: true
     },
-    invoiceUrl: {
-        type: String
+    provider: {
+        type: String,
+        enum: ['tranzila', 'cardcom', 'mock'],
+        required: true
     },
-
-    // מטא-דאטה
-    meta: {
-        type: mongoose.Schema.Types.Mixed
+    providerTxnId: {
+        type: String,
+        required: false
     },
-
-    // יוצר התשלום
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Therapist'
+    metadata: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+    expiresAt: {
+        type: Date,
+        default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ימים מהיום
+        required: true
+    },
+    description: {
+        type: String,
+        required: false
+    },
+    // שדות נוספים לניהול
+    checkoutUrl: {
+        type: String,
+        required: false
+    },
+    callbackData: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
     }
-
 }, {
     timestamps: true
 });
 
-// Middleware לסינון תשלומים מחוקים
-paymentSchema.pre(/^find/, function () {
-    if (!this.getOptions().includeDeleted && !this.getQuery().includeDeleted) {
-        this.where({ deletedAt: null });
-    }
-});
-
 // אינדקסים
-paymentSchema.index({ clientId: 1, createdAt: -1 });
-paymentSchema.index({ appointmentId: 1 });
+paymentSchema.index({ paymentLinkId: 1 }, { unique: true });
 paymentSchema.index({ status: 1 });
-paymentSchema.index({ transactionId: 1 });
-paymentSchema.index({ invoiceId: 1 });
+paymentSchema.index({ clientId: 1, therapistId: 1 });
+paymentSchema.index({ expiresAt: 1 });
+paymentSchema.index({ providerTxnId: 1 });
 
-// וירטואלים
-paymentSchema.virtual('formattedAmount').get(function () {
-    return `${this.amount.toLocaleString()} ${this.currency}`;
+// Middleware לבדיקת תאריך פג
+paymentSchema.pre('find', function () {
+    const now = new Date();
+    this.where({
+        $or: [
+            { expiresAt: { $gt: now } },
+            { status: { $in: ['paid', 'failed', 'canceled'] } }
+        ]
+    });
 });
 
-paymentSchema.virtual('isOverdue').get(function () {
-    if (!this.invoice.dueDate || this.status === 'paid') return false;
-    return new Date() > this.invoice.dueDate;
-});
+// Method לבדיקת פג תוקף
+paymentSchema.methods.isExpired = function () {
+    return this.expiresAt < new Date() && this.status === 'pending';
+};
 
-// מתודות סטטיות
-paymentSchema.statics.findByClient = function (clientId, options = {}) {
-    const query = { clientId: clientId };
-
-    if (options.status) {
-        query.status = options.status;
+// Method לעדכון סטטוס לפג
+paymentSchema.methods.markAsExpired = function () {
+    if (this.status === 'pending' && this.isExpired()) {
+        this.status = 'expired';
+        return this.save();
     }
-
-    return this.find(query).sort({ createdAt: -1 });
+    return Promise.resolve(this);
 };
 
-paymentSchema.statics.findByAppointment = function (appointmentId) {
-    return this.find({ appointmentId: appointmentId }).sort({ createdAt: -1 });
+// Static method למציאת תשלומים פגי תוקף
+paymentSchema.statics.findExpiredPayments = function () {
+    return this.find({
+        status: 'pending',
+        expiresAt: { $lt: new Date() }
+    });
 };
 
-// מתודות אינסטנס
-paymentSchema.methods.markAsPaid = function () {
-    this.status = 'paid';
-    return this.save();
-};
-
-paymentSchema.methods.markAsFailed = function (errorMessage) {
-    this.status = 'failed';
-    this.meta = { ...this.meta, error: errorMessage };
-    return this.save();
-};
-
-paymentSchema.methods.refund = function (reason) {
-    this.status = 'refunded';
-    this.meta = { ...this.meta, refundReason: reason, refundedAt: new Date() };
-    return this.save();
+// Static method לעדכון תשלומים פגי תוקף
+paymentSchema.statics.updateExpiredPayments = function () {
+    return this.updateMany(
+        {
+            status: 'pending',
+            expiresAt: { $lt: new Date() }
+        },
+        { status: 'expired' }
+    );
 };
 
 module.exports = mongoose.model('Payment', paymentSchema);

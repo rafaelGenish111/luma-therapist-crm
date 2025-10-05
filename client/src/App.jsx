@@ -56,6 +56,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyRequest from './pages/PrivacyRequest';
+import PaymentPage from './pages/PaymentPage';
 import { AboutPage, ServicesPage, GalleryPage as PublicGalleryPage, TestimonialsPage, ContactPage } from './pages/public';
 
 const App = () => {
@@ -122,6 +123,7 @@ const App = () => {
                     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/privacy-request" element={<PrivacyRequest />} />
+                    <Route path="/pay/:paymentLinkId" element={<PaymentPage />} />
 
                     {/* דפים ציבוריים */}
                     <Route path="/about" element={<AboutPage />} />

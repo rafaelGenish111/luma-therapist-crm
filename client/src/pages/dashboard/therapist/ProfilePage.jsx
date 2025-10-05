@@ -174,7 +174,11 @@ const ProfilePage = () => {
             });
 
             console.log('ProfilePage - Save response:', response);
-            setProfile(response.data);
+
+            // טיפול בפורמטים שונים של תגובה
+            const updatedProfile = response?.data || response;
+
+            setProfile(updatedProfile);
             setEditMode(false);
             setSuccess('פרופיל עודכן בהצלחה');
             setPreviewClinicImage(null); // איפוס תצוגה מקדימה
@@ -182,13 +186,13 @@ const ProfilePage = () => {
             // עדכון המשתמש ב-AuthContext
             if (updateUser) {
                 console.log('ProfilePage - Updating user in AuthContext...');
-                updateUser(response.data);
+                updateUser(updatedProfile);
             }
 
             console.log('ProfilePage - Save completed successfully');
         } catch (error) {
             console.error('ProfilePage - Save error:', error);
-            setError(error.error || 'שגיאה בעדכון הפרופיל');
+            setError(error.error || error.message || 'שגיאה בעדכון הפרופיל');
         } finally {
             setSaving(false);
         }

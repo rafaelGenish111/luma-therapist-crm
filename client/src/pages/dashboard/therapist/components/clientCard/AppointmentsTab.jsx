@@ -115,6 +115,7 @@ const AppointmentsTab = ({ client }) => {
                 date: appointmentDate,
                 duration: form.duration,
                 type: form.type,
+                status: 'scheduled', // ברירת מחדל לפגישה חדשה
                 location: form.location,
                 price: form.price ? parseFloat(form.price) : undefined,
                 notes: form.notes

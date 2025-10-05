@@ -12,8 +12,23 @@ import EventIcon from '@mui/icons-material/Event';
 import ResponsiveTableCards from '../../../../components/ResponsiveTableCards';
 import '../../../../components/responsive-table.css';
 
+const statusLabels = {
+    'scheduled': 'מתוכננת',
+    'confirmed': 'אושרה',
+    'completed': 'בוצעה',
+    'cancelled': 'בוטלה',
+    'no_show': 'לא הופיעה',
+    // תמיכה בערכים הישנים בעברית
+    'מתוכננת': 'מתוכננת',
+    'אושרה': 'אושרה',
+    'בוצעה': 'בוצעה',
+    'בוטלה': 'בוטלה',
+    'לא הופיעה': 'לא הופיעה'
+};
+
 const getStatusColor = (status) => {
-    switch (status) {
+    const normalizedStatus = statusLabels[status] || status;
+    switch (normalizedStatus) {
         case 'מתוכננת': return { bg: '#e3f2fd', color: '#1976d2' };
         case 'אושרה': return { bg: '#e8f5e8', color: '#2e7d32' };
         case 'בוצעה': return { bg: '#f3e5f5', color: '#7b1fa2' };
@@ -65,7 +80,7 @@ const AppointmentList = ({ appointments = [], onEdit, onDelete, onView }) => {
                     client: `${appointment.client?.firstName || ''} ${appointment.client?.lastName || ''}`.trim(),
                     type: appointment.type,
                     duration: `${appointment.duration} דקות`,
-                    status: appointment.status,
+                    status: statusLabels[appointment.status] || appointment.status,
                     location: appointment.location || '-',
                     price: appointment.price ? `₪${appointment.price}` : '-',
                     _appointment: appointment // שמירת האובייקט המקורי

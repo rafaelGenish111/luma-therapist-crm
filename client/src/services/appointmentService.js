@@ -16,8 +16,10 @@ class AppointmentService {
 
         try {
             const response = await api.get(`/appointments/clients/${clientId}/appointments?${params.toString()}`);
-            // ה-API מחזיר את הנתונים ישירות, לא עטוף ב-data
-            return response;
+            console.log('📅 getByClient raw response:', response);
+            console.log('📅 getByClient response.data:', response.data);
+            // axios מחזיר את הנתונים ב-response.data
+            return response.data || { appointments: [], stats: {} };
         } catch (error) {
             console.error('Error fetching appointments:', error);
             return { appointments: [], stats: {} };

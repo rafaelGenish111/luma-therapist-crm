@@ -34,6 +34,8 @@ const clientRoutes = require('./routes/clients');
 const appointmentRoutes = require('./routes/appointments');
 const websiteRoutes = require('./routes/websites');
 const paymentRoutes = require('./routes/payments');
+const paymentLinksRoutes = require('./routes/paymentLinks');
+const paymentHealthRoutes = require('./routes/paymentHealth');
 const chargeRoutes = require('./routes/charges');
 const documentRoutes = require('./routes/documents');
 const communicationRoutes = require('./routes/communications');
@@ -78,7 +80,7 @@ app.use(validateRequest);
 // CORS Configuration
 const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-    : ['http://localhost:8000', 'http://localhost:5000'];
+    : ['http://localhost:8000', 'http://localhost:5000', 'http://localhost:8004'];
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -141,6 +143,8 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/websites', websiteRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/payment-links', paymentLinksRoutes);
+app.use('/api/payment-health', paymentHealthRoutes);
 app.use('/api/charges', chargeRoutes);
 app.use('/api', require('./routes/enhancedPayments'));
 app.use('/api/documents', documentRoutes);

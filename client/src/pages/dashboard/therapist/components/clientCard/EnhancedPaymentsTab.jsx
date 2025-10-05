@@ -47,6 +47,7 @@ import {
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import PaymentModal from './PaymentModal';
+import SendPaymentLinkModal from '../../../../../components/SendPaymentLinkModal';
 import api from '../../../../../services/api';
 
 const EnhancedPaymentsTab = ({ client }) => {
@@ -57,6 +58,8 @@ const EnhancedPaymentsTab = ({ client }) => {
     const [summary, setSummary] = useState(null);
     const [openCharges, setOpenCharges] = useState([]);
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+    const [sendLinkModalOpen, setSendLinkModalOpen] = useState(false);
+    const [selectedAmount, setSelectedAmount] = useState('');
     const [selectedChargeIds, setSelectedChargeIds] = useState([]);
     const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
     const [defaultPaymentAmount, setDefaultPaymentAmount] = useState(0);
@@ -101,11 +104,17 @@ const EnhancedPaymentsTab = ({ client }) => {
     const loadOpenCharges = async () => {
         try {
             const response = await api.get(`/charges/clients/${client._id}`);
-            const allCharges = response.charges || [];
-            const openCharges = allCharges.filter(charge =>
-                ['PENDING', 'PARTIALLY_PAID'].includes(charge.status) &&
-                charge.amount > 0
-            );
+            console.log('💰 EnhancedPaymentsTab - Charges response:', response);
+            const allCharges = response.data?.charges || response.charges || [];
+            console.log('💰 EnhancedPaymentsTab - All charges:', allCharges);
+            const openCharges = allCharges.filter(charge => {
+                const status = charge.status?.toUpperCase();
+                return (
+                    ['PENDING', 'PARTIALLY_PAID', 'OVERDUE'].includes(status) &&
+                    charge.amount > 0
+                );
+            });
+            console.log('💰 EnhancedPaymentsTab - Open charges:', openCharges);
             setOpenCharges(openCharges);
         } catch (err) {
             console.error('Error loading charges:', err);
@@ -221,11 +230,11 @@ const EnhancedPaymentsTab = ({ client }) => {
 
     const getAppointmentStatus = (appointment) => {
         if (!appointment || !appointment.date) return null;
-        
+
         const now = new Date();
         const appointmentDate = new Date(appointment.date);
         const appointmentEnd = new Date(appointmentDate.getTime() + (appointment.duration || 60) * 60000);
-        
+
         if (now < appointmentDate) {
             return { status: 'future', label: 'עתידית', color: 'default' };
         } else if (now >= appointmentDate && now <= appointmentEnd) {
@@ -594,7 +603,7 @@ const EnhancedPaymentsTab = ({ client }) => {
             {renderSummaryCards()}
 
             {/* Action Buttons */}
-            <Box display="flex" gap={2} mb={3}>
+            <Box display="flex" gap={2} mb={3} flexWrap="wrap">
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
@@ -603,12 +612,28 @@ const EnhancedPaymentsTab = ({ client }) => {
                     תשלום חדש
                 </Button>
                 <Button
-                    variant="outlined"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<CashIcon />}
+                    onClick={() => {
+                        setSelectedAmount('');
+                        setSendLinkModalOpen(true);
+                    }}
+                >
+                    בחר סכום לתשלום
+                </Button>
+                <Button
+                    variant="contained"
+                    color="success"
                     startIcon={<PaymentIcon />}
-                    onClick={handleCollectAllCharges}
+                    onClick={() => {
+                        const totalPending = openCharges.reduce((sum, charge) => sum + (charge.amount - (charge.paidAmount || 0)), 0);
+                        setSelectedAmount(totalPending.toString());
+                        setSendLinkModalOpen(true);
+                    }}
                     disabled={openCharges.length === 0}
                 >
-                    גבה כל החיובים ({formatAmount(openCharges.reduce((sum, charge) => sum + (charge.amount - (charge.paidAmount || 0)), 0))})
+                    גבה את כל התשלומים ({formatAmount(openCharges.reduce((sum, charge) => sum + (charge.amount - (charge.paidAmount || 0)), 0))})
                 </Button>
             </Box>
 
@@ -641,6 +666,20 @@ const EnhancedPaymentsTab = ({ client }) => {
                 appointmentId={selectedAppointmentId}
                 onPaymentSuccess={handlePaymentSuccess}
                 defaultAmount={defaultPaymentAmount}
+            />
+
+            {/* Send Payment Link Modal */}
+            <SendPaymentLinkModal
+                client={client}
+                open={sendLinkModalOpen}
+                onClose={() => {
+                    setSendLinkModalOpen(false);
+                    setSelectedAmount('');
+                    loadPayments();
+                    loadSummary();
+                    loadOpenCharges();
+                }}
+                initialAmount={selectedAmount}
             />
         </Box>
     );

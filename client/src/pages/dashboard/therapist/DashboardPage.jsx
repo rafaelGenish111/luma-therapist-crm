@@ -102,11 +102,11 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <Box 
-        display="flex" 
-        flexDirection="column" 
-        justifyContent="center" 
-        alignItems="center" 
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
         minHeight="70vh"
       >
         <CircularProgress size={60} />

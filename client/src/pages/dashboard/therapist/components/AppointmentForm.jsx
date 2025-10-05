@@ -15,11 +15,11 @@ const appointmentTypes = [
 ];
 
 const appointmentStatuses = [
-    'מתוכננת',
-    'אושרה',
-    'בוצעה',
-    'בוטלה',
-    'לא הופיעה'
+    { value: 'scheduled', label: 'מתוכננת' },
+    { value: 'confirmed', label: 'אושרה' },
+    { value: 'completed', label: 'בוצעה' },
+    { value: 'cancelled', label: 'בוטלה' },
+    { value: 'no_show', label: 'לא הופיעה' }
 ];
 
 const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = [] }) => {
@@ -28,7 +28,7 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
         date: new Date(),
         duration: 60,
         type: 'טיפול רגיל',
-        status: 'מתוכננת',
+        status: 'scheduled',
         notes: '',
         location: '',
         price: '',
@@ -38,10 +38,24 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
 
     useEffect(() => {
         if (initialData) {
+            // המרת ערכי סטטוס מעברית לאנגלית אם נדרש
+            const statusMapping = {
+                'מתוכננת': 'scheduled',
+                'אושרה': 'confirmed',
+                'בוצעה': 'completed',
+                'בוטלה': 'cancelled',
+                'לא הופיעה': 'no_show'
+            };
+
+            const mappedStatus = initialData.status && statusMapping[initialData.status]
+                ? statusMapping[initialData.status]
+                : initialData.status;
+
             setForm({
                 ...form,
                 ...initialData,
-                date: initialData.date ? new Date(initialData.date) : new Date()
+                date: initialData.date ? new Date(initialData.date) : new Date(),
+                status: mappedStatus || 'scheduled'
             });
         }
     }, [initialData]);
@@ -166,8 +180,8 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
                             helperText={errors.status}
                         >
                             {appointmentStatuses.map((status) => (
-                                <MenuItem key={status} value={status}>
-                                    {status}
+                                <MenuItem key={status.value} value={status.value}>
+                                    {status.label}
                                 </MenuItem>
                             ))}
                         </TextField>
@@ -204,7 +218,7 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
                             rows={3}
                         />
                     </Grid>
-                    {form.status === 'בוצעה' && (
+                    {form.status === 'completed' && (
                         <Grid item xs={12}>
                             <TextField
                                 label="סיכום פגישה"

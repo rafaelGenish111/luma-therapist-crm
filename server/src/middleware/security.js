@@ -66,6 +66,20 @@ const signatureLimiter = createRateLimiter(
     'יותר מדי פעולות חתימה. נסה שוב בעוד 30 דקות.'
 );
 
+// Rate limiting for payment operations
+const paymentLimiter = createRateLimiter(
+    15 * 60 * 1000, // 15 minutes
+    20, // 20 payment operations per window
+    'יותר מדי פעולות תשלום. נסה שוב בעוד 15 דקות.'
+);
+
+// Rate limiting for payment callbacks (more restrictive)
+const paymentCallbackLimiter = createRateLimiter(
+    5 * 60 * 1000, // 5 minutes
+    50, // 50 callback requests per window
+    'יותר מדי בקשות callback. נסה שוב בעוד 5 דקות.'
+);
+
 // HTTPS enforcement middleware
 const enforceHTTPS = (req, res, next) => {
     if (process.env.NODE_ENV === 'production' && !req.secure && req.get('x-forwarded-proto') !== 'https') {
@@ -172,6 +186,8 @@ module.exports = {
     passwordResetLimiter,
     otpLimiter,
     signatureLimiter,
+    paymentLimiter,
+    paymentCallbackLimiter,
     enforceHTTPS,
     securityHeaders,
     auditLog,

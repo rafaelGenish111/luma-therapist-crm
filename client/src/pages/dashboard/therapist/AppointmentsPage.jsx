@@ -36,8 +36,13 @@ const AppointmentsPage = () => {
         setError('');
         try {
             const res = await api.get('/appointments');
-            setAppointments(res.data || []);
+            // טיפול בפורמטים שונים של תגובה מה-API
+            const appointmentsData = Array.isArray(res.data)
+                ? res.data
+                : (res.data?.data || res.data?.appointments || []);
+            setAppointments(appointmentsData);
         } catch (err) {
+            console.error('Error fetching appointments:', err);
             setError('שגיאה בטעינת פגישות');
             setAppointments([]);
         } finally {
@@ -49,9 +54,14 @@ const AppointmentsPage = () => {
     const fetchClients = async () => {
         try {
             const res = await api.get('/clients');
-            setClients(res.data || []);
+            // טיפול בפורמטים שונים של תגובה מה-API
+            const clientsData = Array.isArray(res.data)
+                ? res.data
+                : (res.data?.data || res.data?.clients || []);
+            setClients(clientsData);
         } catch (err) {
             console.error('שגיאה בטעינת לקוחות:', err);
+            setClients([]);
         }
     };
 
@@ -155,9 +165,14 @@ const AppointmentsPage = () => {
                     return aptDate >= today && aptDate <= weekFromNow;
                 });
             case 3: // מתוכננות
-                return appointments.filter(apt => apt.status === 'מתוכננת' || apt.status === 'אושרה');
+                return appointments.filter(apt =>
+                    apt.status === 'scheduled' || apt.status === 'confirmed' ||
+                    apt.status === 'מתוכננת' || apt.status === 'אושרה'
+                );
             case 4: // בוצעו
-                return appointments.filter(apt => apt.status === 'בוצעה');
+                return appointments.filter(apt =>
+                    apt.status === 'completed' || apt.status === 'בוצעה'
+                );
             default:
                 return appointments;
         }

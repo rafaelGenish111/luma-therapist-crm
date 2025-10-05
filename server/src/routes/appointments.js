@@ -58,11 +58,29 @@ router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) 
         const appointment = new Appointment(appointmentData);
         await appointment.save();
 
+        console.log('✅ Appointment created successfully:', {
+            id: appointment._id,
+            client: appointment.client,
+            price: appointment.price,
+            status: appointment.status
+        });
+
         // יצירה/עדכון חיוב לפגישה
         try {
-            await ensureChargeForAppointment(appointment);
+            console.log('💰 Attempting to create charge for appointment...');
+            const charge = await ensureChargeForAppointment(appointment);
+            if (charge) {
+                console.log('✅ Charge created successfully:', {
+                    chargeId: charge._id,
+                    amount: charge.amount,
+                    status: charge.status
+                });
+            } else {
+                console.log('ℹ️ No charge created (might be package-based)');
+            }
         } catch (e) {
-            console.warn('ensureChargeForAppointment failed on create:', e.message);
+            console.error('❌ ensureChargeForAppointment failed on create:', e);
+            console.error('❌ Error stack:', e.stack);
         }
 
         // החזרת הפגישה עם פרטי הלקוח

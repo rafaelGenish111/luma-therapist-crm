@@ -8,7 +8,7 @@ import {
 import {
     Add as AddIcon, Download as DownloadIcon, Visibility as ViewIcon,
     Edit as EditIcon, Delete as DeleteIcon, Receipt as ReceiptIcon,
-    Payment as PaymentIcon, AttachMoney as MoneyIcon
+    Payment as PaymentIcon, AttachMoney as MoneyIcon, Send as SendIcon
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -18,6 +18,7 @@ import { he } from 'date-fns/locale';
 import paymentService from '../../../../../services/paymentService';
 import chargeService from '../../../../../services/chargeService';
 import appointmentService from '../../../../../services/appointmentService';
+import SendPaymentLinkModal from '../../../../../components/SendPaymentLinkModal';
 
 const PaymentsTab = ({ client }) => {
     const [payments, setPayments] = useState([]);
@@ -27,6 +28,8 @@ const PaymentsTab = ({ client }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [sendLinkModalOpen, setSendLinkModalOpen] = useState(false);
+    const [selectedAmount, setSelectedAmount] = useState('');
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [selectedCharge, setSelectedCharge] = useState(null);
     const [form, setForm] = useState({
@@ -37,8 +40,12 @@ const PaymentsTab = ({ client }) => {
     });
 
     useEffect(() => {
-        loadPayments();
+        loadData();
     }, [client._id]);
+
+    const loadData = async () => {
+        await loadPayments();
+    };
 
     const loadPayments = async () => {
         try {
@@ -53,20 +60,25 @@ const PaymentsTab = ({ client }) => {
             console.log('🔵 PaymentsTab - Payments data extracted:', paymentsData);
             setPayments(paymentsData);
 
-            // טען כל החיובים (פתוחים ועסורים)
+            // טען כל החיובים (פתוחים וסגורים)
             console.log('🔵 PaymentsTab - Starting to load charges...');
             try {
                 console.log('🔵 PaymentsTab - Calling chargeService.getByClient...');
                 const chargesRes = await chargeService.getByClient(client._id);
                 console.log('🔵 PaymentsTab - Raw charges response:', chargesRes);
-                const allCharges = chargesRes?.charges || [];
+                console.log('🔵 PaymentsTab - chargesRes type:', typeof chargesRes);
+                console.log('🔵 PaymentsTab - chargesRes.charges:', chargesRes?.charges);
+                const allCharges = Array.isArray(chargesRes?.charges) ? chargesRes.charges : [];
                 console.log('🔵 PaymentsTab - All charges:', allCharges);
 
-                // סנן חיובים פתוחים
-                const openCharges = allCharges.filter(charge =>
-                    ['PENDING', 'PARTIALLY_PAID'].includes(charge.status) &&
-                    charge.amount > 0
-                );
+                // סנן חיובים פתוחים (תמיכה באותיות גדולות וקטנות)
+                const openCharges = allCharges.filter(charge => {
+                    const status = charge.status?.toUpperCase();
+                    return (
+                        ['PENDING', 'PARTIALLY_PAID', 'OVERDUE'].includes(status) &&
+                        charge.amount > 0
+                    );
+                });
                 console.log('🔵 PaymentsTab - Open charges:', openCharges);
                 setOpenCharges(openCharges);
             } catch (chargeError) {
@@ -227,6 +239,8 @@ const PaymentsTab = ({ client }) => {
         return `₪${amount?.toFixed(2) || '0.00'}`;
     };
 
+    console.log('🟢 PaymentsTab RENDER - loading:', loading, 'openCharges:', openCharges.length, 'payments:', payments.length);
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
@@ -288,6 +302,42 @@ const PaymentsTab = ({ client }) => {
                     </Card>
                 </Grid>
             </Grid>
+
+            {/* כפתורים מרכזיים */}
+            <Box sx={{ mb: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+                <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<MoneyIcon />}
+                    onClick={() => {
+                        setSelectedAmount('');
+                        setSendLinkModalOpen(true);
+                    }}
+                    color="primary"
+                    sx={{ flex: 1, maxWidth: 300 }}
+                >
+                    בחר סכום לתשלום
+                </Button>
+                <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<PaymentIcon />}
+                    onClick={() => {
+                        const pendingAmount = getPendingAmount();
+                        if (pendingAmount > 0) {
+                            setSelectedAmount(pendingAmount.toString());
+                            setSendLinkModalOpen(true);
+                        } else {
+                            setError('אין סכום ממתין לתשלום');
+                        }
+                    }}
+                    color="success"
+                    disabled={getPendingAmount() === 0}
+                    sx={{ flex: 1, maxWidth: 300 }}
+                >
+                    גבה את כל התשלומים ({paymentService.formatAmount(getPendingAmount())})
+                </Button>
+            </Box>
 
             {/* חיובים פתוחים */}
             {openCharges.length > 0 && (
@@ -568,6 +618,18 @@ const PaymentsTab = ({ client }) => {
             >
                 <AddIcon />
             </Fab>
+
+            {/* Modal לשליחת לינק תשלום */}
+            <SendPaymentLinkModal
+                client={client}
+                open={sendLinkModalOpen}
+                onClose={() => {
+                    setSendLinkModalOpen(false);
+                    setSelectedAmount('');
+                    loadData(); // רענון הנתונים אחרי סגירה
+                }}
+                initialAmount={selectedAmount}
+            />
         </Box>
     );
 };

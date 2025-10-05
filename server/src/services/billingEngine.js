@@ -6,10 +6,26 @@ function calculateAmountFromLineItems(lineItems) {
 }
 
 async function ensureChargeForAppointment(appointment) {
-    if (!appointment) return null;
+    console.log('💰 ensureChargeForAppointment called with:', {
+        appointmentId: appointment?._id,
+        therapist: appointment?.therapist,
+        client: appointment?.client,
+        price: appointment?.price,
+        status: appointment?.status
+    });
+
+    if (!appointment) {
+        console.log('⚠️ No appointment provided');
+        return null;
+    }
 
     const therapistId = appointment.therapist;
     const clientId = appointment.client;
+
+    if (!therapistId || !clientId) {
+        console.error('❌ Missing therapistId or clientId:', { therapistId, clientId });
+        throw new Error('Missing therapistId or clientId for charge creation');
+    }
 
     // אם POLICY הוא PACKAGE ננסה לחייב חבילה
     if (appointment.billingPolicy === 'PACKAGE' && appointment.packageId) {
@@ -29,6 +45,14 @@ async function ensureChargeForAppointment(appointment) {
     const lineItems = [{ type: 'SESSION', qty: 1, unitPrice: appointment.price || 0, note: 'טיפול' }];
 
     const amount = calculateAmountFromLineItems(lineItems);
+
+    // ✨ אם אין מחיר (amount = 0) ואין חיוב קיים, לא ליצור חיוב חדש
+    if (amount === 0 && !existingCharge) {
+        console.log('ℹ️ No charge created - amount is 0 and no existing charge');
+        appointment.paymentStatus = 'UNSET';
+        await appointment.save();
+        return null;
+    }
 
     // קביעת סטטוס בלי הורדה סטטוס של חיוב קיים
     let status;
@@ -60,16 +84,21 @@ async function ensureChargeForAppointment(appointment) {
 
     let charge;
     if (existingCharge) {
+        console.log('📝 Updating existing charge:', existingCharge._id);
         // שמור paidAmount ואל תשכתב אם לא נדרש
         const preservedPaidAmount = existingCharge.paidAmount || 0;
         existingCharge.set(payload);
         existingCharge.paidAmount = preservedPaidAmount;
         existingCharge.audit.push({ action: 'UPDATED_FROM_APPOINTMENT' });
         charge = await existingCharge.save();
+        console.log('✅ Charge updated successfully');
     } else {
+        console.log('➕ Creating new charge with payload:', payload);
         charge = await Charge.create({ ...payload, audit: [{ action: 'CREATED_FROM_APPOINTMENT' }] });
+        console.log('✅ Charge created:', charge._id);
         appointment.chargeId = charge._id;
         await appointment.save();
+        console.log('✅ Appointment updated with chargeId');
     }
 
     // עדכון סטטוס תשלום בפגישה לפי מצב החיוב
