@@ -76,7 +76,7 @@ const MiniCalendar = ({
     // קבלת צבע לפי סטטוס פגישות
     const getAppointmentStatusColor = (appointments) => {
         if (appointments.length === 0) return 'default';
-        
+
         const statuses = appointments.map(apt => apt.status);
         if (statuses.includes('cancelled')) return 'error';
         if (statuses.includes('no_show')) return 'warning';
@@ -138,9 +138,9 @@ const MiniCalendar = ({
     }, [appointments, viewDate]);
 
     return (
-        <Paper 
-            sx={{ 
-                p: 2, 
+        <Paper
+            sx={{
+                p: 2,
                 maxWidth: maxWidth,
                 width: '100%',
                 borderRadius: 2,
@@ -152,7 +152,7 @@ const MiniCalendar = ({
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                     {viewDate.format('MMMM YYYY')}
                 </Typography>
-                
+
                 {showNavigation && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <IconButton size="small" onClick={handlePreviousMonth}>
@@ -175,7 +175,7 @@ const MiniCalendar = ({
                         key={index}
                         variant="caption"
                         align="center"
-                        sx={{ 
+                        sx={{
                             fontWeight: 'bold',
                             color: 'text.secondary',
                             py: 0.5
@@ -222,8 +222,8 @@ const MiniCalendar = ({
                                 cursor: 'pointer',
                                 position: 'relative',
                                 backgroundColor: day.isToday && highlightToday ? 'primary.main' : 'transparent',
-                                color: day.isToday && highlightToday ? 'primary.contrastText' : 
-                                      day.isCurrentMonth ? 'text.primary' : 'text.disabled',
+                                color: day.isToday && highlightToday ? 'primary.contrastText' :
+                                    day.isCurrentMonth ? 'text.primary' : 'text.disabled',
                                 '&:hover': {
                                     backgroundColor: day.isToday ? 'primary.dark' : 'action.hover',
                                 },
@@ -234,7 +234,7 @@ const MiniCalendar = ({
                             <Typography variant="body2" sx={{ fontWeight: day.isToday ? 'bold' : 'normal' }}>
                                 {day.date.format('D')}
                             </Typography>
-                            
+
                             {/* אינדיקטור פגישות */}
                             {day.appointmentCount > 0 && showEventCount && (
                                 <Box
@@ -245,8 +245,8 @@ const MiniCalendar = ({
                                         width: 6,
                                         height: 6,
                                         borderRadius: '50%',
-                                        backgroundColor: getAppointmentColor(day.appointmentCount) === 'default' ? 
-                                            'text.secondary' : 
+                                        backgroundColor: getAppointmentColor(day.appointmentCount) === 'default' ?
+                                            'text.secondary' :
                                             `${getAppointmentColor(day.appointmentCount)}.main`
                                     }}
                                 />
@@ -265,7 +265,7 @@ const MiniCalendar = ({
                             <EventIcon fontSize="small" />
                             סיכום החודש
                         </Typography>
-                        
+
                         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                             <Chip
                                 label={`סה"כ: ${monthStats.total}`}
@@ -273,7 +273,7 @@ const MiniCalendar = ({
                                 color="primary"
                                 variant="outlined"
                             />
-                            
+
                             {Object.entries(monthStats.byStatus).map(([status, count]) => (
                                 <Chip
                                     key={status}

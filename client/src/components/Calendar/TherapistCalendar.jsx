@@ -118,10 +118,10 @@ const TherapistCalendar = ({
     // סינון פגישות
     const filteredAppointments = useMemo(() => {
         return appointments.filter(appointment => {
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 appointment.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 appointment.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-            
+
             const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
             const matchesService = serviceFilter === 'all' || appointment.serviceType === serviceFilter;
             const matchesClient = clientFilter === 'all' || appointment.clientId === clientFilter;
@@ -155,10 +155,10 @@ const TherapistCalendar = ({
     // סגנון אירועים
     const eventStyleGetter = useCallback((event) => {
         const { status, serviceType, location, googleCalendarSynced } = event.resource;
-        
+
         let backgroundColor = STATUS_COLORS[status] || '#2196F3';
         let borderColor = backgroundColor;
-        
+
         // אם לא סונכרן עם Google, הוסף קו מקווקו
         if (!googleCalendarSynced && status !== 'cancelled') {
             borderColor = '#FF5722';
@@ -231,7 +231,7 @@ const TherapistCalendar = ({
                     </Button>
                 </ButtonGroup>
             </Box>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <IconButton onClick={() => onNavigate('PREV')} size="small">
                     <NavigateBeforeIcon />
@@ -249,7 +249,7 @@ const TherapistCalendar = ({
     // רכיב Event מותאם אישית
     const CustomEvent = useCallback(({ event }) => {
         const { status, serviceType, location, googleCalendarSynced, meetingUrl } = event.resource;
-        
+
         const getLocationIcon = () => {
             switch (location) {
                 case 'online': return <VideoCallIcon sx={{ fontSize: 12 }} />;
@@ -280,7 +280,7 @@ const TherapistCalendar = ({
             return acc;
         }, {});
         const synced = filteredAppointments.filter(apt => apt.googleCalendarSynced).length;
-        
+
         return { total, byStatus, synced };
     }, [filteredAppointments]);
 
@@ -313,7 +313,7 @@ const TherapistCalendar = ({
                             }}
                             sx={{ minWidth: 200 }}
                         />
-                        
+
                         <IconButton
                             onClick={() => setShowFilters(!showFilters)}
                             color={showFilters ? 'primary' : 'default'}

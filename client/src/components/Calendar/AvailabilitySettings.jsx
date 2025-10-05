@@ -174,7 +174,7 @@ const AvailabilitySettings = ({
     const generateWeekPreview = (schedule) => {
         const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
         const nextWeek = moment().add(1, 'week').startOf('week');
-        
+
         return schedule.map((daySchedule, index) => {
             const dayDate = nextWeek.clone().add(index, 'days');
             const totalMinutes = daySchedule.timeSlots.reduce((total, slot) => {
@@ -182,7 +182,7 @@ const AvailabilitySettings = ({
                 const end = moment(slot.endTime, 'HH:mm');
                 return total + end.diff(start, 'minutes');
             }, 0);
-            
+
             return {
                 dayName: days[index],
                 date: dayDate.format('DD/MM'),

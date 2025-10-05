@@ -219,7 +219,7 @@ const AppointmentModal = ({
 
         while (currentDate.isBefore(endMoment) && preview.length < 10) {
             preview.push(currentDate.clone());
-            
+
             switch (frequency) {
                 case 'daily':
                     currentDate.add(1, 'day');
@@ -348,9 +348,9 @@ const AppointmentModal = ({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <ScheduleIcon />
                         <Typography variant="h6">
-                            {mode === 'create' ? 'פגישה חדשה' : 
-                             mode === 'edit' ? 'עריכת פגישה' : 
-                             'פרטי פגישה'}
+                            {mode === 'create' ? 'פגישה חדשה' :
+                                mode === 'edit' ? 'עריכת פגישה' :
+                                    'פרטי פגישה'}
                         </Typography>
                         {appointment?.googleCalendarSynced && (
                             <Tooltip title="מסונכרן עם Google Calendar">
@@ -387,9 +387,9 @@ const AppointmentModal = ({
                                         <Autocomplete
                                             {...field}
                                             options={clients}
-                                            getOptionLabel={(option) => 
-                                                typeof option === 'string' ? option : 
-                                                `${option.firstName} ${option.lastName}`
+                                            getOptionLabel={(option) =>
+                                                typeof option === 'string' ? option :
+                                                    `${option.firstName} ${option.lastName}`
                                             }
                                             value={clients.find(c => c._id === field.value) || null}
                                             onChange={(event, newValue) => {
@@ -638,7 +638,7 @@ const AppointmentModal = ({
                                 <Typography variant="h6" gutterBottom>
                                     פגישות חוזרות
                                 </Typography>
-                                
+
                                 <Controller
                                     name="recurringPattern.isRecurring"
                                     control={control}
@@ -742,11 +742,11 @@ const AppointmentModal = ({
                             {/* התנגשויות */}
                             {conflicts.length > 0 && (
                                 <Grid item xs={12}>
-                                    <Alert 
-                                        severity="warning" 
+                                    <Alert
+                                        severity="warning"
                                         action={
-                                            <Button 
-                                                color="inherit" 
+                                            <Button
+                                                color="inherit"
                                                 size="small"
                                                 onClick={() => setShowConflicts(!showConflicts)}
                                             >
@@ -756,7 +756,7 @@ const AppointmentModal = ({
                                     >
                                         נמצאו {conflicts.length} התנגשויות אפשריות
                                     </Alert>
-                                    
+
                                     <Collapse in={showConflicts}>
                                         <Box sx={{ mt: 1 }}>
                                             {conflicts.map((conflict, index) => (
@@ -778,7 +778,7 @@ const AppointmentModal = ({
                                     <Typography variant="h6" gutterBottom>
                                         מידע נוסף
                                     </Typography>
-                                    
+
                                     <Grid container spacing={2}>
                                         <Grid item xs={12} md={4}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -870,7 +870,7 @@ const AppointmentModal = ({
                     <Button onClick={onClose} disabled={loading}>
                         בטל
                     </Button>
-                    
+
                     {mode !== 'view' && (
                         <Button
                             onClick={handleSubmit(handleSave)}

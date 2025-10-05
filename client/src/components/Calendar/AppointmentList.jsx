@@ -118,20 +118,20 @@ const AppointmentList = ({
     // סינון ומיון פגישות
     const filteredAndSortedAppointments = useMemo(() => {
         let filtered = appointments.filter(appointment => {
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 appointment.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 appointment.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-            
+
             const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
             const matchesService = serviceFilter === 'all' || appointment.serviceType === serviceFilter;
             const matchesPayment = paymentFilter === 'all' || appointment.paymentStatus === paymentFilter;
-            const matchesSync = syncFilter === 'all' || 
+            const matchesSync = syncFilter === 'all' ||
                 (syncFilter === 'synced' && appointment.googleCalendarSynced) ||
                 (syncFilter === 'not_synced' && !appointment.googleCalendarSynced);
 
             const appointmentDate = moment(appointment.startTime || appointment.date);
             const matchesDateRange = (!dateRange.start || appointmentDate.isSameOrAfter(dateRange.start, 'day')) &&
-                                   (!dateRange.end || appointmentDate.isSameOrBefore(dateRange.end, 'day'));
+                (!dateRange.end || appointmentDate.isSameOrBefore(dateRange.end, 'day'));
 
             return matchesSearch && matchesStatus && matchesService && matchesPayment && matchesSync && matchesDateRange;
         });
@@ -139,7 +139,7 @@ const AppointmentList = ({
         // מיון
         filtered.sort((a, b) => {
             let aValue, bValue;
-            
+
             switch (sortBy) {
                 case 'startTime':
                     aValue = new Date(a.startTime || a.date);
@@ -192,8 +192,8 @@ const AppointmentList = ({
     };
 
     const handleSelectOne = (appointmentId) => {
-        setSelectedAppointments(prev => 
-            prev.includes(appointmentId) 
+        setSelectedAppointments(prev =>
+            prev.includes(appointmentId)
                 ? prev.filter(id => id !== appointmentId)
                 : [...prev, appointmentId]
         );
@@ -234,7 +234,7 @@ const AppointmentList = ({
     // פעולות על מספר פגישות
     const handleBulkAction = (action) => {
         if (selectedAppointments.length === 0) return;
-        
+
         setBulkActionDialog(true);
         // כאן יהיה הטיפול בפעולות על מספר פגישות
     };
@@ -404,7 +404,7 @@ const AppointmentList = ({
                             <IconButton onClick={onRefresh} disabled={loading}>
                                 <RefreshIcon />
                             </IconButton>
-                            
+
                             {selectedAppointments.length > 0 && (
                                 <Button
                                     onClick={() => handleBulkAction('status')}
@@ -415,7 +415,7 @@ const AppointmentList = ({
                                     פעולות על {selectedAppointments.length}
                                 </Button>
                             )}
-                            
+
                             <Button
                                 onClick={onExport}
                                 startIcon={<DownloadIcon />}
@@ -511,7 +511,7 @@ const AppointmentList = ({
                                                     onChange={() => handleSelectOne(appointment._id)}
                                                 />
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Box>
                                                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
@@ -522,7 +522,7 @@ const AppointmentList = ({
                                                     </Typography>
                                                 </Box>
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                     <Avatar sx={{ width: 32, height: 32 }}>
@@ -538,7 +538,7 @@ const AppointmentList = ({
                                                     </Box>
                                                 </Box>
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Chip
                                                     label={getServiceTypeLabel(appointment.serviceType)}
@@ -546,7 +546,7 @@ const AppointmentList = ({
                                                     variant="outlined"
                                                 />
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                                     <AccessTimeIcon fontSize="small" />
@@ -555,7 +555,7 @@ const AppointmentList = ({
                                                     </Typography>
                                                 </Box>
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Chip
                                                     label={getStatusLabel(appointment.status)}
@@ -563,7 +563,7 @@ const AppointmentList = ({
                                                     size="small"
                                                 />
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                     <Chip
@@ -578,7 +578,7 @@ const AppointmentList = ({
                                                     )}
                                                 </Box>
                                             </TableCell>
-                                            
+
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                                     {appointment.googleCalendarSynced ? (
@@ -593,7 +593,7 @@ const AppointmentList = ({
                                                     {getLocationIcon(appointment.location)}
                                                 </Box>
                                             </TableCell>
-                                            
+
                                             <TableCell align="center">
                                                 <IconButton
                                                     onClick={(e) => setAnchorEl({ [appointment._id]: e.currentTarget })}
@@ -601,7 +601,7 @@ const AppointmentList = ({
                                                 >
                                                     <MoreVertIcon />
                                                 </IconButton>
-                                                
+
                                                 <Menu
                                                     anchorEl={anchorEl?.[appointment._id]}
                                                     open={Boolean(anchorEl?.[appointment._id])}
@@ -649,7 +649,7 @@ const AppointmentList = ({
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    
+
                     <TablePagination
                         rowsPerPageOptions={[10, 20, 50, 100]}
                         component="div"
