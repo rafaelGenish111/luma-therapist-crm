@@ -171,4 +171,10 @@ blockedTimeSchema.pre('save', async function (next) {
     next();
 });
 
+// Indexes for performance optimization
+blockedTimeSchema.index({ therapistId: 1, startTime: 1 });
+blockedTimeSchema.index({ startTime: 1, endTime: 1 });
+blockedTimeSchema.index({ isRecurring: 1, 'recurringPattern.parentBlockedTimeId': 1 });
+blockedTimeSchema.index({ reason: 1 });
+
 module.exports = mongoose.model('BlockedTime', blockedTimeSchema);

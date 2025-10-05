@@ -327,4 +327,51 @@ appointmentSchema.pre('save', function (next) {
     next();
 });
 
+// Indexes for performance optimization
+appointmentSchema.index({ therapistId: 1, startTime: 1 });
+appointmentSchema.index({ clientId: 1, startTime: 1 });
+appointmentSchema.index({ status: 1, startTime: 1 });
+appointmentSchema.index({ googleEventId: 1 }, { sparse: true });
+appointmentSchema.index({ confirmationCode: 1 }, { unique: true, sparse: true });
+
+// Compound indexes for complex queries
+appointmentSchema.index({ therapistId: 1, status: 1, startTime: 1 });
+appointmentSchema.index({ clientId: 1, status: 1, startTime: 1 });
+appointmentSchema.index({ startTime: 1, endTime: 1 });
+appointmentSchema.index({ status: 1, createdAt: 1 });
+
+// Text search index for notes and search functionality
+appointmentSchema.index({ 
+    notes: 'text', 
+    privateNotes: 'text',
+    cancellationReason: 'text' 
+});
+
+// Partial indexes for better performance
+appointmentSchema.index(
+    { therapistId: 1, startTime: 1 }, 
+    { 
+        partialFilterExpression: { status: { $in: ['confirmed', 'pending'] } },
+        name: 'active_appointments_index'
+    }
+);
+
+appointmentSchema.index(
+    { googleEventId: 1 }, 
+    { 
+        partialFilterExpression: { googleEventId: { $exists: true } },
+        name: 'google_synced_appointments_index'
+    }
+);
+
+// TTL index for automatic cleanup of old cancelled appointments
+appointmentSchema.index(
+    { createdAt: 1 }, 
+    { 
+        partialFilterExpression: { status: 'cancelled' },
+        expireAfterSeconds: 90 * 24 * 60 * 60, // 90 days
+        name: 'cancelled_appointments_ttl'
+    }
+);
+
 module.exports = mongoose.model('Appointment', appointmentSchema); 

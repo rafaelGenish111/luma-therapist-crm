@@ -207,4 +207,10 @@ googleCalendarSyncSchema.methods.getTokens = function () {
     };
 };
 
+// Indexes for performance optimization
+googleCalendarSyncSchema.index({ therapistId: 1 }, { unique: true });
+googleCalendarSyncSchema.index({ webhookChannelId: 1 });
+googleCalendarSyncSchema.index({ syncEnabled: 1, lastSyncedAt: 1 });
+googleCalendarSyncSchema.index({ googleCalendarId: 1 });
+
 module.exports = mongoose.model('GoogleCalendarSync', googleCalendarSyncSchema);

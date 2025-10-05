@@ -177,4 +177,9 @@ therapistAvailabilitySchema.pre('save', function (next) {
     next();
 });
 
+// Indexes for performance optimization
+therapistAvailabilitySchema.index({ therapistId: 1 }, { unique: true });
+therapistAvailabilitySchema.index({ 'weeklySchedule.dayOfWeek': 1 });
+therapistAvailabilitySchema.index({ timezone: 1 });
+
 module.exports = mongoose.model('TherapistAvailability', therapistAvailabilitySchema);
