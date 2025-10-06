@@ -65,8 +65,10 @@ let scheduledTasks = null;
 if (!process.env.VERCEL) {
     try {
         scheduledTasks = require('./services/scheduledTasks');
+        console.log('✅ Scheduled tasks loaded successfully');
     } catch (error) {
         console.log('⚠️ Failed to load scheduled tasks:', error.message);
+        console.log('⚠️ Error stack:', error.stack);
     }
 }
 
@@ -138,11 +140,7 @@ app.use(cookieParser());
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// התחבר פעם אחת בהתחלה
-connectDB().catch(err => {
-    console.error('❌ Initial MongoDB connection failed:', err);
-    // אל תעצור את השרת - זה serverless, הוא ינסה שוב בפעם הבאה
-});
+// MongoDB connection will be handled in initializeApp()
 
 // Routes
 app.use('/api/auth', authRoutes);
