@@ -60,17 +60,8 @@ const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const dashboardRoutes = require('./routes/dashboard');
 const calendarRoutes = require('./routes/calendar.routes');
 
-// Import scheduled tasks only in non-serverless environment
+// Scheduled tasks will be loaded after MongoDB connection
 let scheduledTasks = null;
-if (!process.env.VERCEL) {
-    try {
-        scheduledTasks = require('./services/scheduledTasks');
-        console.log('✅ Scheduled tasks loaded successfully');
-    } catch (error) {
-        console.log('⚠️ Failed to load scheduled tasks:', error.message);
-        console.log('⚠️ Error stack:', error.stack);
-    }
-}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -256,13 +247,14 @@ const initializeApp = async () => {
             isConnected = true;
             console.log('📦 Database connected successfully');
 
-            // הפעלת עבודות מתוזמנות רק אם לא ב-Vercel
-            if (scheduledTasks && (process.env.NODE_ENV !== 'production' || !process.env.VERCEL)) {
+            // טעינת והפעלת עבודות מתוזמנות
+            if (!process.env.VERCEL) {
                 try {
+                    scheduledTasks = require('./services/scheduledTasks');
                     scheduledTasks.startAll();
                     console.log('⏰ Scheduled tasks started');
                 } catch (error) {
-                    console.log('⚠️ Failed to start scheduled tasks:', error.message);
+                    console.log('⚠️ Failed to load scheduled tasks:', error.message);
                 }
             } else {
                 console.log('⏰ Scheduled tasks disabled in serverless environment');
@@ -287,9 +279,15 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
             await connectDB();
             console.log('✅ MongoDB connected successfully');
 
-            // הפעלת עבודות מתוזמנות
-            if (scheduledTasks) {
-                scheduledTasks.startAll();
+            // טעינת והפעלת עבודות מתוזמנות
+            if (!process.env.VERCEL) {
+                try {
+                    scheduledTasks = require('./services/scheduledTasks');
+                    scheduledTasks.startAll();
+                    console.log('⏰ Scheduled tasks started');
+                } catch (error) {
+                    console.log('⚠️ Failed to load scheduled tasks:', error.message);
+                }
             }
 
             const server = app.listen(PORT, '0.0.0.0', () => {
@@ -301,7 +299,9 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
             // Graceful shutdown
             const gracefulShutdown = () => {
                 console.log('🛑 Shutting down gracefully...');
-                scheduledTasks.stopAll();
+                if (scheduledTasks) {
+                    scheduledTasks.stopAll();
+                }
                 server.close(() => {
                     console.log('💤 Server closed');
                     process.exit(0);
