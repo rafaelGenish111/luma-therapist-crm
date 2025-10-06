@@ -34,7 +34,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    QRCode,
+    // QRCode,
     useTheme,
     useMediaQuery
 } from '@mui/material';
