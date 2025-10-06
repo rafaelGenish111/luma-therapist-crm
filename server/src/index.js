@@ -266,6 +266,19 @@ const initializeApp = async () => {
     }
 };
 
+// Global unhandled rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+    // Don't exit - log and continue
+});
+
+// Global uncaught exception handler
+process.on('uncaughtException', (error) => {
+    console.error('🚨 Uncaught Exception:', error);
+    // Don't exit immediately - give time to log
+    setTimeout(() => process.exit(1), 1000);
+});
+
 console.log('📝 Checking if should start server...');
 console.log('📝 require.main === module:', require.main === module);
 console.log('📝 NODE_ENV:', process.env.NODE_ENV);
