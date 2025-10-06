@@ -324,7 +324,6 @@ appointmentSchema.index({ clientId: 1, startTime: 1 });
 appointmentSchema.index({ status: 1, startTime: 1 });
 
 // Compound indexes for complex queries
-appointmentSchema.index({ therapistId: 1, status: 1, startTime: 1 });
 appointmentSchema.index({ clientId: 1, status: 1, startTime: 1 });
 appointmentSchema.index({ startTime: 1, endTime: 1 });
 appointmentSchema.index({ status: 1, createdAt: 1 });

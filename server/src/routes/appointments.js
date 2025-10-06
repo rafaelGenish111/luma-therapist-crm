@@ -11,26 +11,26 @@ router.get('/stats', auth, authorize(['manage_own_appointments']), async (req, r
     try {
         const therapistId = req.user.id;
         const { date } = req.query;
-        
+
         const query = {
             therapist: therapistId,
             deletedAt: null
         };
-        
+
         if (date) {
             const startOfDay = new Date(date);
             startOfDay.setHours(0, 0, 0, 0);
             const endOfDay = new Date(date);
             endOfDay.setHours(23, 59, 59, 999);
-            
+
             query.date = {
                 $gte: startOfDay,
                 $lte: endOfDay
             };
         }
-        
+
         const appointments = await Appointment.find(query);
-        
+
         const stats = {
             total: appointments.length,
             byStatus: {
@@ -50,7 +50,7 @@ router.get('/stats', auth, authorize(['manage_own_appointments']), async (req, r
                 .filter(apt => apt.status === 'completed' && apt.paymentAmount)
                 .reduce((sum, apt) => sum + (apt.paymentAmount || 0), 0)
         };
-        
+
         res.json({ success: true, data: stats });
     } catch (error) {
         console.error('Error fetching appointment stats:', error);
