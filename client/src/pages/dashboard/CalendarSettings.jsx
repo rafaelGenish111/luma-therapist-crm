@@ -46,7 +46,7 @@ import {
     Policy,
     Add,
     Remove,
-    Copy,
+    ContentCopy as Copy,
     QrCode,
     CheckCircle,
     Error,
