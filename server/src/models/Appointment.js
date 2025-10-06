@@ -211,12 +211,7 @@ appointmentSchema.pre(/^find/, function () {
     }
 });
 
-// אינדקסים
-appointmentSchema.index({ therapistId: 1, startTime: 1 });
-appointmentSchema.index({ clientId: 1, startTime: 1 });
-appointmentSchema.index({ googleEventId: 1 });
-appointmentSchema.index({ status: 1, startTime: 1 });
-// אינדקסים קיימים לשמירה על תאימות
+// אינדקסים קיימים לשמירה על תאימות (backward compatibility)
 appointmentSchema.index({ therapist: 1, date: 1 });
 appointmentSchema.index({ client: 1, date: 1 });
 
