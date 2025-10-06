@@ -4,7 +4,6 @@ import {
     momentLocalizer,
     Views,
     Toolbar,
-    DateHeader,
     Event
 } from 'react-big-calendar';
 import moment from 'moment';
