@@ -63,6 +63,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import moment from 'moment';
 import 'moment/locale/he';
+
+// Set Hebrew as default locale
+moment.locale('he');
 // Remove date-fns imports - using moment instead
 import api from '../../services/api';
 
@@ -203,7 +206,7 @@ const CalendarPage = () => {
                     handleNewAppointment();
                     break;
                 case 't':
-                    setCurrentDate(new Date());
+                    setCurrentDate(moment());
                     break;
                 case 'arrowleft':
                     handlePreviousDate();
@@ -266,27 +269,23 @@ const CalendarPage = () => {
     };
 
     const handlePreviousDate = () => {
-        const newDate = new Date(currentDate);
         if (view === 'day') {
-            newDate.setDate(newDate.getDate() - 1);
+            setCurrentDate(moment(currentDate).subtract(1, 'day'));
         } else if (view === 'week') {
-            newDate.setDate(newDate.getDate() - 7);
+            setCurrentDate(moment(currentDate).subtract(1, 'week'));
         } else {
-            newDate.setMonth(newDate.getMonth() - 1);
+            setCurrentDate(moment(currentDate).subtract(1, 'month'));
         }
-        setCurrentDate(newDate);
     };
 
     const handleNextDate = () => {
-        const newDate = new Date(currentDate);
         if (view === 'day') {
-            newDate.setDate(newDate.getDate() + 1);
+            setCurrentDate(moment(currentDate).add(1, 'day'));
         } else if (view === 'week') {
-            newDate.setDate(newDate.getDate() + 7);
+            setCurrentDate(moment(currentDate).add(1, 'week'));
         } else {
-            newDate.setMonth(newDate.getMonth() + 1);
+            setCurrentDate(moment(currentDate).add(1, 'month'));
         }
-        setCurrentDate(newDate);
     };
 
     const handleFilterChange = (filterType, key, value) => {
@@ -599,7 +598,7 @@ const CalendarPage = () => {
                             <Button
                                 variant="outlined"
                                 startIcon={<Today />}
-                                onClick={() => setCurrentDate(new Date())}
+                                onClick={() => setCurrentDate(moment())}
                             >
                                 היום
                             </Button>
