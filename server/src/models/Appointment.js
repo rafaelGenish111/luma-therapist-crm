@@ -165,8 +165,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     chargeId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Charge',
-        index: true
+        ref: 'Charge'
     },
     packageId: {
         type: mongoose.Schema.Types.ObjectId,

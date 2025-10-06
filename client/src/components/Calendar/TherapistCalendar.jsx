@@ -3,8 +3,7 @@ import {
     Calendar,
     momentLocalizer,
     Views,
-    Toolbar,
-    Event
+    Toolbar
 } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/he';

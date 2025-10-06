@@ -5,7 +5,6 @@ const importantInfoSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Therapist',
         required: true,
-        index: true
     },
     title: {
         type: String,

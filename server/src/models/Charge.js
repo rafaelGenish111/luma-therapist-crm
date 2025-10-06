@@ -19,15 +19,14 @@ const auditEntrySchema = new mongoose.Schema({
 }, { _id: false });
 
 const chargeSchema = new mongoose.Schema({
-    therapistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Therapist', index: true, required: true },
-    clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', index: true, required: true },
-    appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment', index: true },
+    therapistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Therapist', required: true },
+    clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
+    appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' },
 
     status: {
         type: String,
         enum: ['DRAFT', 'PENDING', 'PAID', 'PARTIALLY_PAID', 'FAILED', 'CANCELED', 'REFUNDED', 'WRITEOFF'],
         default: 'PENDING',
-        index: true
     },
 
     amount: { type: Number, required: true, min: 0 },
@@ -47,7 +46,7 @@ const chargeSchema = new mongoose.Schema({
     paidAt: { type: Date },
 
     provider: { type: String, enum: ['STRIPE', 'TR-ZILLA', 'NONE'], default: 'NONE' },
-    providerChargeId: { type: String, index: true },
+    providerChargeId: { type: String },
     providerInvoiceId: { type: String },
 
     invoiceNumber: { type: String },

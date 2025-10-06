@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const otpTokenSchema = new mongoose.Schema({
     userId: {
         type: String,
-        index: true,
         required: true
     },
     payloadHash: {

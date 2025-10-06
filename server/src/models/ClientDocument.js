@@ -6,7 +6,6 @@ const clientDocumentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Client',
         required: [true, 'לקוח הוא שדה חובה'],
-        index: true
     },
 
     // פרטי המסמך

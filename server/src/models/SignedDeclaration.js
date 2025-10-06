@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const signedDeclarationSchema = new mongoose.Schema({
     userId: {
         type: String,
-        index: true,
         required: true
     },
     signerName: String,

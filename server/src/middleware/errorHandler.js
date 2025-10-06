@@ -274,7 +274,7 @@ const uncaughtExceptionHandler = () => {
             error: err.message,
             stack: err.stack
         });
-        
+
         process.exit(1);
     });
 };
@@ -289,7 +289,7 @@ const unhandledRejectionHandler = () => {
             error: err.message,
             stack: err.stack
         });
-        
+
         process.exit(1);
     });
 };
@@ -366,16 +366,16 @@ const externalServiceErrorHandler = (error, service) => {
 const initializeErrorHandlers = (app) => {
     // Global error handler
     app.use(globalErrorHandler);
-    
+
     // 404 handler
     app.use(notFoundHandler);
-    
+
     // Uncaught exception handler
     uncaughtExceptionHandler();
-    
+
     // Unhandled rejection handler
     unhandledRejectionHandler();
-    
+
     logger.info('Error handlers initialized');
 };
 
