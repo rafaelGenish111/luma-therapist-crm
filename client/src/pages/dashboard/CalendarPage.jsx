@@ -66,10 +66,10 @@ import { format, startOfDay, endOfDay, isToday, isTomorrow, isYesterday } from '
 import axios from 'axios';
 
 // Import existing components
-import { TherapistCalendar } from '../../components/Calendar/TherapistCalendar';
-import { AppointmentModal } from '../../components/Calendar/AppointmentModal';
-import { AvailabilitySettings } from '../../components/Calendar/AvailabilitySettings';
-import { MiniCalendar } from '../../components/Calendar/MiniCalendar';
+import TherapistCalendar from '../../components/Calendar/TherapistCalendar';
+import AppointmentModal from '../../components/Calendar/AppointmentModal';
+import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
+import MiniCalendar from '../../components/Calendar/MiniCalendar';
 
 const CalendarPage = () => {
     const navigate = useNavigate();
