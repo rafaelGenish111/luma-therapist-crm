@@ -63,13 +63,14 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { he } from 'date-fns/locale';
 import { format, startOfDay, endOfDay, isToday, isTomorrow, isYesterday } from 'date-fns';
-import axios from 'axios';
+import api from '../../../services/api';
 
 // Import existing components
 import TherapistCalendar from '../../components/Calendar/TherapistCalendar';
 import AppointmentModal from '../../components/Calendar/AppointmentModal';
 import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
 import MiniCalendar from '../../components/Calendar/MiniCalendar';
+import '../../../styles/calendar.css';
 
 const CalendarPage = () => {
     const navigate = useNavigate();
@@ -130,7 +131,7 @@ const CalendarPage = () => {
             const startDate = startOfDay(currentDate);
             const endDate = endOfDay(currentDate);
 
-            const response = await axios.get('/api/appointments', {
+            const response = await api.get('/appointments', {
                 params: {
                     startDate: startDate.toISOString(),
                     endDate: endDate.toISOString(),
@@ -151,7 +152,7 @@ const CalendarPage = () => {
     const loadStats = useCallback(async () => {
         try {
             const today = startOfDay(new Date());
-            const response = await axios.get('/api/appointments/stats', {
+            const response = await api.get('/appointments/stats', {
                 params: { date: today.toISOString() }
             });
 
@@ -164,7 +165,7 @@ const CalendarPage = () => {
     // Load sync status
     const loadSyncStatus = useCallback(async () => {
         try {
-            const response = await axios.get('/api/calendar/sync-status');
+            const response = await api.get('/calendar/sync-status');
             setSyncStatus(response.data);
         } catch (err) {
             console.error('Error loading sync status:', err);
@@ -240,7 +241,7 @@ const CalendarPage = () => {
 
     const handleEventDrop = async (event) => {
         try {
-            await axios.put(`/api/appointments/${event._id}`, {
+            await api.put(`/appointments/${event._id}`, {
                 startTime: event.startTime,
                 endTime: event.endTime
             });
@@ -253,7 +254,7 @@ const CalendarPage = () => {
     const handleSyncNow = async () => {
         try {
             setSyncStatus(prev => ({ ...prev, syncing: true }));
-            await axios.post('/api/calendar/sync');
+            await api.post('/calendar/sync');
             await loadSyncStatus();
             await loadAppointments();
         } catch (err) {
@@ -510,10 +511,10 @@ const CalendarPage = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={he}>
-            <Container maxWidth={false} sx={{ py: 2 }}>
+            <Container maxWidth="xl" sx={{ py: 3 }}>
                 {/* Header */}
-                <Paper sx={{ p: 2, mb: 2 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+                <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2} mb={2}>
                         <Box display="flex" alignItems="center" gap={2}>
                             <Typography variant="h4">
                                 היומן שלי
@@ -632,26 +633,9 @@ const CalendarPage = () => {
 
                 {/* Main Content */}
                 <Grid container spacing={2}>
-                    {/* Sidebar */}
-                    <Grid item xs={12} md={3}>
-                        {isMobile ? (
-                            <Drawer
-                                anchor="left"
-                                open={sidebarOpen}
-                                onClose={() => setSidebarOpen(false)}
-                            >
-                                <Box sx={{ width: 250 }}>
-                                    <Sidebar />
-                                </Box>
-                            </Drawer>
-                        ) : (
-                            <Sidebar />
-                        )}
-                    </Grid>
-
                     {/* Main Calendar */}
-                    <Grid item xs={12} md={9}>
-                        <Paper sx={{ height: 'calc(100vh - 200px)', minHeight: 600 }}>
+                    <Grid item xs={12} md={9} order={{ xs: 2, md: 1 }}>
+                        <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
                             <TherapistCalendar
                                 appointments={appointments}
                                 currentDate={currentDate}
@@ -664,6 +648,23 @@ const CalendarPage = () => {
                                 onNavigate={setCurrentDate}
                             />
                         </Paper>
+                    </Grid>
+
+                    {/* Sidebar */}
+                    <Grid item xs={12} md={3} order={{ xs: 1, md: 2 }}>
+                        {isMobile ? (
+                            <Drawer
+                                anchor="left"
+                                open={sidebarOpen}
+                                onClose={() => setSidebarOpen(false)}
+                            >
+                                <Box sx={{ width: 280, p: 2 }}>
+                                    <Sidebar />
+                                </Box>
+                            </Drawer>
+                        ) : (
+                            <Sidebar />
+                        )}
                     </Grid>
                 </Grid>
 
