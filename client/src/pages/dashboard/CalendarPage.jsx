@@ -83,6 +83,7 @@ const CalendarPage = () => {
 
     // State management
     const [appointments, setAppointments] = useState([]);
+    const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentDate, setCurrentDate] = useState(moment());
@@ -179,6 +180,17 @@ const CalendarPage = () => {
     // Effects
     useEffect(() => {
         loadAppointments();
+        // טען לקוחות להצגת רשימה נפתחת בטופס
+        (async () => {
+            try {
+                const res = await api.get('/clients');
+                const list = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.clients || []);
+                setClients(list);
+            } catch (e) {
+                console.error('שגיאה בטעינת לקוחות:', e);
+                setClients([]);
+            }
+        })();
     }, [loadAppointments]);
 
     useEffect(() => {
@@ -694,30 +706,52 @@ const CalendarPage = () => {
                     open={showAppointmentModal}
                     onClose={() => setShowAppointmentModal(false)}
                     appointment={selectedAppointment}
-                    onSave={() => {
-                        setShowAppointmentModal(false);
-                        loadAppointments();
-                    }}
-                />
+                                clients={clients}
+                                onSave={async (appointmentData) => {
+                                    try {
+                                        const payload = {
+                                            clientId: appointmentData.clientId,
+                                            serviceType: appointmentData.serviceType,
+                                            startTime: appointmentData.startTime,
+                                            endTime: appointmentData.endTime,
+                                            duration: appointmentData.duration,
+                                            location: appointmentData.location,
+                                            meetingUrl: appointmentData.meetingUrl,
+                                            notes: appointmentData.notes || '',
+                                            privateNotes: appointmentData.privateNotes || '',
+                                            paymentAmount: appointmentData.paymentAmount || 0,
+                                            paymentStatus: appointmentData.paymentStatus || 'unpaid',
+                                            recurringPattern: appointmentData.recurringPattern || { isRecurring: false }
+                                        };
 
-                <AvailabilitySettings
-                    open={showAvailabilityModal}
-                    onClose={() => setShowAvailabilityModal(false)}
-                    onSave={() => {
-                        setShowAvailabilityModal(false);
-                        loadAppointments();
-                    }}
-                />
+                                        await api.post('/appointments', payload);
+                                        setShowAppointmentModal(false);
+                                        await loadAppointments();
+                                    } catch (e) {
+                                        console.error('שגיאה ביצירת פגישה:', e);
+                                        alert('שגיאה ביצירת פגישה');
+                                    }
+                                }}
+                            />
 
-                {/* Block Time Modal - placeholder */}
-                {showBlockTimeModal && (
-                    <Alert severity="info" sx={{ position: 'fixed', top: 16, right: 16, zIndex: 9999 }}>
-                        פונקציונליות חסימת זמן תתווסף בקרוב
-                    </Alert>
-                )}
-            </Container>
-        </LocalizationProvider>
-    );
+                            <AvailabilitySettings
+                                open={showAvailabilityModal}
+                                onClose={() => setShowAvailabilityModal(false)}
+                                onSave={() => {
+                                    setShowAvailabilityModal(false);
+                                    loadAppointments();
+                                }}
+                            />
+
+                            {/* Block Time Modal - placeholder */}
+                            {showBlockTimeModal && (
+                                <Alert severity="info" sx={{ position: 'fixed', top: 16, right: 16, zIndex: 9999 }}>
+                                    פונקציונליות חסימת זמן תתווסף בקרוב
+                                </Alert>
+                            )}
+                        </Container>
+                    </LocalizationProvider>
+                );
 };
 
-export default CalendarPage;
+                export default CalendarPage;

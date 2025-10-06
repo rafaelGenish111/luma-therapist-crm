@@ -94,20 +94,56 @@ router.get('/:id', auth, authorize(['manage_own_appointments']), async (req, res
 // POST /api/appointments - יצירת פגישה חדשה
 router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) => {
     try {
-        const appointmentData = {
-            ...req.body,
-            therapist: req.user.id
+        // מיפוי שדות מהלקוח לתצורה הנתמכת במודל
+        const {
+            clientId,
+            client,
+            startTime,
+            endTime,
+            duration,
+            serviceType,
+            location,
+            meetingUrl,
+            notes,
+            privateNotes,
+            paymentAmount,
+            paymentStatus,
+            recurringPattern,
+        } = req.body;
+
+        const mapped = {
+            therapistId: req.user.id,
+            therapist: req.user.id,
+            clientId: clientId || client,
+            client: clientId || client,
+            startTime: startTime ? new Date(startTime) : undefined,
+            endTime: endTime
+                ? new Date(endTime)
+                : (startTime && duration
+                    ? new Date(new Date(startTime).getTime() + Number(duration || 60) * 60000)
+                    : undefined),
+            duration: Number(duration || 60),
+            serviceType: serviceType || 'individual',
+            location: location || 'clinic',
+            meetingUrl,
+            notes,
+            privateNotes,
+            paymentAmount,
+            paymentStatus: paymentStatus || 'unpaid',
+            recurringPattern: recurringPattern || { isRecurring: false }
         };
 
         // וידוא שהלקוח קיים ושייך למטפלת
-        if (appointmentData.client) {
-            const client = await Client.findOne({ _id: appointmentData.client, therapist: req.user.id });
-            if (!client) {
+        if (mapped.clientId) {
+            const clientDoc = await Client.findOne({ _id: mapped.clientId, therapist: req.user.id });
+            if (!clientDoc) {
                 return res.status(400).json({ success: false, message: 'לקוח לא נמצא' });
             }
+        } else {
+            return res.status(400).json({ success: false, message: 'יש לספק מזהה לקוח' });
         }
 
-        const appointment = new Appointment(appointmentData);
+        const appointment = new Appointment(mapped);
         await appointment.save();
 
         console.log('✅ Appointment created successfully:', {

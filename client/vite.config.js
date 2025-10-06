@@ -5,7 +5,7 @@ import manifest from './public/manifest.json'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  
+
   return {
     plugins: [
       react(),
@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 8000,
       host: '0.0.0.0',
+      strictPort: true, // אל תחליף פורט אוטומטית – ימנע מעבר ל-8001
       proxy: mode === 'development' ? {
         '/api': {
           target: env.VITE_API_URL || 'http://localhost:5000',
