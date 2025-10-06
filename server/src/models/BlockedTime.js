@@ -52,9 +52,7 @@ const blockedTimeSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// אינדקסים
-blockedTimeSchema.index({ therapistId: 1, startTime: 1 });
-blockedTimeSchema.index({ startTime: 1, endTime: 1 });
+// אינדקסים - הועברו למטה
 
 // וירטואלים
 blockedTimeSchema.virtual('duration').get(function () {

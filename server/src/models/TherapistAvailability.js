@@ -82,7 +82,7 @@ const therapistAvailabilitySchema = new mongoose.Schema({
 });
 
 // אינדקסים
-therapistAvailabilitySchema.index({ therapistId: 1 });
+// therapistAvailabilitySchema.index({ therapistId: 1 }); // duplicate - removed
 
 // וירטואלים
 therapistAvailabilitySchema.virtual('isAvailableToday').get(function () {

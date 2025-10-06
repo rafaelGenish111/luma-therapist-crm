@@ -84,7 +84,7 @@ const googleCalendarSyncSchema = new mongoose.Schema({
 });
 
 // אינדקסים
-googleCalendarSyncSchema.index({ therapistId: 1 });
+// googleCalendarSyncSchema.index({ therapistId: 1 }); // duplicate - removed
 googleCalendarSyncSchema.index({ lastSyncedAt: 1 });
 googleCalendarSyncSchema.index({ syncEnabled: 1 });
 
