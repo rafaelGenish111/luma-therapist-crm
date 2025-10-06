@@ -1,3 +1,17 @@
+try {
+    const express = require('express');
+    const cors = require('cors');
+    const helmet = require('helmet');
+    const compression = require('compression');
+    const morgan = require('morgan');
+    const { rateLimit } = require('express-rate-limit');
+    const cookieParser = require('cookie-parser');
+    require('dotenv').config();
+} catch (topLevelError) {
+    console.error('🚨 Top-level error loading dependencies:', topLevelError);
+    process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -58,10 +72,13 @@ const calendlyRoutes = require('./routes/calendly');
 const therapistAdminRoutes = require('./routes/therapistAdmin');
 const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const dashboardRoutes = require('./routes/dashboard');
+console.log('✅ Dashboard routes loaded');
 const calendarRoutes = require('./routes/calendar.routes');
+console.log('✅ Calendar routes loaded');
 
 // Scheduled tasks will be loaded after MongoDB connection
 let scheduledTasks = null;
+console.log('✅ All routes loaded successfully');
 
 const app = express();
 const PORT = process.env.PORT || 5000;

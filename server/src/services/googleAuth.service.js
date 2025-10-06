@@ -9,7 +9,8 @@ class GoogleAuthService {
         this.encryptionKey = process.env.ENCRYPTION_KEY;
 
         if (!this.encryptionKey) {
-            throw new Error('ENCRYPTION_KEY is required for Google OAuth');
+            console.warn('⚠️ ENCRYPTION_KEY not configured - Google OAuth will not work');
+            // Don't throw - allow server to start without Google OAuth
         }
     }
 
