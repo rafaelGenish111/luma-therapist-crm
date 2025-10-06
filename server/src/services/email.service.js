@@ -39,8 +39,13 @@ class EmailService {
             await this.transporter.verify();
             logger.info('Email service initialized successfully');
 
-            // Load templates
-            await this.loadTemplates();
+            // Load templates (non-blocking)
+            try {
+                await this.loadTemplates();
+            } catch (error) {
+                logger.warn('Failed to load email templates:', error.message);
+                // Continue without templates - they're optional
+            }
         } catch (error) {
             logger.error('Failed to initialize email service:', error);
             throw error;
