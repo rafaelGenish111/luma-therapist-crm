@@ -63,14 +63,14 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { he } from 'date-fns/locale';
 import { format, startOfDay, endOfDay, isToday, isTomorrow, isYesterday } from 'date-fns';
-import api from '../../../services/api';
+import api from '../../services/api';
 
 // Import existing components
 import TherapistCalendar from '../../components/Calendar/TherapistCalendar';
 import AppointmentModal from '../../components/Calendar/AppointmentModal';
 import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
 import MiniCalendar from '../../components/Calendar/MiniCalendar';
-import '../../../styles/calendar.css';
+import '../../styles/calendar.css';
 
 const CalendarPage = () => {
     const navigate = useNavigate();
