@@ -39,7 +39,7 @@ const chargeSchema = new mongoose.Schema({
     lineItems: { type: [lineItemSchema], default: [] },
 
     // קישור לתשלומים שבוצעו על חיוב זה
-    payments: { type: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Payment' } ], default: [] },
+    payments: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Payment' }], default: [] },
 
     dueAt: { type: Date },
     issuedAt: { type: Date },

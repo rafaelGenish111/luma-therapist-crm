@@ -44,9 +44,7 @@ const appointmentSchema = new mongoose.Schema({
 
     // סנכרון עם Google Calendar
     googleEventId: {
-        type: String,
-        unique: true,
-        sparse: true
+        type: String
     },
     googleCalendarSynced: {
         type: Boolean,
@@ -331,7 +329,6 @@ appointmentSchema.index({ therapistId: 1, startTime: 1 });
 appointmentSchema.index({ clientId: 1, startTime: 1 });
 appointmentSchema.index({ status: 1, startTime: 1 });
 appointmentSchema.index({ googleEventId: 1 }, { sparse: true });
-appointmentSchema.index({ confirmationCode: 1 }, { unique: true, sparse: true });
 
 // Compound indexes for complex queries
 appointmentSchema.index({ therapistId: 1, status: 1, startTime: 1 });

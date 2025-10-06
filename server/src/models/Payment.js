@@ -40,8 +40,7 @@ const paymentSchema = new mongoose.Schema({
     },
     paymentLinkId: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     provider: {
         type: String,

@@ -2,8 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import {
     Calendar,
     momentLocalizer,
-    Views,
-    Toolbar
+    Views
 } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/he';
