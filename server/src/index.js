@@ -266,8 +266,13 @@ const initializeApp = async () => {
     }
 };
 
+console.log('📝 Checking if should start server...');
+console.log('📝 require.main === module:', require.main === module);
+console.log('📝 NODE_ENV:', process.env.NODE_ENV);
+
 // For local development
 if (require.main === module || process.env.NODE_ENV === 'development') {
+    console.log('✅ Starting server in local/development mode');
     const startServer = async () => {
         try {
             console.log('🔄 Starting server...');

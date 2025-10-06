@@ -7,7 +7,9 @@ class EmailService {
     constructor() {
         this.transporter = null;
         this.templates = {};
-        this.init();
+        this.init().catch(err => {
+            console.error('Failed to initialize email service in constructor:', err);
+        });
     }
 
     /**
@@ -48,8 +50,13 @@ class EmailService {
                 });
             }
 
-            // Load email templates
-            await this.loadTemplates();
+            // Load email templates (non-blocking)
+            try {
+                await this.loadTemplates();
+            } catch (templateError) {
+                console.warn('Failed to load email templates:', templateError.message);
+                // Continue without templates
+            }
 
             console.log('Email service initialized successfully');
         } catch (error) {
