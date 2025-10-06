@@ -4,8 +4,7 @@ const googleCalendarSyncSchema = new mongoose.Schema({
     therapistId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Therapist',
-        required: true,
-        unique: true
+        required: true
     },
 
     // טוקנים מוצפנים
