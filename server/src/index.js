@@ -58,6 +58,7 @@ const calendlyRoutes = require('./routes/calendly');
 const therapistAdminRoutes = require('./routes/therapistAdmin');
 const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const dashboardRoutes = require('./routes/dashboard');
+const calendarRoutes = require('./routes/calendar.routes');
 
 // Import scheduled tasks only in non-serverless environment
 let scheduledTasks = null;
@@ -176,6 +177,7 @@ app.use('/api/therapists', therapistRegistrationRoutes);
 app.use('/api/calendly', calendlyRoutes);
 app.use('/api/integrations/calendly', calendlyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/calendar', calendarRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

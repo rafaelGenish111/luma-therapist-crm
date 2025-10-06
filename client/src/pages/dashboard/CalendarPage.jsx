@@ -60,9 +60,10 @@ import {
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { he } from 'date-fns/locale';
-import { format, startOfDay, endOfDay, isToday, isTomorrow, isYesterday } from 'date-fns';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import moment from 'moment';
+import 'moment/locale/he';
+// Remove date-fns imports - using moment instead
 import api from '../../services/api';
 
 // Import existing components
@@ -81,7 +82,7 @@ const CalendarPage = () => {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(moment());
     const [view, setView] = useState('month');
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
@@ -128,8 +129,8 @@ const CalendarPage = () => {
     const loadAppointments = useCallback(async () => {
         try {
             setLoading(true);
-            const startDate = startOfDay(currentDate);
-            const endDate = endOfDay(currentDate);
+            const startDate = moment(currentDate).startOf('day').toDate();
+            const endDate = moment(currentDate).endOf('day').toDate();
 
             const response = await api.get('/appointments', {
                 params: {
@@ -151,7 +152,7 @@ const CalendarPage = () => {
     // Load stats
     const loadStats = useCallback(async () => {
         try {
-            const today = startOfDay(new Date());
+            const today = moment().startOf('day').toDate();
             const response = await api.get('/appointments/stats', {
                 params: { date: today.toISOString() }
             });
@@ -510,7 +511,7 @@ const CalendarPage = () => {
     }
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={he}>
+        <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="he">
             <Container maxWidth="xl" sx={{ py: 3 }}>
                 {/* Header */}
                 <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
@@ -588,7 +589,7 @@ const CalendarPage = () => {
                             </IconButton>
 
                             <Typography variant="h6">
-                                {format(currentDate, 'MMMM yyyy', { locale: he })}
+                                {moment(currentDate).format('MMMM YYYY')}
                             </Typography>
 
                             <IconButton onClick={handleNextDate}>

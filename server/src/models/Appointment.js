@@ -320,10 +320,8 @@ appointmentSchema.pre('save', function (next) {
 });
 
 // Indexes for performance optimization
-appointmentSchema.index({ therapistId: 1, startTime: 1 });
 appointmentSchema.index({ clientId: 1, startTime: 1 });
 appointmentSchema.index({ status: 1, startTime: 1 });
-appointmentSchema.index({ googleEventId: 1 }, { sparse: true });
 
 // Compound indexes for complex queries
 appointmentSchema.index({ therapistId: 1, status: 1, startTime: 1 });

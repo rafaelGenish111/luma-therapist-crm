@@ -6,6 +6,58 @@ const Client = require('../models/Client');
 const { auth } = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
+// GET /api/appointments/stats - סטטיסטיקות פגישות
+router.get('/stats', auth, authorize(['manage_own_appointments']), async (req, res) => {
+    try {
+        const therapistId = req.user.id;
+        const { date } = req.query;
+        
+        const query = {
+            therapist: therapistId,
+            deletedAt: null
+        };
+        
+        if (date) {
+            const startOfDay = new Date(date);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(date);
+            endOfDay.setHours(23, 59, 59, 999);
+            
+            query.date = {
+                $gte: startOfDay,
+                $lte: endOfDay
+            };
+        }
+        
+        const appointments = await Appointment.find(query);
+        
+        const stats = {
+            total: appointments.length,
+            byStatus: {
+                pending: appointments.filter(apt => apt.status === 'pending').length,
+                confirmed: appointments.filter(apt => apt.status === 'confirmed').length,
+                completed: appointments.filter(apt => apt.status === 'completed').length,
+                cancelled: appointments.filter(apt => apt.status === 'cancelled').length
+            },
+            byServiceType: {
+                individual: appointments.filter(apt => apt.serviceType === 'individual').length,
+                couple: appointments.filter(apt => apt.serviceType === 'couple').length,
+                family: appointments.filter(apt => apt.serviceType === 'family').length,
+                group: appointments.filter(apt => apt.serviceType === 'group').length,
+                consultation: appointments.filter(apt => apt.serviceType === 'consultation').length
+            },
+            revenue: appointments
+                .filter(apt => apt.status === 'completed' && apt.paymentAmount)
+                .reduce((sum, apt) => sum + (apt.paymentAmount || 0), 0)
+        };
+        
+        res.json({ success: true, data: stats });
+    } catch (error) {
+        console.error('Error fetching appointment stats:', error);
+        res.status(500).json({ success: false, message: 'שגיאה בקבלת סטטיסטיקות פגישות', error: error.message });
+    }
+});
+
 // GET /api/appointments - קבלת כל הפגישות של המטפלת
 router.get('/', auth, authorize(['manage_own_appointments']), async (req, res) => {
     try {
