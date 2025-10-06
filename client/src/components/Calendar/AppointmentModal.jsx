@@ -79,7 +79,7 @@ moment.locale('he');
 const appointmentSchema = yup.object({
     clientId: yup.string().required('בחירת לקוח היא חובה'),
     serviceType: yup.string().required('סוג שירות הוא חובה'),
-    startTime: yup.date().required('תאריך ושעה הם חובה').min(new Date(), 'תאריך חייב להיות בעתיד'),
+    startTime: yup.date().required('תאריך ושעה הם חובה').min(moment().toDate(), 'תאריך חייב להיות בעתיד'),
     duration: yup.number().required('משך פגישה הוא חובה').min(15, 'משך מינימלי: 15 דקות').max(480, 'משך מקסימלי: 8 שעות'),
     location: yup.string().required('מיקום הוא חובה'),
     meetingUrl: yup.string().when('location', {
@@ -136,7 +136,7 @@ const AppointmentModal = ({
         defaultValues: {
             clientId: '',
             serviceType: 'individual',
-            startTime: new Date(),
+            startTime: moment(),
             duration: 60,
             location: 'clinic',
             meetingUrl: '',
@@ -161,7 +161,7 @@ const AppointmentModal = ({
             reset({
                 clientId: appointment.clientId || appointment.client?._id || '',
                 serviceType: appointment.serviceType || 'individual',
-                startTime: appointment.startTime ? new Date(appointment.startTime) : new Date(),
+                startTime: appointment.startTime ? moment(appointment.startTime) : moment(),
                 duration: appointment.duration || 60,
                 location: appointment.location || 'clinic',
                 meetingUrl: appointment.meetingUrl || '',
@@ -172,7 +172,7 @@ const AppointmentModal = ({
                 recurringPattern: {
                     isRecurring: appointment.recurringPattern?.isRecurring || false,
                     frequency: appointment.recurringPattern?.frequency || 'weekly',
-                    endDate: appointment.recurringPattern?.endDate ? new Date(appointment.recurringPattern.endDate) : null
+                    endDate: appointment.recurringPattern?.endDate ? moment(appointment.recurringPattern.endDate) : null
                 }
             });
             setShowRecurringSettings(appointment.recurringPattern?.isRecurring || false);
@@ -180,7 +180,7 @@ const AppointmentModal = ({
             reset({
                 clientId: '',
                 serviceType: 'individual',
-                startTime: new Date(),
+                startTime: moment(),
                 duration: 60,
                 location: 'clinic',
                 meetingUrl: '',
