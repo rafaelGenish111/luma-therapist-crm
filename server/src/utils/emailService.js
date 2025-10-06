@@ -7,15 +7,22 @@ class EmailService {
     constructor() {
         this.transporter = null;
         this.templates = {};
-        this.init().catch(err => {
-            console.error('Failed to initialize email service in constructor:', err);
-        });
+        // Don't call init() in constructor - it will be called on first use
+        // or explicitly by the server
+        this._initialized = false;
+        this._initializing = false;
     }
 
     /**
      * Initialize email service based on environment
      */
     async init() {
+        if (this._initialized || this._initializing) {
+            return;
+        }
+        
+        this._initializing = true;
+        
         try {
             if (process.env.SENDGRID_API_KEY) {
                 // Use SendGrid
@@ -59,8 +66,11 @@ class EmailService {
             }
 
             console.log('Email service initialized successfully');
+            this._initialized = true;
         } catch (error) {
             console.error('Email service initialization error:', error);
+        } finally {
+            this._initializing = false;
         }
     }
 
