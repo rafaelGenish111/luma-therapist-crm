@@ -45,7 +45,7 @@ const bookingRoutes = require('./routes/bookings');
 const treatmentTypeRoutes = require('./routes/treatmentTypes');
 const importantInfoRoutes = require('./routes/importantInfo');
 const geoRoutes = require('./routes/geo');
-const errorHandler = require('./middleware/errorHandler');
+const { globalErrorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { generalLimiter, securityHeaders, validateRequest, setLongTimeout } = require('./middleware/security');
 const healthDeclarationsRouter = require('./routes/healthDeclarations');
 const healthDeclarationTemplatesPublic = require('./routes/healthDeclarationTemplates');
@@ -240,12 +240,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Error handling
-app.use(errorHandler);
+// 404 handler for undefined routes
+app.use(notFoundHandler);
 
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({ message: 'Route not found' });
-});
+// Global error handler (must be last)
+app.use(globalErrorHandler);
 
 // Initialize database connection
 let isConnected = false;
