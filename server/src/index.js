@@ -72,13 +72,10 @@ const calendlyRoutes = require('./routes/calendly');
 const therapistAdminRoutes = require('./routes/therapistAdmin');
 const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const dashboardRoutes = require('./routes/dashboard');
-console.log('✅ Dashboard routes loaded');
 const calendarRoutes = require('./routes/calendar.routes');
-console.log('✅ Calendar routes loaded');
 
 // Scheduled tasks will be loaded after MongoDB connection
 let scheduledTasks = null;
-console.log('✅ All routes loaded successfully');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
