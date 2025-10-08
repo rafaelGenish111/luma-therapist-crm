@@ -74,6 +74,10 @@ import TherapistCalendar from '../../components/Calendar/TherapistCalendar';
 import AppointmentModal from '../../components/Calendar/AppointmentModal';
 import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
 import MiniCalendar from '../../components/Calendar/MiniCalendar';
+import DayDetailsPanel from '../../components/Calendar/DayDetailsPanel';
+import AppointmentCard from '../../components/Calendar/AppointmentCard';
+import ViewToggle from '../../components/Calendar/ViewToggle';
+import AppointmentsListView from '../../components/Calendar/AppointmentsListView';
 import '../../styles/calendar.css';
 
 const CalendarPage = () => {
@@ -87,7 +91,8 @@ const CalendarPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentDate, setCurrentDate] = useState(moment());
-    const [view, setView] = useState('month');
+    const [selectedDate, setSelectedDate] = useState(moment());
+    const [view, setView] = useState('calendar');
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
     const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
@@ -255,6 +260,15 @@ const CalendarPage = () => {
         setShowAppointmentModal(true);
     };
 
+    const handleDateSelect = (date) => {
+        setSelectedDate(moment(date));
+    };
+
+    const handleAppointmentClick = (appointment) => {
+        setSelectedAppointment(appointment);
+        setShowAppointmentModal(true);
+    };
+
     const handleEventDrop = async (event) => {
         try {
             await api.put(`/appointments/${event._id}`, {
@@ -283,8 +297,9 @@ const CalendarPage = () => {
     const handlePreviousDate = () => {
         if (view === 'day') {
             setCurrentDate(moment(currentDate).subtract(1, 'day'));
-        } else if (view === 'week') {
-            setCurrentDate(moment(currentDate).subtract(1, 'week'));
+            setSelectedDate(moment(selectedDate).subtract(1, 'day'));
+        } else if (view === 'calendar') {
+            setCurrentDate(moment(currentDate).subtract(1, 'month'));
         } else {
             setCurrentDate(moment(currentDate).subtract(1, 'month'));
         }
@@ -293,8 +308,9 @@ const CalendarPage = () => {
     const handleNextDate = () => {
         if (view === 'day') {
             setCurrentDate(moment(currentDate).add(1, 'day'));
-        } else if (view === 'week') {
-            setCurrentDate(moment(currentDate).add(1, 'week'));
+            setSelectedDate(moment(selectedDate).add(1, 'day'));
+        } else if (view === 'calendar') {
+            setCurrentDate(moment(currentDate).add(1, 'month'));
         } else {
             setCurrentDate(moment(currentDate).add(1, 'month'));
         }
@@ -560,36 +576,11 @@ const CalendarPage = () => {
                         </Box>
 
                         {/* View Switcher */}
-                        <Box display="flex" gap={1}>
-                            <Button
-                                variant={view === 'day' ? 'contained' : 'outlined'}
-                                onClick={() => setView('day')}
-                                startIcon={<ViewDay />}
-                            >
-                                יום
-                            </Button>
-                            <Button
-                                variant={view === 'week' ? 'contained' : 'outlined'}
-                                onClick={() => setView('week')}
-                                startIcon={<ViewWeek />}
-                            >
-                                שבוע
-                            </Button>
-                            <Button
-                                variant={view === 'month' ? 'contained' : 'outlined'}
-                                onClick={() => setView('month')}
-                                startIcon={<ViewMonth />}
-                            >
-                                חודש
-                            </Button>
-                            <Button
-                                variant={view === 'list' ? 'contained' : 'outlined'}
-                                onClick={() => setView('list')}
-                                startIcon={<ViewList />}
-                            >
-                                רשימה
-                            </Button>
-                        </Box>
+                        <ViewToggle 
+                            value={view} 
+                            onChange={setView}
+                            disabled={loading}
+                        />
                     </Box>
 
                     {/* Date Navigator */}
@@ -644,41 +635,115 @@ const CalendarPage = () => {
                 )}
 
                 {/* Main Content */}
-                <Grid container spacing={2}>
-                    {/* Main Calendar */}
-                    <Grid item xs={12} md={9} order={{ xs: 2, md: 1 }}>
-                        <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
-                            <TherapistCalendar
-                                appointments={appointments}
-                                currentDate={currentDate}
-                                view={view}
-                                onSelectSlot={handleSelectSlot}
-                                onSelectEvent={handleSelectEvent}
-                                onEventDrop={handleEventDrop}
-                                loading={loading}
-                                onViewChange={setView}
-                                onNavigate={setCurrentDate}
-                            />
-                        </Paper>
-                    </Grid>
+                {view === 'calendar' && (
+                    <Box sx={{ display: 'flex', height: 'calc(100vh - 280px)', minHeight: 500, gap: 2 }}>
+                        {/* Main Calendar */}
+                        <Box sx={{ 
+                            flex: { xs: '0 0 100%', md: '0 0 70%' },
+                        }}>
+                            <Paper sx={{ height: '100%', p: 2 }}>
+                                <TherapistCalendar
+                                    appointments={appointments}
+                                    currentDate={currentDate}
+                                    selectedDate={selectedDate}
+                                    view="month"
+                                    onSelectSlot={handleSelectSlot}
+                                    onSelectEvent={handleSelectEvent}
+                                    onEventDrop={handleEventDrop}
+                                    onDateSelect={handleDateSelect}
+                                    loading={loading}
+                                    onViewChange={setView}
+                                    onNavigate={setCurrentDate}
+                                />
+                            </Paper>
+                        </Box>
 
-                    {/* Sidebar */}
-                    <Grid item xs={12} md={3} order={{ xs: 1, md: 2 }}>
-                        {isMobile ? (
-                            <Drawer
-                                anchor="left"
-                                open={sidebarOpen}
-                                onClose={() => setSidebarOpen(false)}
-                            >
-                                <Box sx={{ width: 280, p: 2 }}>
-                                    <Sidebar />
-                                </Box>
-                            </Drawer>
-                        ) : (
+                        {/* Day Details Panel */}
+                        <Box sx={{ 
+                            flex: { xs: '0 0 100%', md: '0 0 30%' },
+                            borderLeft: { md: 1 },
+                            borderColor: { md: 'divider' },
+                            pl: { md: 2 }
+                        }}>
+                            <DayDetailsPanel
+                                selectedDate={selectedDate.toDate()}
+                                appointments={appointments}
+                                onAppointmentClick={handleAppointmentClick}
+                                onNewAppointment={handleNewAppointment}
+                                loading={loading}
+                            />
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Day View */}
+                {view === 'day' && (
+                    <Box sx={{ height: 'calc(100vh - 280px)', minHeight: 500 }}>
+                        <DayDetailsPanel
+                            selectedDate={selectedDate.toDate()}
+                            appointments={appointments}
+                            onAppointmentClick={handleAppointmentClick}
+                            onNewAppointment={handleNewAppointment}
+                            loading={loading}
+                        />
+                    </Box>
+                )}
+
+                {/* List View */}
+                {view === 'list' && (
+                    <Box sx={{ height: 'calc(100vh - 280px)', minHeight: 500 }}>
+                        <AppointmentsListView
+                            appointments={appointments}
+                            loading={loading}
+                            onAppointmentClick={handleAppointmentClick}
+                            onEditAppointment={(appointment) => {
+                                setSelectedAppointment(appointment);
+                                setShowAppointmentModal(true);
+                            }}
+                            onCancelAppointment={async (appointment) => {
+                                try {
+                                    await api.put(`/appointments/${appointment._id}`, {
+                                        status: 'cancelled'
+                                    });
+                                    await loadAppointments();
+                                } catch (err) {
+                                    setError('שגיאה בביטול הפגישה');
+                                }
+                            }}
+                            onBulkAction={async (action, selectedIds) => {
+                                try {
+                                    if (action === 'confirm') {
+                                        await api.put('/appointments/bulk', {
+                                            ids: selectedIds,
+                                            status: 'confirmed'
+                                        });
+                                    } else if (action === 'cancel') {
+                                        await api.put('/appointments/bulk', {
+                                            ids: selectedIds,
+                                            status: 'cancelled'
+                                        });
+                                    }
+                                    await loadAppointments();
+                                } catch (err) {
+                                    setError('שגיאה בפעולה הקבוצתית');
+                                }
+                            }}
+                        />
+                    </Box>
+                )}
+
+                {/* Mobile Sidebar */}
+                {isMobile && (
+                    <Drawer
+                        anchor="left"
+                        open={sidebarOpen}
+                        onClose={() => setSidebarOpen(false)}
+                    >
+                        <Box sx={{ width: 280, p: 2 }}>
                             <Sidebar />
-                        )}
-                    </Grid>
-                </Grid>
+                        </Box>
+                    </Drawer>
+                )}
 
                 {/* Mobile Sidebar Toggle */}
                 {isMobile && (

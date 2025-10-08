@@ -95,10 +95,12 @@ const TherapistCalendar = ({
     onSelectSlot,
     onSelectEvent,
     onEventDrop,
+    onDateSelect,
     loading = false,
     view = Views.MONTH,
     onViewChange,
     date = new Date(),
+    selectedDate,
     onNavigate,
     clients = [],
     onRefresh,
@@ -181,14 +183,22 @@ const TherapistCalendar = ({
         if (onSelectSlot) {
             onSelectSlot(slotInfo);
         }
-    }, [onSelectSlot]);
+        // גם עדכן את התאריך הנבחר
+        if (onDateSelect) {
+            onDateSelect(slotInfo.start);
+        }
+    }, [onSelectSlot, onDateSelect]);
 
     // טיפול בבחירת אירוע
     const handleSelectEvent = useCallback((event) => {
         if (onSelectEvent) {
             onSelectEvent(event);
         }
-    }, [onSelectEvent]);
+        // גם עדכן את התאריך הנבחר
+        if (onDateSelect) {
+            onDateSelect(event.start);
+        }
+    }, [onSelectEvent, onDateSelect]);
 
     // טיפול בגרירת אירוע
     const handleEventDrop = useCallback((event) => {
@@ -196,6 +206,17 @@ const TherapistCalendar = ({
             onEventDrop(event);
         }
     }, [onEventDrop]);
+
+    // טיפול בלחיצה על תאריך
+    const handleNavigate = useCallback((newDate) => {
+        if (onNavigate) {
+            onNavigate(newDate);
+        }
+        // עדכן את התאריך הנבחר
+        if (onDateSelect) {
+            onDateSelect(newDate);
+        }
+    }, [onNavigate, onDateSelect]);
 
     // רכיב Toolbar מותאם אישית
     const CustomToolbar = useCallback(({ label, onNavigate, onView, view }) => (
@@ -440,7 +461,7 @@ const TherapistCalendar = ({
                         view={view}
                         onView={onViewChange}
                         date={date}
-                        onNavigate={onNavigate}
+                        onNavigate={handleNavigate}
                         onSelectSlot={handleSelectSlot}
                         onSelectEvent={handleSelectEvent}
                         onEventDrop={handleEventDrop}
