@@ -742,52 +742,56 @@ const CalendarPage = () => {
                     open={showAppointmentModal}
                     onClose={() => setShowAppointmentModal(false)}
                     appointment={selectedAppointment}
-                                clients={clients}
-                                onSave={async (appointmentData) => {
-                                    try {
-                                        const payload = {
-                                            clientId: appointmentData.clientId,
-                                            serviceType: appointmentData.serviceType,
-                                            startTime: appointmentData.startTime,
-                                            endTime: appointmentData.endTime,
-                                            duration: appointmentData.duration,
-                                            location: appointmentData.location,
-                                            meetingUrl: appointmentData.meetingUrl,
-                                            notes: appointmentData.notes || '',
-                                            privateNotes: appointmentData.privateNotes || '',
-                                            paymentAmount: appointmentData.paymentAmount || 0,
-                                            paymentStatus: appointmentData.paymentStatus || 'unpaid',
-                                            recurringPattern: appointmentData.recurringPattern || { isRecurring: false }
-                                        };
+                    clients={clients}
+                    onSave={async (appointmentData) => {
+                        try {
+                            console.log('📝 Appointment data from form:', appointmentData);
+                            
+                            const payload = {
+                                clientId: appointmentData.client || appointmentData.clientId,
+                                serviceType: appointmentData.type || appointmentData.serviceType || 'individual',
+                                startTime: appointmentData.date || appointmentData.startTime,
+                                endTime: appointmentData.endTime,
+                                duration: appointmentData.duration || 60,
+                                location: appointmentData.location || 'clinic',
+                                meetingUrl: appointmentData.meetingUrl,
+                                notes: appointmentData.notes || appointmentData.summary || '',
+                                privateNotes: appointmentData.privateNotes || '',
+                                paymentAmount: appointmentData.price || appointmentData.paymentAmount || 0,
+                                paymentStatus: appointmentData.paymentStatus || 'unpaid',
+                                recurringPattern: appointmentData.recurringPattern || { isRecurring: false }
+                            };
 
-                                        await api.post('/appointments', payload);
-                                        setShowAppointmentModal(false);
-                                        await loadAppointments();
-                                    } catch (e) {
-                                        console.error('שגיאה ביצירת פגישה:', e);
-                                        alert('שגיאה ביצירת פגישה');
-                                    }
-                                }}
-                            />
+                            console.log('📤 Sending payload to server:', payload);
+                            await api.post('/appointments', payload);
+                            setShowAppointmentModal(false);
+                            await loadAppointments();
+                        } catch (e) {
+                            console.error('שגיאה ביצירת פגישה:', e);
+                            console.error('Response:', e.response?.data);
+                            alert('שגיאה ביצירת פגישה: ' + (e.response?.data?.message || e.message));
+                        }
+                    }}
+                />
 
-                            <AvailabilitySettings
-                                open={showAvailabilityModal}
-                                onClose={() => setShowAvailabilityModal(false)}
-                                onSave={() => {
-                                    setShowAvailabilityModal(false);
-                                    loadAppointments();
-                                }}
-                            />
+                <AvailabilitySettings
+                    open={showAvailabilityModal}
+                    onClose={() => setShowAvailabilityModal(false)}
+                    onSave={() => {
+                        setShowAvailabilityModal(false);
+                        loadAppointments();
+                    }}
+                />
 
-                            {/* Block Time Modal - placeholder */}
-                            {showBlockTimeModal && (
-                                <Alert severity="info" sx={{ position: 'fixed', top: 16, right: 16, zIndex: 9999 }}>
-                                    פונקציונליות חסימת זמן תתווסף בקרוב
-                                </Alert>
-                            )}
-                        </Container>
-                    </LocalizationProvider>
-                );
+                {/* Block Time Modal - placeholder */}
+                {showBlockTimeModal && (
+                    <Alert severity="info" sx={{ position: 'fixed', top: 16, right: 16, zIndex: 9999 }}>
+                        פונקציונליות חסימת זמן תתווסף בקרוב
+                    </Alert>
+                )}
+            </Container>
+        </LocalizationProvider>
+    );
 };
 
 export default CalendarPage;
