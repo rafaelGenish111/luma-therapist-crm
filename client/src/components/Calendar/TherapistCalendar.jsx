@@ -116,14 +116,21 @@ const TherapistCalendar = ({
 
     // סינון פגישות
     const filteredAppointments = useMemo(() => {
+        console.log('🔍 Filtering appointments, total:', appointments.length);
         return appointments.filter(appointment => {
+            const clientName = appointment.client 
+                ? `${appointment.client.firstName || ''} ${appointment.client.lastName || ''}`.trim()
+                : appointment.clientName || '';
+            
             const matchesSearch = !searchTerm ||
-                appointment.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 appointment.notes?.toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
             const matchesService = serviceFilter === 'all' || appointment.serviceType === serviceFilter;
-            const matchesClient = clientFilter === 'all' || appointment.clientId === clientFilter;
+            const matchesClient = clientFilter === 'all' || 
+                appointment.clientId === clientFilter || 
+                appointment.client?._id === clientFilter;
 
             return matchesSearch && matchesStatus && matchesService && matchesClient;
         });
@@ -131,24 +138,43 @@ const TherapistCalendar = ({
 
     // המרת פגישות לפורמט של react-big-calendar
     const events = useMemo(() => {
-        return filteredAppointments.map(appointment => ({
-            id: appointment._id,
-            title: appointment.clientName || 'לקוח לא מוגדר',
-            start: new Date(appointment.startTime || appointment.date),
-            end: new Date(appointment.endTime || new Date(appointment.startTime || appointment.date).getTime() + appointment.duration * 60000),
-            resource: {
-                ...appointment,
-                status: appointment.status,
-                serviceType: appointment.serviceType,
-                location: appointment.location,
-                googleCalendarSynced: appointment.googleCalendarSynced,
-                meetingUrl: appointment.meetingUrl,
-                notes: appointment.notes,
-                privateNotes: appointment.privateNotes,
-                paymentStatus: appointment.paymentStatus,
-                paymentAmount: appointment.paymentAmount
-            }
-        }));
+        console.log('🗓️ Converting appointments to events:', filteredAppointments.length);
+        return filteredAppointments.map(appointment => {
+            const clientName = appointment.client 
+                ? `${appointment.client.firstName || ''} ${appointment.client.lastName || ''}`.trim()
+                : appointment.clientName || 'לקוח לא מוגדר';
+            
+            const startDate = appointment.startTime || appointment.date;
+            const endDate = appointment.endTime || new Date(new Date(startDate).getTime() + (appointment.duration || 60) * 60000);
+            
+            console.log('📅 Event:', {
+                id: appointment._id,
+                title: clientName,
+                start: startDate,
+                end: endDate,
+                serviceType: appointment.serviceType
+            });
+            
+            return {
+                id: appointment._id,
+                title: clientName,
+                start: new Date(startDate),
+                end: new Date(endDate),
+                resource: {
+                    ...appointment,
+                    clientName,
+                    status: appointment.status,
+                    serviceType: appointment.serviceType,
+                    location: appointment.location,
+                    googleCalendarSynced: appointment.googleCalendarSynced,
+                    meetingUrl: appointment.meetingUrl,
+                    notes: appointment.notes,
+                    privateNotes: appointment.privateNotes,
+                    paymentStatus: appointment.paymentStatus,
+                    paymentAmount: appointment.paymentAmount
+                }
+            };
+        });
     }, [filteredAppointments]);
 
     // סגנון אירועים
