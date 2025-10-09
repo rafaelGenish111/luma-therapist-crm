@@ -118,18 +118,18 @@ const TherapistCalendar = ({
     const filteredAppointments = useMemo(() => {
         console.log('🔍 Filtering appointments, total:', appointments.length);
         return appointments.filter(appointment => {
-            const clientName = appointment.client 
+            const clientName = appointment.client
                 ? `${appointment.client.firstName || ''} ${appointment.client.lastName || ''}`.trim()
                 : appointment.clientName || '';
-            
+
             const matchesSearch = !searchTerm ||
                 clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 appointment.notes?.toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
             const matchesService = serviceFilter === 'all' || appointment.serviceType === serviceFilter;
-            const matchesClient = clientFilter === 'all' || 
-                appointment.clientId === clientFilter || 
+            const matchesClient = clientFilter === 'all' ||
+                appointment.clientId === clientFilter ||
                 appointment.client?._id === clientFilter;
 
             return matchesSearch && matchesStatus && matchesService && matchesClient;
@@ -140,15 +140,15 @@ const TherapistCalendar = ({
     const events = useMemo(() => {
         console.log('🗓️ Converting appointments to events:', filteredAppointments.length);
         console.log('🗓️ Full appointments data:', filteredAppointments);
-        
+
         const convertedEvents = filteredAppointments.map(appointment => {
-            const clientName = appointment.client 
+            const clientName = appointment.client
                 ? `${appointment.client.firstName || ''} ${appointment.client.lastName || ''}`.trim()
                 : appointment.clientName || 'לקוח לא מוגדר';
-            
+
             const startDate = appointment.startTime || appointment.date;
             const endDate = appointment.endTime || new Date(new Date(startDate).getTime() + (appointment.duration || 60) * 60000);
-            
+
             const event = {
                 id: appointment._id,
                 title: clientName,
@@ -168,7 +168,7 @@ const TherapistCalendar = ({
                     paymentAmount: appointment.paymentAmount
                 }
             };
-            
+
             console.log('📅 Event created:', {
                 id: event.id,
                 title: event.title,
@@ -179,10 +179,10 @@ const TherapistCalendar = ({
                 status: event.resource.status,
                 serviceType: event.resource.serviceType
             });
-            
+
             return event;
         });
-        
+
         console.log('🗓️ Total events created:', convertedEvents.length);
         return convertedEvents;
     }, [filteredAppointments]);
@@ -282,6 +282,13 @@ const TherapistCalendar = ({
                         startIcon={<ViewModuleIcon />}
                     >
                         חודש
+                    </Button>
+                    <Button
+                        variant={view === Views.AGENDA ? 'contained' : 'outlined'}
+                        onClick={() => onView(Views.AGENDA)}
+                        startIcon={<ViewWeekIcon />}
+                    >
+                        רשימה
                     </Button>
                 </ButtonGroup>
             </Box>
@@ -516,7 +523,7 @@ const TherapistCalendar = ({
                             month: 'חודש',
                             week: 'שבוע',
                             day: 'יום',
-                            agenda: 'סדר יום',
+                            agenda: 'רשימה',
                             date: 'תאריך',
                             time: 'שעה',
                             event: 'אירוע',
@@ -524,6 +531,7 @@ const TherapistCalendar = ({
                             showMore: (total) => `+${total} נוספות`
                         }}
                         rtl={true}
+                        views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
                     />
                 </Box>
             </Paper>

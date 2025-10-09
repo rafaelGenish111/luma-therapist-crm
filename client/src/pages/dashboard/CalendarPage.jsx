@@ -604,8 +604,8 @@ const CalendarPage = () => {
                                 חודש
                             </Button>
                             <Button
-                                variant={view === 'list' ? 'contained' : 'outlined'}
-                                onClick={() => setView('list')}
+                                variant={view === 'agenda' ? 'contained' : 'outlined'}
+                                onClick={() => setView('agenda')}
                                 startIcon={<ViewList />}
                             >
                                 רשימה
