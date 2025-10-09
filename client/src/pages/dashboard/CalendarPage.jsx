@@ -763,12 +763,23 @@ const CalendarPage = () => {
                             };
 
                             console.log('📤 Sending payload to server:', payload);
-                            await api.post('/appointments', payload);
+                            const response = await api.post('/appointments', payload);
+                            console.log('✅ Appointment created:', response.data);
+                            
+                            // Close modal first
                             setShowAppointmentModal(false);
-                            await loadAppointments();
+                            setSelectedAppointment(null);
+                            
+                            // Reload appointments and stats
+                            await Promise.all([
+                                loadAppointments(),
+                                loadStats()
+                            ]);
+                            
+                            console.log('✅ Appointments reloaded');
                         } catch (e) {
-                            console.error('שגיאה ביצירת פגישה:', e);
-                            console.error('Response:', e.response?.data);
+                            console.error('❌ שגיאה ביצירת פגישה:', e);
+                            console.error('❌ Response:', e.response?.data);
                             alert('שגיאה ביצירת פגישה: ' + (e.response?.data?.message || e.message));
                         }
                     }}

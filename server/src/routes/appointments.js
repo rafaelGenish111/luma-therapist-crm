@@ -61,14 +61,28 @@ router.get('/stats', auth, authorize(['manage_own_appointments']), async (req, r
 // GET /api/appointments - קבלת כל הפגישות של המטפלת
 router.get('/', auth, authorize(['manage_own_appointments']), async (req, res) => {
     try {
-        const appointments = await Appointment.find({
+        const { startDate, endDate } = req.query;
+        const query = {
             therapist: req.user.id,
             deletedAt: null
-        })
+        };
+
+        // Add date range filter if provided
+        if (startDate && endDate) {
+            query.$or = [
+                { startTime: { $gte: new Date(startDate), $lte: new Date(endDate) } },
+                { date: { $gte: new Date(startDate), $lte: new Date(endDate) } }
+            ];
+        }
+
+        const appointments = await Appointment.find(query)
             .populate('client', 'firstName lastName phone email')
-            .sort({ date: 1 });
+            .sort({ startTime: 1, date: 1 });
+        
+        console.log(`📅 Loaded ${appointments.length} appointments for therapist ${req.user.id}`);
         res.json({ success: true, data: appointments });
     } catch (error) {
+        console.error('Error loading appointments:', error);
         res.status(500).json({ success: false, message: 'שגיאה בקבלת פגישות', error: error.message });
     }
 });
