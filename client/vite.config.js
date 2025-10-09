@@ -64,6 +64,19 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-mui': ['@mui/material', '@mui/icons-material', '@mui/x-data-grid', '@mui/x-date-pickers'],
+            'vendor-charts': ['recharts', '@mui/x-charts'],
+            'vendor-calendar': ['react-big-calendar', 'moment', 'date-fns'],
+            'vendor-forms': ['formik', 'yup', 'react-hook-form'],
+            'vendor-utils': ['axios', 'lodash'],
+          },
+        },
+      },
     },
     define: {
       global: 'globalThis',
