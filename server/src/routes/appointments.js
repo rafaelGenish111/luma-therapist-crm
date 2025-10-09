@@ -94,6 +94,8 @@ router.get('/:id', auth, authorize(['manage_own_appointments']), async (req, res
 // POST /api/appointments - יצירת פגישה חדשה
 router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) => {
     try {
+        console.log('📥 Received appointment creation request:', JSON.stringify(req.body, null, 2));
+        
         // מיפוי שדות מהלקוח לתצורה הנתמכת במודל
         const {
             clientId,
@@ -133,16 +135,22 @@ router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) 
             recurringPattern: recurringPattern || { isRecurring: false }
         };
 
+        console.log('🗺️ Mapped appointment data:', JSON.stringify(mapped, null, 2));
+
         // וידוא שהלקוח קיים ושייך למטפלת
         if (mapped.clientId) {
             const clientDoc = await Client.findOne({ _id: mapped.clientId, therapist: req.user.id });
             if (!clientDoc) {
+                console.log('❌ Client not found:', mapped.clientId);
                 return res.status(400).json({ success: false, message: 'לקוח לא נמצא' });
             }
+            console.log('✅ Client found:', clientDoc._id);
         } else {
+            console.log('❌ No clientId provided');
             return res.status(400).json({ success: false, message: 'יש לספק מזהה לקוח' });
         }
 
+        console.log('💾 Creating appointment with data:', JSON.stringify(mapped, null, 2));
         const appointment = new Appointment(mapped);
         await appointment.save();
 
@@ -176,8 +184,24 @@ router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) 
 
         res.status(201).json({ success: true, data: appointment, message: 'פגישה נוצרה בהצלחה' });
     } catch (error) {
+        console.error('❌ Error creating appointment:', error);
+        console.error('❌ Error name:', error.name);
+        console.error('❌ Error message:', error.message);
+        if (error.errors) {
+            console.error('❌ Validation errors:', JSON.stringify(error.errors, null, 2));
+        }
+        
         if (error.name === 'ValidationError') {
-            return res.status(400).json({ success: false, message: 'נתונים לא תקינים', errors: error.errors });
+            const validationErrors = Object.keys(error.errors).map(key => ({
+                field: key,
+                message: error.errors[key].message
+            }));
+            return res.status(400).json({ 
+                success: false, 
+                message: 'נתונים לא תקינים', 
+                errors: validationErrors,
+                details: error.message 
+            });
         }
         res.status(500).json({ success: false, message: 'שגיאה ביצירת פגישה', error: error.message });
     }
