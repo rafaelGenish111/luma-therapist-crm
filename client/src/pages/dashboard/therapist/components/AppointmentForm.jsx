@@ -24,7 +24,7 @@ const locationTypes = [
 ];
 
 const appointmentStatuses = [
-    { value: 'scheduled', label: 'מתוכננת' },
+    { value: 'pending', label: 'ממתינה לאישור' },
     { value: 'confirmed', label: 'אושרה' },
     { value: 'completed', label: 'בוצעה' },
     { value: 'cancelled', label: 'בוטלה' },
@@ -37,7 +37,7 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
         date: new Date(),
         duration: 60,
         type: 'individual',
-        status: 'scheduled',
+        status: 'pending',
         notes: '',
         location: 'clinic',
         price: '',

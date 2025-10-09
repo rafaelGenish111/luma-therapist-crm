@@ -66,7 +66,7 @@ const appointmentSchema = new mongoose.Schema({
     // מיקום פגישה
     location: {
         type: String,
-        enum: ['online', 'clinic', 'home'],
+        enum: ['clinic', 'home', 'online', 'therapist_home', 'outdoor', 'other'],
         default: 'clinic'
     },
     meetingUrl: {

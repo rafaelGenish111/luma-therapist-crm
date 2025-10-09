@@ -139,7 +139,9 @@ const TherapistCalendar = ({
     // המרת פגישות לפורמט של react-big-calendar
     const events = useMemo(() => {
         console.log('🗓️ Converting appointments to events:', filteredAppointments.length);
-        return filteredAppointments.map(appointment => {
+        console.log('🗓️ Full appointments data:', filteredAppointments);
+        
+        const convertedEvents = filteredAppointments.map(appointment => {
             const clientName = appointment.client 
                 ? `${appointment.client.firstName || ''} ${appointment.client.lastName || ''}`.trim()
                 : appointment.clientName || 'לקוח לא מוגדר';
@@ -147,15 +149,7 @@ const TherapistCalendar = ({
             const startDate = appointment.startTime || appointment.date;
             const endDate = appointment.endTime || new Date(new Date(startDate).getTime() + (appointment.duration || 60) * 60000);
             
-            console.log('📅 Event:', {
-                id: appointment._id,
-                title: clientName,
-                start: startDate,
-                end: endDate,
-                serviceType: appointment.serviceType
-            });
-            
-            return {
+            const event = {
                 id: appointment._id,
                 title: clientName,
                 start: new Date(startDate),
@@ -174,7 +168,23 @@ const TherapistCalendar = ({
                     paymentAmount: appointment.paymentAmount
                 }
             };
+            
+            console.log('📅 Event created:', {
+                id: event.id,
+                title: event.title,
+                start: event.start,
+                end: event.end,
+                startISO: event.start.toISOString(),
+                endISO: event.end.toISOString(),
+                status: event.resource.status,
+                serviceType: event.resource.serviceType
+            });
+            
+            return event;
         });
+        
+        console.log('🗓️ Total events created:', convertedEvents.length);
+        return convertedEvents;
     }, [filteredAppointments]);
 
     // סגנון אירועים
