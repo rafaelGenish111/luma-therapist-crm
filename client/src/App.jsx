@@ -41,8 +41,8 @@ import AccessibilityStatement from './pages/AccessibilityStatement'
 import DesignPage from './pages/dashboard/therapist/DesignPage'
 import CampaignsPage from './pages/dashboard/therapist/CampaignsPage';
 // Calendar Pages
-import CalendarPage from './pages/Dashboard/CalendarPage';
-import CalendarSettings from './pages/Dashboard/CalendarSettings';
+import CalendarPage from './pages/dashboard/CalendarPage';
+import CalendarSettings from './pages/dashboard/CalendarSettings';
 // import WebsiteBuilderPage from './pages/dashboard/WebsiteBuilderPage'
 // import SettingsPage from './pages/dashboard/SettingsPage'
 // import ProfilePage from './pages/dashboard/ProfilePage'
