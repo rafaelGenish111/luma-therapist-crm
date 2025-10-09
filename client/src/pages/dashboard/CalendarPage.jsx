@@ -749,11 +749,11 @@ const CalendarPage = () => {
                             
                             const payload = {
                                 clientId: appointmentData.client || appointmentData.clientId,
-                                serviceType: appointmentData.type || appointmentData.serviceType || 'individual',
+                                serviceType: appointmentData.type,
                                 startTime: appointmentData.date || appointmentData.startTime,
                                 endTime: appointmentData.endTime,
                                 duration: appointmentData.duration || 60,
-                                location: appointmentData.location || 'clinic',
+                                location: appointmentData.location,
                                 meetingUrl: appointmentData.meetingUrl,
                                 notes: appointmentData.notes || appointmentData.summary || '',
                                 privateNotes: appointmentData.privateNotes || '',

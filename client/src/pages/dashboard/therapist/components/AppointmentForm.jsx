@@ -7,11 +7,20 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { he } from 'date-fns/locale';
 
 const appointmentTypes = [
-    'פגישה ראשונה',
-    'טיפול רגיל',
-    'מעקב',
-    'ייעוץ',
-    'אחר'
+    { value: 'individual', label: 'טיפול פרטני' },
+    { value: 'couple', label: 'טיפול זוגי' },
+    { value: 'family', label: 'טיפול משפחתי' },
+    { value: 'group', label: 'טיפול קבוצתי' },
+    { value: 'workshop', label: 'סדנה' }
+];
+
+const locationTypes = [
+    { value: 'clinic', label: 'קליניקה' },
+    { value: 'home', label: 'בית הלקוח' },
+    { value: 'online', label: 'מקוון/אונליין' },
+    { value: 'therapist_home', label: 'בית המטפל' },
+    { value: 'outdoor', label: 'פארק/חוץ' },
+    { value: 'other', label: 'אחר' }
 ];
 
 const appointmentStatuses = [
@@ -27,10 +36,10 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
         client: clientId || '',
         date: new Date(),
         duration: 60,
-        type: 'טיפול רגיל',
+        type: 'individual',
         status: 'scheduled',
         notes: '',
-        location: '',
+        location: 'clinic',
         price: '',
         summary: ''
     });
@@ -161,8 +170,8 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
                             helperText={errors.type}
                         >
                             {appointmentTypes.map((type) => (
-                                <MenuItem key={type} value={type}>
-                                    {type}
+                                <MenuItem key={type.value} value={type.value}>
+                                    {type.label}
                                 </MenuItem>
                             ))}
                         </TextField>
@@ -188,13 +197,20 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField
+                            select
                             label="מיקום"
                             name="location"
                             value={form.location}
                             onChange={handleChange}
                             fullWidth
-                            placeholder="כתובת או חדר"
-                        />
+                            required
+                        >
+                            {locationTypes.map((loc) => (
+                                <MenuItem key={loc.value} value={loc.value}>
+                                    {loc.label}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField
