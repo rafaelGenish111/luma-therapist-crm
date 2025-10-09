@@ -21,7 +21,7 @@ import RevenueChart from '../../../components/dashboard/RevenueChart';
 import ActivityFeed from '../../../components/dashboard/ActivityFeed';
 import QuickActions from '../../../components/dashboard/QuickActions';
 import NotificationCenter from '../../../components/dashboard/NotificationCenter';
-import UpcomingAppointments from '../../../components/Dashboard/UpcomingAppointments';
+import UpcomingAppointments from '../../../components/dashboard/UpcomingAppointments';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 
