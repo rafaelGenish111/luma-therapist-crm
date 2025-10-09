@@ -74,6 +74,7 @@ import TherapistCalendar from '../../components/Calendar/TherapistCalendar';
 import AppointmentModal from '../../components/Calendar/AppointmentModal';
 import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
 import MiniCalendar from '../../components/Calendar/MiniCalendar';
+import DayView from '../../components/Calendar/DayView';
 import '../../styles/calendar.css';
 
 const CalendarPage = () => {
@@ -88,6 +89,8 @@ const CalendarPage = () => {
     const [error, setError] = useState(null);
     const [currentDate, setCurrentDate] = useState(moment());
     const [view, setView] = useState('month');
+    const [selectedDate, setSelectedDate] = useState(null); // For day view
+    const [showDayView, setShowDayView] = useState(false); // Toggle day view
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
     const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
@@ -133,8 +136,9 @@ const CalendarPage = () => {
     const loadAppointments = useCallback(async () => {
         try {
             setLoading(true);
-            const startDate = moment(currentDate).startOf('day').toDate();
-            const endDate = moment(currentDate).endOf('day').toDate();
+            // Load appointments for the entire month (or selected date range)
+            const startDate = moment(currentDate).startOf('month').toDate();
+            const endDate = moment(currentDate).endOf('month').toDate();
 
             const response = await api.get('/appointments', {
                 params: {
@@ -243,11 +247,9 @@ const CalendarPage = () => {
     };
 
     const handleSelectSlot = (slotInfo) => {
-        setSelectedAppointment({
-            startTime: slotInfo.start,
-            endTime: slotInfo.end
-        });
-        setShowAppointmentModal(true);
+        // When clicking on a day in month view, show day view instead of opening modal
+        setSelectedDate(moment(slotInfo.start));
+        setShowDayView(true);
     };
 
     const handleSelectEvent = (event) => {
@@ -347,6 +349,25 @@ const CalendarPage = () => {
             case 'cancelled': return 'בוטל';
             default: return status;
         }
+    };
+
+    // Day view handlers
+    const handleBackToCalendar = () => {
+        setShowDayView(false);
+        setSelectedDate(null);
+    };
+
+    const handleAddAppointmentFromDayView = () => {
+        setSelectedAppointment({
+            startTime: selectedDate?.toDate(),
+            endTime: moment(selectedDate).add(1, 'hour').toDate()
+        });
+        setShowAppointmentModal(true);
+    };
+
+    const handleEditAppointmentFromDayView = (appointment) => {
+        setSelectedAppointment(appointment);
+        setShowAppointmentModal(true);
     };
 
     const Sidebar = () => (
@@ -644,41 +665,56 @@ const CalendarPage = () => {
                 )}
 
                 {/* Main Content */}
-                <Grid container spacing={2}>
-                    {/* Main Calendar */}
-                    <Grid item xs={12} md={9} order={{ xs: 2, md: 1 }}>
-                        <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
-                            <TherapistCalendar
-                                appointments={appointments}
-                                currentDate={currentDate}
-                                view={view}
-                                onSelectSlot={handleSelectSlot}
-                                onSelectEvent={handleSelectEvent}
-                                onEventDrop={handleEventDrop}
-                                loading={loading}
-                                onViewChange={setView}
-                                onNavigate={setCurrentDate}
-                            />
-                        </Paper>
-                    </Grid>
+                {showDayView ? (
+                    // Day View
+                    <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
+                        <DayView
+                            selectedDate={selectedDate}
+                            appointments={appointments}
+                            onBack={handleBackToCalendar}
+                            onAddAppointment={handleAddAppointmentFromDayView}
+                            onEditAppointment={handleEditAppointmentFromDayView}
+                            loading={loading}
+                        />
+                    </Paper>
+                ) : (
+                    // Calendar View
+                    <Grid container spacing={2}>
+                        {/* Main Calendar */}
+                        <Grid item xs={12} md={9} order={{ xs: 2, md: 1 }}>
+                            <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
+                                <TherapistCalendar
+                                    appointments={appointments}
+                                    currentDate={currentDate}
+                                    view={view}
+                                    onSelectSlot={handleSelectSlot}
+                                    onSelectEvent={handleSelectEvent}
+                                    onEventDrop={handleEventDrop}
+                                    loading={loading}
+                                    onViewChange={setView}
+                                    onNavigate={setCurrentDate}
+                                />
+                            </Paper>
+                        </Grid>
 
-                    {/* Sidebar */}
-                    <Grid item xs={12} md={3} order={{ xs: 1, md: 2 }}>
-                        {isMobile ? (
-                            <Drawer
-                                anchor="left"
-                                open={sidebarOpen}
-                                onClose={() => setSidebarOpen(false)}
-                            >
-                                <Box sx={{ width: 280, p: 2 }}>
-                                    <Sidebar />
-                                </Box>
-                            </Drawer>
-                        ) : (
-                            <Sidebar />
-                        )}
+                        {/* Sidebar */}
+                        <Grid item xs={12} md={3} order={{ xs: 1, md: 2 }}>
+                            {isMobile ? (
+                                <Drawer
+                                    anchor="left"
+                                    open={sidebarOpen}
+                                    onClose={() => setSidebarOpen(false)}
+                                >
+                                    <Box sx={{ width: 280, p: 2 }}>
+                                        <Sidebar />
+                                    </Box>
+                                </Drawer>
+                            ) : (
+                                <Sidebar />
+                            )}
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
 
                 {/* Mobile Sidebar Toggle */}
                 {isMobile && (
