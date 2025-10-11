@@ -92,7 +92,9 @@ const logger = winston.createLogger({
     ],
     
     // Handle exceptions and rejections
-    exceptionHandlers: [
+    exceptionHandlers: isServerless ? [
+        new winston.transports.Console({ format: consoleFormat })
+    ] : [
         new winston.transports.File({
             filename: path.join(logsDir, 'exceptions.log'),
             maxsize: 5242880, // 5MB
@@ -100,7 +102,9 @@ const logger = winston.createLogger({
         })
     ],
     
-    rejectionHandlers: [
+    rejectionHandlers: isServerless ? [
+        new winston.transports.Console({ format: consoleFormat })
+    ] : [
         new winston.transports.File({
             filename: path.join(logsDir, 'rejections.log'),
             maxsize: 5242880, // 5MB
