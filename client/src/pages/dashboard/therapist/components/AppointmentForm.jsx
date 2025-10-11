@@ -61,9 +61,16 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
 
             setForm((prev) => ({
                 ...prev,
-                ...initialData,
+                // שדות ממופה כדי להציג ערכים נכונים כברירת מחדל
+                client: initialData.client?._id || initialData.clientId || initialData.client || prev.client,
                 date: initialData.startTime ? new Date(initialData.startTime) : (initialData.date ? new Date(initialData.date) : new Date()),
-                status: mappedStatus
+                duration: initialData.duration || prev.duration,
+                type: initialData.serviceType || initialData.type || prev.type,
+                status: mappedStatus,
+                notes: initialData.notes || '',
+                location: initialData.location || prev.location,
+                price: (initialData.paymentAmount ?? initialData.price ?? '') === '' ? '' : (initialData.paymentAmount ?? initialData.price),
+                summary: initialData.summary || ''
             }));
         }
     }, [initialData]);
@@ -109,7 +116,7 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
                             onChange={handleDateChange}
                             ampm={false}
                             minutesStep={5}
-                            disablePast
+                            disablePast={!initialData}
                             format="dd.MM.yyyy HH:mm"
                             viewRenderers={{
                                 hours: renderTimeViewClock,
