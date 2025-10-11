@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import api from '../../services/api';
 import { format } from 'date-fns';
 
 const statusColor = (status) => {
@@ -22,8 +23,9 @@ const paymentColor = (paymentStatus) => {
     }
 };
 
-const AppointmentsListView = ({ appointments = [], onEdit, onDelete }) => {
+const AppointmentsListView = ({ appointments = [], onEdit, onDelete, onRefresh }) => {
     const [search, setSearch] = useState('');
+    const [savingRowId, setSavingRowId] = useState(null);
 
     const rows = useMemo(() => {
         return appointments
@@ -65,7 +67,14 @@ const AppointmentsListView = ({ appointments = [], onEdit, onDelete }) => {
         { field: 'service', headerName: 'שירות', flex: 1, minWidth: 140 },
         { field: 'duration', headerName: 'משך (דק׳)', type: 'number', flex: 0.8, minWidth: 120 },
         {
-            field: 'status', headerName: 'סטטוס', flex: 1, minWidth: 140,
+            field: 'status', headerName: 'סטטוס', flex: 1, minWidth: 140, editable: true, type: 'singleSelect',
+            valueOptions: [
+                { value: 'pending', label: 'ממתין' },
+                { value: 'confirmed', label: 'מאושר' },
+                { value: 'completed', label: 'הושלם' },
+                { value: 'cancelled', label: 'בוטל' },
+                { value: 'no_show', label: 'לא הגיע' }
+            ],
             renderCell: (params) => (
                 <Chip label={params.value} color={statusColor(params.value)} size="small" />
             )
@@ -80,6 +89,17 @@ const AppointmentsListView = ({ appointments = [], onEdit, onDelete }) => {
             )
         },
         {
+            field: 'paymentStatus', headerName: 'סטטוס תשלום', flex: 1, minWidth: 150, editable: true, type: 'singleSelect',
+            valueOptions: [
+                { value: 'unpaid', label: 'לא שולם' },
+                { value: 'paid', label: 'שולם' },
+                { value: 'refunded', label: 'הוחזר' }
+            ]
+        },
+        {
+            field: 'paymentAmount', headerName: 'סכום (₪)', type: 'number', flex: 0.8, minWidth: 120, editable: true
+        },
+        {
             field: 'actions', headerName: 'פעולות', sortable: false, flex: 1, minWidth: 160,
             renderCell: (params) => (
                 <Stack direction="row" spacing={1}>
@@ -89,6 +109,27 @@ const AppointmentsListView = ({ appointments = [], onEdit, onDelete }) => {
             )
         }
     ];
+
+    const processRowUpdate = useCallback(async (newRow, oldRow) => {
+        try {
+            setSavingRowId(newRow.id);
+            const changed = {};
+            if (newRow.status !== oldRow.status) changed.status = newRow.status;
+            if (newRow.paymentStatus !== oldRow.paymentStatus) changed.paymentStatus = newRow.paymentStatus;
+            if (Number(newRow.paymentAmount) !== Number(oldRow.paymentAmount)) changed.paymentAmount = Number(newRow.paymentAmount || 0);
+
+            if (Object.keys(changed).length > 0) {
+                await api.put(`/appointments/${newRow.id}`, changed);
+                await onRefresh?.();
+            }
+            return newRow;
+        } catch (e) {
+            console.error('Failed to update row', e);
+            throw e;
+        } finally {
+            setSavingRowId(null);
+        }
+    }, [onRefresh]);
 
     return (
         <Box sx={{ height: '70vh', display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -109,6 +150,9 @@ const AppointmentsListView = ({ appointments = [], onEdit, onDelete }) => {
                 }}
                 pageSizeOptions={[10, 20, 50]}
                 localeText={{ noRowsLabel: 'אין פגישות להצגה' }}
+                processRowUpdate={processRowUpdate}
+                onProcessRowUpdateError={(err) => console.error(err)}
+                loading={!!savingRowId}
                 sx={{ direction: 'rtl', '& .MuiDataGrid-columnHeaders': { fontWeight: 600 } }}
             />
         </Box>
