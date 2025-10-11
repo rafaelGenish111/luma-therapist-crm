@@ -211,6 +211,36 @@ router.post('/appointments', async (req, res) => {
             console.warn('Failed to send booking email notification:', e.message);
         }
 
+        // Send confirmation email to client (if provided), with ICS
+        try {
+            if (clientDoc.email) {
+                await emailService.init();
+                const icsContent = generateAppointmentICS({
+                    appointment,
+                    therapist,
+                    client: clientDoc,
+                    serverBaseUrl: process.env.SERVER_URL
+                });
+                await emailService.sendEmail({
+                    email: clientDoc.email,
+                    subject: 'אישור פגישה - Luma',
+                    html: `<p>שלום ${clientDoc.firstName},</p>
+                           <p>הפגישה שלך ${autoConfirm ? 'אושרה' : 'נרשמה וממתינה לאישור'}.</p>
+                           <ul>
+                             <li><strong>תאריך:</strong> ${moment(start).format('DD/MM/YYYY')}</li>
+                             <li><strong>שעה:</strong> ${moment(start).format('HH:mm')} - ${moment(calcEnd).format('HH:mm')}</li>
+                             <li><strong>מטפל/ת:</strong> ${therapist.firstName} ${therapist.lastName || ''}</li>
+                           </ul>
+                           <p>מצורף קובץ להוספה ליומן.</p>`,
+                    attachments: [
+                        { filename: 'appointment.ics', content: icsContent, contentType: 'text/calendar; charset=UTF-8; method=PUBLISH' }
+                    ]
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to send client confirmation email:', e.message);
+        }
+
         await appointment.populate('client', 'firstName lastName phone email');
         res.status(201).json({ success: true, data: appointment });
     } catch (e) {
