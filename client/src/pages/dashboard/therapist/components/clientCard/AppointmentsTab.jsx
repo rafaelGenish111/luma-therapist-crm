@@ -110,7 +110,6 @@ const AppointmentsTab = ({ client }) => {
             appointmentDate.setHours(form.time.getHours());
             appointmentDate.setMinutes(form.time.getMinutes());
 
-            // Align with server payload (same as CalendarPage)
             const appointmentData = {
                 clientId: client._id,
                 serviceType: form.type,

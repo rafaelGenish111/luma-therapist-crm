@@ -287,17 +287,24 @@ router.get('/clients/:clientId/appointments', auth, authorize(['therapist', 'adm
         // בניית query בסיסי
         let query = {
             client: clientId,
-            therapist: therapistId
+            therapist: therapistId,
+            deletedAt: null
         };
 
         // סינון לפי scope
         const now = new Date();
         switch (scope) {
             case 'upcoming':
-                query.date = { $gte: now };
+                query.$or = [
+                    { startTime: { $gte: now } },
+                    { date: { $gte: now } }
+                ];
                 break;
             case 'history':
-                query.date = { $lt: now };
+                query.$or = [
+                    { startTime: { $lt: now } },
+                    { date: { $lt: now } }
+                ];
                 break;
             case 'all':
             default:
@@ -311,28 +318,27 @@ router.get('/clients/:clientId/appointments', auth, authorize(['therapist', 'adm
         // קבלת הפגישות
         const appointments = await Appointment.find(query)
             .populate('client', 'firstName lastName phone email')
-            .sort({ date: scope === 'history' ? -1 : 1 }) // היסטוריה בסדר יורד, עתידיות בסדר עולה
+            .sort({ startTime: scope === 'history' ? -1 : 1, date: scope === 'history' ? -1 : 1 })
             .skip(skip)
             .limit(parseInt(limit));
 
         // חישוב סטטיסטיקות
-        const allAppointments = await Appointment.find({ client: clientId, therapist: therapistId });
+        const allAppointments = await Appointment.find({ client: clientId, therapist: therapistId, deletedAt: null });
         const stats = {
             total: allAppointments.length,
-            upcoming: allAppointments.filter(apt => apt.date >= now).length,
-            history: allAppointments.filter(apt => apt.date < now).length,
+            upcoming: allAppointments.filter(apt => (apt.startTime || apt.date) >= now).length,
+            history: allAppointments.filter(apt => (apt.startTime || apt.date) < now).length,
             byStatus: {
-                scheduled: allAppointments.filter(apt => apt.status === 'scheduled').length,
+                pending: allAppointments.filter(apt => apt.status === 'pending').length,
                 confirmed: allAppointments.filter(apt => apt.status === 'confirmed').length,
                 completed: allAppointments.filter(apt => apt.status === 'completed').length,
                 cancelled: allAppointments.filter(apt => apt.status === 'cancelled').length,
                 no_show: allAppointments.filter(apt => apt.status === 'no_show').length
             },
             byPaymentStatus: {
-                not_required: allAppointments.filter(apt => apt.paymentStatus === 'not_required').length,
-                pending: allAppointments.filter(apt => apt.paymentStatus === 'pending').length,
+                unpaid: allAppointments.filter(apt => apt.paymentStatus === 'unpaid').length,
                 paid: allAppointments.filter(apt => apt.paymentStatus === 'paid').length,
-                failed: allAppointments.filter(apt => apt.paymentStatus === 'failed').length
+                refunded: allAppointments.filter(apt => apt.paymentStatus === 'refunded').length
             }
         };
 
