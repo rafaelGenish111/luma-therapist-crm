@@ -6,11 +6,16 @@ const path = require('path');
  * מערכת רישום מתקדמת עם Winston
  */
 
-// Create logs directory if it doesn't exist
+// Create logs directory only when not running on serverless (e.g., Vercel)
 const fs = require('fs');
+const isServerless = !!process.env.VERCEL;
 const logsDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
+try {
+    if (!isServerless && !fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+    }
+} catch (e) {
+    // On serverless (read-only FS) ignore mkdir errors gracefully
 }
 
 // Custom log format
@@ -58,7 +63,9 @@ const logger = winston.createLogger({
         service: 'wellness-platform',
         version: process.env.API_VERSION || '1.0.0'
     },
-    transports: [
+    transports: isServerless ? [
+        new winston.transports.Console({ format: consoleFormat })
+    ] : [
         // Error log file
         new winston.transports.File({
             filename: path.join(logsDir, 'error.log'),
@@ -67,7 +74,6 @@ const logger = winston.createLogger({
             maxFiles: 5,
             format: logFormat
         }),
-        
         // Combined log file
         new winston.transports.File({
             filename: path.join(logsDir, 'combined.log'),
@@ -75,7 +81,6 @@ const logger = winston.createLogger({
             maxFiles: 5,
             format: logFormat
         }),
-        
         // Audit log file (for security events)
         new winston.transports.File({
             filename: path.join(logsDir, 'audit.log'),
@@ -104,8 +109,8 @@ const logger = winston.createLogger({
     ]
 });
 
-// Add console transport for non-production environments
-if (process.env.NODE_ENV !== 'production') {
+// Add console transport for non-production environments (and keep console in serverless)
+if (process.env.NODE_ENV !== 'production' && !isServerless) {
     logger.add(new winston.transports.Console({
         format: consoleFormat
     }));
