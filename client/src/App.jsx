@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Box } from '@mui/material'
 import { useAuth } from './context/AuthContext'
 import AccessibilityWidget from './components/AccessibilityWidget'
@@ -110,7 +110,8 @@ const App = () => {
                         <Route path="calendar/settings" element={<CalendarSettings />} />
                         <Route path="clients" element={<ClientsPage />} />
                         <Route path="clients/:clientId" element={<ClientCard />} />
-                        <Route path="appointments" element={<AppointmentsPage />} />
+                        {/* הפניה: דף תורים ישן -> דף יומן */}
+                        <Route path="appointments" element={<Navigate to="/dashboard/calendar" replace />} />
                         <Route path="articles" element={<ArticlesPage />} />
                         <Route path="articles/:id" element={<ArticlesPage />} />
                         <Route path="gallery" element={<GalleryPage />} />
