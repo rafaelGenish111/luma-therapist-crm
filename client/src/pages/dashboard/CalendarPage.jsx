@@ -276,7 +276,9 @@ const CalendarPage = () => {
     };
 
     const handleSelectEvent = (event) => {
-        setSelectedAppointment(event);
+        // פותח את האירוע הקיים לעריכה (לא יצירת חדש)
+        const appointment = event?.resource || event;
+        setSelectedAppointment(appointment);
         setShowAppointmentModal(true);
     };
 

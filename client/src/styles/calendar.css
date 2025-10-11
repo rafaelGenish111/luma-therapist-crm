@@ -144,6 +144,12 @@
     background-color: #3174ad;
 }
 
+/* Hover highlight for calendar day cells */
+.luma-day-cell:hover {
+    background-color: rgba(59, 185, 255, 0.1);
+    transition: background-color 120ms ease-in-out;
+}
+
 /* Fix z-index issues */
 .MuiDialog-root {
     z-index: 1300 !important;

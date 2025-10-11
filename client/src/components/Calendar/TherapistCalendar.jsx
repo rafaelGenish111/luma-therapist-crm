@@ -216,12 +216,12 @@ const TherapistCalendar = ({
 
     // טיפול בבחירת slot ריק
     const handleSelectSlot = useCallback((slotInfo) => {
-        if (onSelectSlot) {
-            onSelectSlot(slotInfo);
-        }
-        // גם עדכן את התאריך הנבחר
+        // לחיצה על יום/סלוט לא תפתח יצירה אוטומטית; רק תעדכן תאריך נבחר
         if (onDateSelect) {
             onDateSelect(slotInfo.start);
+        }
+        if (onSelectSlot) {
+            onSelectSlot(slotInfo);
         }
     }, [onSelectSlot, onDateSelect]);
 
@@ -515,6 +515,13 @@ const TherapistCalendar = ({
                         components={{
                             toolbar: CustomToolbar,
                             event: CustomEvent
+                        }}
+                        dayPropGetter={(date) => {
+                            // היילייט עדין (hover) לימי החודש
+                            return {
+                                className: 'luma-day-cell',
+                                style: {}
+                            };
                         }}
                         messages={{
                             next: 'הבא',
