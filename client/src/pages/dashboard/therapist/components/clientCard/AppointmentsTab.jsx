@@ -86,14 +86,14 @@ const AppointmentsTab = ({ client }) => {
     };
 
     const handleCloseDialog = () => {
-            setDialogOpen(false);
+        setDialogOpen(false);
         setSelectedAppointment(null);
         setForm({
             date: null,
             time: null,
             duration: 60,
-                type: 'individual',
-                location: 'clinic',
+            type: 'individual',
+            location: 'clinic',
             price: '',
             notes: ''
         });
@@ -250,11 +250,11 @@ const AppointmentsTab = ({ client }) => {
     const getFutureAppointments = () => {
         const now = new Date();
         const futureAppointments = appointments.filter(apt => {
-            const appointmentDate = new Date(apt.date);
+            const appointmentDate = new Date(apt.startTime || apt.date);
             const isFuture = appointmentDate > now;
-            const isActiveStatus = ['scheduled', 'confirmed', 'מתוכננת', 'אושרה'].includes(apt.status);
+            const isActiveStatus = ['pending', 'scheduled', 'confirmed', 'מתוכננת', 'אושרה'].includes(apt.status);
             console.log(`🔍 Appointment ${apt._id}:`, {
-                date: apt.date,
+                date: apt.startTime || apt.date,
                 status: apt.status,
                 isFuture,
                 isActiveStatus,
@@ -269,7 +269,7 @@ const AppointmentsTab = ({ client }) => {
     const getPastAppointments = () => {
         const now = new Date();
         return appointments.filter(apt => {
-            const appointmentDate = new Date(apt.date);
+            const appointmentDate = new Date(apt.startTime || apt.date);
             const isPast = appointmentDate <= now;
             const isCompletedStatus = ['completed', 'cancelled', 'no_show', 'בוצעה', 'בוטלה', 'לא הופיעה'].includes(apt.status);
             return isPast || isCompletedStatus;
@@ -424,7 +424,7 @@ const AppointmentsTab = ({ client }) => {
                                                 </Typography>
                                             </Box>
                                         </TableCell>
-                                        <TableCell>{appointment.type}</TableCell>
+                                        <TableCell>{appointment.serviceType || appointment.type}</TableCell>
                                         <TableCell>{appointment.duration} דקות</TableCell>
                                         <TableCell>
                                             <Chip
@@ -440,9 +440,9 @@ const AppointmentsTab = ({ client }) => {
                                                     color={getPaymentStatusColor(appointment.paymentStatus)}
                                                     size="small"
                                                 />
-                                                {appointment.price && (
+                                                {(appointment.paymentAmount ?? appointment.price) && (
                                                     <Typography variant="caption">
-                                                        ₪{appointment.price}
+                                                        ₪{appointment.paymentAmount ?? appointment.price}
                                                     </Typography>
                                                 )}
                                             </Box>

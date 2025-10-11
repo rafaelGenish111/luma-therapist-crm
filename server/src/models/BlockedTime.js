@@ -19,7 +19,7 @@ const blockedTimeSchema = new mongoose.Schema({
 
     reason: {
         type: String,
-        enum: ['vacation', 'sick', 'personal', 'training', 'other'],
+        enum: ['vacation', 'sick', 'personal', 'training', 'other', 'OFF_HOURS'],
         required: true
     },
 

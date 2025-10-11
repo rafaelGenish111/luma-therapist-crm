@@ -51,7 +51,7 @@ import CalendarSettings from './pages/dashboard/CalendarSettings';
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
 // Website Pages
-import { WebsiteLayout, Home, About, Articles, Gallery, BookAppointment, Contact } from './pages/website';
+import { WebsiteLayout, Home, About, Articles, Gallery, BookAppointment, Contact, PublicBooking } from './pages/website';
 import ArticleDetail from './pages/website/ArticleDetail';
 import HealthDeclaration from './pages/website/HealthDeclaration';
 import TermsAndPrivacyPage from './pages/TermsAndPrivacyPage';
@@ -143,7 +143,7 @@ const App = () => {
                         <Route path="articles/:articleSlug" element={<ArticleDetail />} />
                         <Route path="gallery" element={<Gallery />} />
                         <Route path="health-declaration" element={<HealthDeclaration />} />
-                        <Route path="book" element={<BookAppointment />} />
+                        <Route path="book" element={<PublicBooking />} />
                         <Route path="contact" element={<Contact />} />
                     </Route>
                     {/* דוגמה לראוט עם הרשאה */}

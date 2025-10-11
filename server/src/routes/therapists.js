@@ -175,7 +175,7 @@ router.put('/profile', auth, authorize(['manage_own_profile']), validateProfileU
             'businessName', 'businessAddress', 'businessPhone', 'businessEmail',
             'hourlyRate', 'currency', 'paymentMethods',
             'homeSummary', 'clinicImage',
-            'website', 'calendlyUrl'
+            'website', 'calendlyUrl', 'calendarSettings'
         ];
 
         updateFields.forEach(field => {
@@ -192,6 +192,8 @@ router.put('/profile', auth, authorize(['manage_own_profile']), validateProfileU
                     therapist.businessPhone = String(req.body[field]).replace(/[\s-]/g, '');
                 } else if (field === 'website') {
                     therapist.website = { ...therapist.website, ...req.body[field] };
+                } else if (field === 'calendarSettings') {
+                    therapist.calendarSettings = { ...therapist.calendarSettings, ...req.body[field] };
                 } else {
                     therapist[field] = req.body[field];
                 }

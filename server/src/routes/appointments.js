@@ -78,7 +78,7 @@ router.get('/', auth, authorize(['manage_own_appointments']), async (req, res) =
         const appointments = await Appointment.find(query)
             .populate('client', 'firstName lastName phone email')
             .sort({ startTime: 1, date: 1 });
-        
+
         console.log(`📅 Loaded ${appointments.length} appointments for therapist ${req.user.id}`);
         res.json({ success: true, data: appointments });
     } catch (error) {
@@ -109,7 +109,7 @@ router.get('/:id', auth, authorize(['manage_own_appointments']), async (req, res
 router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) => {
     try {
         console.log('📥 Received appointment creation request:', JSON.stringify(req.body, null, 2));
-        
+
         // מיפוי שדות מהלקוח לתצורה הנתמכת במודל
         const {
             clientId,
@@ -204,17 +204,17 @@ router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) 
         if (error.errors) {
             console.error('❌ Validation errors:', JSON.stringify(error.errors, null, 2));
         }
-        
+
         if (error.name === 'ValidationError') {
             const validationErrors = Object.keys(error.errors).map(key => ({
                 field: key,
                 message: error.errors[key].message
             }));
-            return res.status(400).json({ 
-                success: false, 
-                message: 'נתונים לא תקינים', 
+            return res.status(400).json({
+                success: false,
+                message: 'נתונים לא תקינים',
                 errors: validationErrors,
-                details: error.message 
+                details: error.message
             });
         }
         res.status(500).json({ success: false, message: 'שגיאה ביצירת פגישה', error: error.message });

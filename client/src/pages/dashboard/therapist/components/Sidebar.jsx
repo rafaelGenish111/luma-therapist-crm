@@ -13,7 +13,7 @@ import Logo from '../../../../components/common/Logo';
 const links = [
     { to: '/dashboard', label: 'לוח בקרה', title: 'סקירה כללית של הפעילות ומדדים' },
     { to: '/dashboard/calendar', label: 'יומן', title: 'ניהול יומן ופגישות', icon: <CalendarTodayIcon /> },
-    { to: '/dashboard/appointments', label: 'תורים', title: 'ניהול תורים ופגישות' },
+    // הוסר: דף תורים ישן. הניהול מבוצע כעת בתוך דף היומן (תצוגת רשימה)
     { to: '/dashboard/clients', label: 'לקוחות', title: 'ניהול פרטי לקוחות' },
     { to: '/dashboard/campaigns', label: 'קמפיינים', title: 'יצירה וניהול קמפיינים שיווקיים', icon: <EmailIcon /> },
     { to: '/dashboard/treatment-types', label: 'סוגי טיפולים', title: 'ניהול סוגי טיפולים ומחירים' },

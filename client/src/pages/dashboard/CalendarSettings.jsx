@@ -56,6 +56,7 @@ import {
     ArrowBack
 } from '@mui/icons-material';
 import axios from 'axios';
+import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
 
 const CalendarSettings = () => {
     const navigate = useNavigate();
@@ -112,6 +113,9 @@ const CalendarSettings = () => {
             instructions: 'אנא בחרו תאריך ושעה המתאימים לכם',
             policies: 'ניתן לבטל פגישה עד 24 שעות מראש'
         },
+        calendarSettings: {
+            autoConfirmBookings: false
+        },
         policies: {
             cancellation: {
                 minNoticeHours: 24,
@@ -131,14 +135,38 @@ const CalendarSettings = () => {
             }
         }
     });
+    const [blockedTimes, setBlockedTimes] = useState([]);
 
     // Load settings
     useEffect(() => {
         const loadSettings = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('/api/calendar/settings');
-                setSettings(response.data);
+                // ודא שהטוקן מתווסף לבקשות (api service עושה זאת, אבל כאן נשתמש בו ישירות)
+                const api = (await import('../../services/api')).default;
+                const [availabilityRes, profileRes, syncStatusRes] = await Promise.all([
+                    api.get('/availability'),
+                    api.get('/therapists/profile'),
+                    api.get('/calendar/sync-status')
+                ]);
+
+                const availability = availabilityRes.data?.availability || settings.availability;
+                setBlockedTimes(availabilityRes.data?.blockedTimes || []);
+
+                const autoConfirm = !!profileRes.data?.data?.calendarSettings?.autoConfirmBookings;
+
+                setSettings(prev => ({
+                    ...prev,
+                    availability,
+                    calendarSettings: { autoConfirmBookings: autoConfirm },
+                    googleCalendar: {
+                        ...prev.googleCalendar,
+                        connected: !!syncStatusRes.data?.connected,
+                        lastSynced: syncStatusRes.data?.lastSyncedAt || null,
+                        syncDirection: syncStatusRes.data?.syncDirection || prev.googleCalendar.syncDirection,
+                        privacyLevel: syncStatusRes.data?.privacyLevel || prev.googleCalendar.privacyLevel
+                    }
+                }));
             } catch (err) {
                 setError('שגיאה בטעינת ההגדרות');
                 console.error('Error loading settings:', err);
@@ -148,6 +176,18 @@ const CalendarSettings = () => {
         };
 
         loadSettings();
+        // האזן לעדכוני חסימות מ-DayView כדי לרענן את הרשימה
+        const handler = async () => {
+            try {
+                const api = (await import('../../services/api')).default;
+                const res = await api.get('/availability');
+                setBlockedTimes(res.data?.blockedTimes || []);
+            } catch (e) {
+                // ignore
+            }
+        };
+        window.addEventListener('blockedTimes:updated', handler);
+        return () => window.removeEventListener('blockedTimes:updated', handler);
     }, []);
 
     // Handle tab change with unsaved changes warning
@@ -166,7 +206,9 @@ const CalendarSettings = () => {
     const handleSave = async () => {
         try {
             setSaving(true);
-            await axios.put('/api/calendar/settings', settings);
+            const api = (await import('../../services/api')).default;
+            await api.put('/availability', settings.availability);
+            await api.put('/therapists/profile', { calendarSettings: settings.calendarSettings });
             setSuccess('ההגדרות נשמרו בהצלחה');
             setHasUnsavedChanges(false);
             setTimeout(() => setSuccess(null), 3000);
@@ -198,7 +240,8 @@ const CalendarSettings = () => {
     // Google Calendar connection
     const handleGoogleConnect = async () => {
         try {
-            const response = await axios.get('/api/calendar/google/auth');
+            const api = (await import('../../services/api')).default;
+            const response = await api.get('/calendar/google/auth');
             window.location.href = response.data.authUrl;
         } catch (err) {
             setError('שגיאה בחיבור ל-Google Calendar');
@@ -207,7 +250,8 @@ const CalendarSettings = () => {
 
     const handleGoogleDisconnect = async () => {
         try {
-            await axios.post('/api/calendar/google/disconnect');
+            const api = (await import('../../services/api')).default;
+            await api.post('/calendar/google/disconnect');
             setSettings(prev => ({
                 ...prev,
                 googleCalendar: {
@@ -338,65 +382,53 @@ const CalendarSettings = () => {
                     {/* Availability Tab */}
                     {activeTab === 0 && (
                         <Box>
-                            <Typography variant="h6" gutterBottom>
-                                הגדרות זמינות
-                            </Typography>
-
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="זמן חיץ בין פגישות (דקות)"
-                                        type="number"
-                                        value={settings.availability.bufferTime}
-                                        onChange={(e) => handleSettingChange('availability.bufferTime', parseInt(e.target.value))}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="מקסימום פגישות ליום"
-                                        type="number"
-                                        value={settings.availability.maxDailyAppointments}
-                                        onChange={(e) => handleSettingChange('availability.maxDailyAppointments', parseInt(e.target.value))}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="הזמנה מראש מקסימלית (ימים)"
-                                        type="number"
-                                        value={settings.availability.advanceBookingDays}
-                                        onChange={(e) => handleSettingChange('availability.advanceBookingDays', parseInt(e.target.value))}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="הודעה מינימלית מראש (שעות)"
-                                        type="number"
-                                        value={settings.availability.minNoticeHours}
-                                        onChange={(e) => handleSettingChange('availability.minNoticeHours', parseInt(e.target.value))}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>אזור זמן</InputLabel>
-                                        <Select
-                                            value={settings.availability.timezone}
-                                            onChange={(e) => handleSettingChange('availability.timezone', e.target.value)}
-                                        >
-                                            <MenuItem value="Asia/Jerusalem">אסיה/ירושלים</MenuItem>
-                                            <MenuItem value="Europe/London">אירופה/לונדון</MenuItem>
-                                            <MenuItem value="America/New_York">אמריקה/ניו יורק</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            </Grid>
+                            <AvailabilitySettings
+                                availability={settings.availability}
+                                blockedTimes={blockedTimes}
+                                loading={saving}
+                                onSave={async (data) => {
+                                    try {
+                                        handleSettingChange('availability', data);
+                                        const api = (await import('../../services/api')).default;
+                                        await api.put('/availability', data);
+                                        setSuccess('הזמינות נשמרה');
+                                        setHasUnsavedChanges(false);
+                                    } catch (e) {
+                                        setError('שגיאה בשמירת הזמינות');
+                                    }
+                                }}
+                                onSaveBlockedTime={async (payload) => {
+                                    try {
+                                        const api = (await import('../../services/api')).default;
+                                        await api.post('/availability/blocked', payload);
+                                        const res = await api.get('/availability');
+                                        setBlockedTimes(res.data?.blockedTimes || []);
+                                    } catch (e) {
+                                        setError('שגיאה ביצירת זמן חסום');
+                                    }
+                                }}
+                                onDeleteBlockedTime={async (id) => {
+                                    try {
+                                        const api = (await import('../../services/api')).default;
+                                        await api.delete(`/availability/blocked/${id}`);
+                                        const res = await api.get('/availability');
+                                        setBlockedTimes(res.data?.blockedTimes || []);
+                                    } catch (e) {
+                                        setError('שגיאה במחיקת זמן חסום');
+                                    }
+                                }}
+                            />
+                            <Box mt={2}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.calendarSettings?.autoConfirmBookings || false}
+                                            onChange={(e) => handleSettingChange('calendarSettings.autoConfirmBookings', e.target.checked)}
+                                        />
+                                    }
+                                    label="אישור אוטומטי של פגישות ציבוריות"
+                                />
+                            </Box>
                         </Box>
                     )}
 
@@ -476,7 +508,23 @@ const CalendarSettings = () => {
                                         <Button
                                             variant="outlined"
                                             startIcon={<Refresh />}
-                                            onClick={() => axios.post('/api/calendar/sync')}
+                                            onClick={async () => {
+                                                try {
+                                                    const api = (await import('../../services/api')).default;
+                                                    await api.post('/calendar/sync', { direction: settings.googleCalendar.syncDirection || 'two-way' });
+                                                    const status = await api.get('/calendar/sync-status');
+                                                    setSettings(prev => ({
+                                                        ...prev,
+                                                        googleCalendar: {
+                                                            ...prev.googleCalendar,
+                                                            lastSynced: status.data?.lastSyncedAt || new Date().toISOString()
+                                                        }
+                                                    }));
+                                                    setSuccess('הסנכרון הושלם');
+                                                } catch (e) {
+                                                    setError('שגיאה בסנכרון');
+                                                }
+                                            }}
                                         >
                                             סנכרון עכשיו
                                         </Button>

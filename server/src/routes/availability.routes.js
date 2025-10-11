@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const availabilityController = require('../controllers/availability.controller');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const rateLimit = require('express-rate-limit');
 
 // Rate limiting for availability operations

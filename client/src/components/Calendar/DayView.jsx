@@ -11,7 +11,12 @@ import {
     Paper,
     Stack,
     Tooltip,
-    Alert
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField
 } from '@mui/material';
 import {
     ArrowBack,
@@ -26,11 +31,20 @@ import {
     CheckCircle
 } from '@mui/icons-material';
 import moment from 'moment';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import api from '../../services/api';
 import 'moment/locale/he';
 
 moment.locale('he');
 
 const DayView = ({ selectedDate, appointments = [], onBack, onAddAppointment, onEditAppointment, loading }) => {
+    const [availabilityOpen, setAvailabilityOpen] = React.useState(false);
+    const [fromTime, setFromTime] = React.useState(moment(selectedDate).hour(9).minute(0));
+    const [toTime, setToTime] = React.useState(moment(selectedDate).hour(17).minute(0));
+    const [savingAvailability, setSavingAvailability] = React.useState(false);
+    const [availabilityError, setAvailabilityError] = React.useState('');
     // Filter appointments for the selected date
     const dayAppointments = appointments.filter(apt => {
         const aptDate = moment(apt.startTime);
@@ -93,14 +107,22 @@ const DayView = ({ selectedDate, appointments = [], onBack, onAddAppointment, on
                             </Typography>
                         </Box>
                     </Box>
-                    <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={onAddAppointment}
-                        size="large"
-                    >
-                        הוסף פגישה
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setAvailabilityOpen(true)}
+                        >
+                            הגדר שעות עבודה ליום זה
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<Add />}
+                            onClick={onAddAppointment}
+                            size="large"
+                        >
+                            הוסף פגישה
+                        </Button>
+                    </Stack>
                 </Box>
 
                 {/* Stats */}
@@ -267,6 +289,101 @@ const DayView = ({ selectedDate, appointments = [], onBack, onAddAppointment, on
                     </Stack>
                 )}
             </Box>
+            {/* Availability Dialog */}
+            <Dialog open={availabilityOpen} onClose={() => setAvailabilityOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>הגדרת שעות עבודה ליום {selectedDate.format('DD/MM/YYYY')}</DialogTitle>
+                <DialogContent>
+                    <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="he">
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TimePicker
+                                label="שעת התחלה"
+                                value={fromTime}
+                                onChange={(v) => setFromTime(v)}
+                                renderInput={(params) => <TextField {...params} fullWidth />}
+                            />
+                            <TimePicker
+                                label="שעת סיום"
+                                value={toTime}
+                                onChange={(v) => setToTime(v)}
+                                renderInput={(params) => <TextField {...params} fullWidth />}
+                            />
+                        </Stack>
+                    </LocalizationProvider>
+                    {availabilityError && (
+                        <Alert severity="error" sx={{ mt: 2 }}>{availabilityError}</Alert>
+                    )}
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                        נגדיר זמנים חסומים מחוץ לחלון העבודה, כך שלא ניתן יהיה לקבוע שם פגישות.
+                    </Alert>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setAvailabilityOpen(false)} disabled={savingAvailability}>ביטול</Button>
+                    <Button
+                        variant="contained"
+                        disabled={savingAvailability}
+                        onClick={async () => {
+                            try {
+                                setAvailabilityError('');
+                                if (!fromTime || !toTime) {
+                                    setAvailabilityError('נא לבחור שעות התחלה וסיום');
+                                    return;
+                                }
+                                if (!moment(toTime).isAfter(fromTime)) {
+                                    setAvailabilityError('שעת הסיום חייבת להיות אחרי שעת ההתחלה');
+                                    return;
+                                }
+                                setSavingAvailability(true);
+                                const dayStart = moment(selectedDate).startOf('day');
+                                const dayEnd = moment(selectedDate).endOf('day');
+                                const workStart = moment(selectedDate)
+                                    .hour(fromTime.hour())
+                                    .minute(fromTime.minute())
+                                    .second(0)
+                                    .millisecond(0);
+                                const workEnd = moment(selectedDate)
+                                    .hour(toTime.hour())
+                                    .minute(toTime.minute())
+                                    .second(0)
+                                    .millisecond(0);
+
+                                const requests = [];
+                                // בלוק לפני תחילת העבודה
+                                if (workStart.isAfter(dayStart)) {
+                                    requests.push(api.post('/availability/blocked', {
+                                        startTime: dayStart.toDate(),
+                                        endTime: workStart.toDate(),
+                                        reason: 'OFF_HOURS',
+                                        notes: 'חסום אוטומטית מחוץ לשעות עבודה'
+                                    }));
+                                }
+                                // בלוק אחרי סיום העבודה
+                                if (dayEnd.isAfter(workEnd)) {
+                                    requests.push(api.post('/availability/blocked', {
+                                        startTime: workEnd.toDate(),
+                                        endTime: dayEnd.toDate(),
+                                        reason: 'OFF_HOURS',
+                                        notes: 'חסום אוטומטית מחוץ לשעות עבודה'
+                                    }));
+                                }
+                                await Promise.all(requests);
+                                // שדר אירוע גלובלי לריענון רשימת החסימות במסכים אחרים
+                                try {
+                                    window.dispatchEvent(new CustomEvent('blockedTimes:updated', {
+                                        detail: { date: selectedDate?.toISOString?.() }
+                                    }));
+                                } catch (_) { }
+                                setAvailabilityOpen(false);
+                            } catch (e) {
+                                setAvailabilityError(e.response?.data?.message || 'שגיאה בשמירת השעות');
+                            } finally {
+                                setSavingAvailability(false);
+                            }
+                        }}
+                    >
+                        שמור
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

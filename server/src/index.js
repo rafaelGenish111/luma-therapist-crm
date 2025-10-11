@@ -56,6 +56,7 @@ const communicationRoutes = require('./routes/communications');
 const hookRoutes = require('./routes/hooks');
 const campaignRoutes = require('./routes/campaigns');
 const bookingRoutes = require('./routes/bookings');
+const publicRoutes = require('./routes/public');
 const treatmentTypeRoutes = require('./routes/treatmentTypes');
 const importantInfoRoutes = require('./routes/importantInfo');
 const geoRoutes = require('./routes/geo');
@@ -73,6 +74,7 @@ const therapistAdminRoutes = require('./routes/therapistAdmin');
 const therapistRegistrationRoutes = require('./routes/therapistRegistration');
 const dashboardRoutes = require('./routes/dashboard');
 const calendarRoutes = require('./routes/calendar.routes');
+const availabilityRoutes = require('./routes/availability.routes');
 
 // Scheduled tasks will be loaded after MongoDB connection
 let scheduledTasks = null;
@@ -165,6 +167,7 @@ app.use('/api/communications', communicationRoutes);
 app.use('/api/hooks', hookRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/public', publicRoutes);
 app.use('/api/treatment-types', treatmentTypeRoutes);
 app.use('/api/important-info', importantInfoRoutes);
 app.use('/api/health-declarations', healthDeclarationsRouter);
@@ -181,6 +184,7 @@ app.use('/api/calendly', calendlyRoutes);
 app.use('/api/integrations/calendly', calendlyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use('/api/availability', availabilityRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

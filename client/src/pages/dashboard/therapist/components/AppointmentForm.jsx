@@ -47,25 +47,24 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
 
     useEffect(() => {
         if (initialData) {
-            // המרת ערכי סטטוס מעברית לאנגלית אם נדרש
+            // המרת סטטוסים לעברית->אנגלית במקרה הצורך
             const statusMapping = {
-                'מתוכננת': 'scheduled',
+                'ממתינה לאישור': 'pending',
+                'מתוכננת': 'pending',
                 'אושרה': 'confirmed',
                 'בוצעה': 'completed',
                 'בוטלה': 'cancelled',
                 'לא הופיעה': 'no_show'
             };
 
-            const mappedStatus = initialData.status && statusMapping[initialData.status]
-                ? statusMapping[initialData.status]
-                : initialData.status;
+            const mappedStatus = statusMapping[initialData.status] || initialData.status || 'pending';
 
-            setForm({
-                ...form,
+            setForm((prev) => ({
+                ...prev,
                 ...initialData,
-                date: initialData.date ? new Date(initialData.date) : new Date(),
-                status: mappedStatus || 'scheduled'
-            });
+                date: initialData.startTime ? new Date(initialData.startTime) : (initialData.date ? new Date(initialData.date) : new Date()),
+                status: mappedStatus
+            }));
         }
     }, [initialData]);
 

@@ -17,20 +17,15 @@ import {
     FormLabel,
     FormGroup,
     FormControlLabel,
+    Switch,
     Checkbox,
     Divider,
     Tooltip,
-    Badge,
     CircularProgress,
     Alert,
     useTheme,
     useMediaQuery,
-    Drawer,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemIcon,
-    ListItemButton
+    Drawer
 } from '@mui/material';
 import {
     CalendarToday,
@@ -45,18 +40,8 @@ import {
     CalendarViewWeek as ViewWeek,
     CalendarMonth as ViewMonth,
     List as ViewList,
-    AccessTime,
     Person,
-    AttachMoney,
-    CheckCircle,
-    Pending,
-    Cancel,
-    Block,
-    Schedule,
-    TrendingUp,
-    Refresh,
-    KeyboardArrowDown,
-    KeyboardArrowUp
+    CheckCircle
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -71,9 +56,8 @@ import api from '../../services/api';
 
 // Import existing components
 import TherapistCalendar from '../../components/Calendar/TherapistCalendar';
+import AppointmentsListView from '../../components/Calendar/AppointmentsListView';
 import AppointmentModal from '../../components/Calendar/AppointmentModal';
-import AvailabilitySettings from '../../components/Calendar/AvailabilitySettings';
-import MiniCalendar from '../../components/Calendar/MiniCalendar';
 import DayView from '../../components/Calendar/DayView';
 import '../../styles/calendar.css';
 
@@ -93,8 +77,6 @@ const CalendarPage = () => {
     const [showDayView, setShowDayView] = useState(false); // Toggle day view
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-    const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
-    const [showBlockTimeModal, setShowBlockTimeModal] = useState(false);
     const [showSyncStatus, setShowSyncStatus] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 
@@ -131,6 +113,9 @@ const CalendarPage = () => {
         lastSynced: null,
         syncing: false
     });
+
+    // Auto-confirm state (quick toggle)
+    const [autoConfirm, setAutoConfirm] = useState(!!localStorage.getItem('autoConfirmBookings'));
 
     // Load appointments
     const loadAppointments = useCallback(async () => {
@@ -200,6 +185,44 @@ const CalendarPage = () => {
     useEffect(() => {
         loadStats();
         loadSyncStatus();
+        // Try load preference from therapist profile if exists
+        (async () => {
+            try {
+                const res = await api.get('/therapists/profile');
+                const value = res.data?.data?.calendarSettings?.autoConfirmBookings;
+                if (typeof value === 'boolean') {
+                    setAutoConfirm(value);
+                    if (value) localStorage.setItem('autoConfirmBookings', '1');
+                    else localStorage.removeItem('autoConfirmBookings');
+                }
+            } catch (e) {
+                // ignore if not available
+            }
+        })();
+        // האזן לאירוע יצירת פגישה (מעמוד ציבורי) לרענון מיידי
+        let bc;
+        try {
+            if ('BroadcastChannel' in window) {
+                bc = new BroadcastChannel('appointments');
+                bc.onmessage = (msg) => {
+                    if (msg?.data?.type === 'created') {
+                        loadAppointments();
+                        loadStats();
+                    }
+                };
+            }
+        } catch (_) { }
+        const storageHandler = (e) => {
+            if (e.key === 'appointments:lastCreated') {
+                loadAppointments();
+                loadStats();
+            }
+        };
+        window.addEventListener('storage', storageHandler);
+        return () => {
+            try { bc && bc.close && bc.close(); } catch (_) { }
+            window.removeEventListener('storage', storageHandler);
+        };
     }, [loadStats, loadSyncStatus]);
 
     // Auto-refresh every 5 minutes
@@ -372,20 +395,6 @@ const CalendarPage = () => {
 
     const Sidebar = () => (
         <Box sx={{ width: 250, p: 2 }}>
-            {/* Mini Calendar */}
-            <Card sx={{ mb: 2 }}>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        יומן קטן
-                    </Typography>
-                    <MiniCalendar
-                        currentDate={currentDate}
-                        onDateChange={setCurrentDate}
-                        appointments={appointments}
-                    />
-                </CardContent>
-            </Card>
-
             {/* Filters */}
             <Card sx={{ mb: 2 }}>
                 <CardContent>
@@ -493,44 +502,7 @@ const CalendarPage = () => {
                     </Box>
                 </CardContent>
             </Card>
-
-            {/* Quick Actions */}
-            <Card>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        פעולות מהירות
-                    </Typography>
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<Schedule />}
-                        onClick={() => setShowAvailabilityModal(true)}
-                        sx={{ mb: 1 }}
-                    >
-                        הגדר זמינות
-                    </Button>
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<Block />}
-                        onClick={() => setShowBlockTimeModal(true)}
-                        sx={{ mb: 1 }}
-                    >
-                        חסום זמן
-                    </Button>
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<TrendingUp />}
-                        onClick={() => navigate('/dashboard/waitlist')}
-                    >
-                        רשימת המתנה
-                    </Button>
-                </CardContent>
-            </Card>
+            {/* End Sidebar */}
         </Box>
     );
 
@@ -610,6 +582,29 @@ const CalendarPage = () => {
                             >
                                 רשימה
                             </Button>
+                            {/* Auto-confirm toggle */}
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        size="small"
+                                        checked={autoConfirm}
+                                        onChange={async (e) => {
+                                            const val = e.target.checked;
+                                            setAutoConfirm(val); // update UI immediately
+                                            if (val) localStorage.setItem('autoConfirmBookings', '1');
+                                            else localStorage.removeItem('autoConfirmBookings');
+                                            // persist to server (best-effort)
+                                            try {
+                                                await api.put('/therapists/profile', { calendarSettings: { autoConfirmBookings: val } });
+                                            } catch (err) {
+                                                console.warn('Failed to persist autoConfirm preference:', err?.response?.data || err.message);
+                                            }
+                                        }}
+                                    />
+                                }
+                                label="אשר אוטומטית"
+                                sx={{ ml: 2 }}
+                            />
                         </Box>
                     </Box>
 
@@ -665,6 +660,9 @@ const CalendarPage = () => {
                 )}
 
                 {/* Main Content */}
+                <Alert severity="info" sx={{ mb: 2 }}>
+                    לתצוגת ניהול טבלאית של כל הפגישות לחצי על "רשימה". זהו תחליף לדף "תורים" הישן.
+                </Alert>
                 {showDayView ? (
                     // Day View
                     <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
@@ -678,42 +676,59 @@ const CalendarPage = () => {
                         />
                     </Paper>
                 ) : (
-                    // Calendar View
-                    <Grid container spacing={2}>
-                        {/* Main Calendar */}
-                        <Grid item xs={12} md={9} order={{ xs: 2, md: 1 }}>
-                            <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
-                                <TherapistCalendar
-                                    appointments={appointments}
-                                    currentDate={currentDate}
-                                    view={view}
-                                    onSelectSlot={handleSelectSlot}
-                                    onSelectEvent={handleSelectEvent}
-                                    onEventDrop={handleEventDrop}
-                                    loading={loading}
-                                    onViewChange={setView}
-                                    onNavigate={setCurrentDate}
-                                />
-                            </Paper>
-                        </Grid>
+                    // Calendar/List View
+                    view === 'agenda' ? (
+                        <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
+                            <AppointmentsListView
+                                appointments={appointments}
+                                onEdit={(apt) => setSelectedAppointment(apt) || setShowAppointmentModal(true)}
+                                onDelete={async (id) => {
+                                    try {
+                                        await api.delete(`/appointments/${id}`);
+                                        await loadAppointments();
+                                    } catch (e) {
+                                        setError('שגיאה במחיקת פגישה');
+                                    }
+                                }}
+                            />
+                        </Paper>
+                    ) : (
+                        <Grid container spacing={2}>
+                            {/* Main Calendar */}
+                            <Grid item xs={12} md={9} order={{ xs: 2, md: 1 }}>
+                                <Paper sx={{ height: 'calc(100vh - 280px)', minHeight: 500, p: 2 }}>
+                                    <TherapistCalendar
+                                        appointments={appointments}
+                                        currentDate={currentDate}
+                                        view={view}
+                                        onSelectSlot={handleSelectSlot}
+                                        onSelectEvent={handleSelectEvent}
+                                        onEventDrop={handleEventDrop}
+                                        loading={loading}
+                                        onViewChange={setView}
+                                        onNavigate={setCurrentDate}
+                                    />
+                                </Paper>
+                            </Grid>
 
-                        {/* Sidebar */}
-                        <Grid item xs={12} md={3} order={{ xs: 1, md: 2 }}>
-                            {isMobile ? (
-                                <Drawer
-                                    anchor="left"
-                                    open={sidebarOpen}
-                                    onClose={() => setSidebarOpen(false)}
-                                >
-                                    <Box sx={{ width: 280, p: 2 }}>
-                                        <Sidebar />
-                                    </Box>
-                                </Drawer>
-                            ) : (
-                                <Sidebar />
-                            )}
+                            {/* Sidebar */}
+                            <Grid item xs={12} md={3} order={{ xs: 1, md: 2 }}>
+                                {isMobile ? (
+                                    <Drawer
+                                        anchor="left"
+                                        open={sidebarOpen}
+                                        onClose={() => setSidebarOpen(false)}
+                                    >
+                                        <Box sx={{ width: 280, p: 2 }}>
+                                            <Sidebar />
+                                        </Box>
+                                    </Drawer>
+                                ) : (
+                                    <Sidebar />
+                                )}
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    )
                 )}
 
                 {/* Mobile Sidebar Toggle */}
@@ -746,7 +761,7 @@ const CalendarPage = () => {
                     onSave={async (appointmentData) => {
                         try {
                             console.log('📝 Appointment data from form:', appointmentData);
-                            
+
                             const payload = {
                                 clientId: appointmentData.client || appointmentData.clientId,
                                 serviceType: appointmentData.type,
@@ -759,23 +774,24 @@ const CalendarPage = () => {
                                 privateNotes: appointmentData.privateNotes || '',
                                 paymentAmount: appointmentData.price || appointmentData.paymentAmount || 0,
                                 paymentStatus: appointmentData.paymentStatus || 'unpaid',
+                                status: localStorage.getItem('autoConfirmBookings') ? 'confirmed' : 'pending',
                                 recurringPattern: appointmentData.recurringPattern || { isRecurring: false }
                             };
 
                             console.log('📤 Sending payload to server:', payload);
                             const response = await api.post('/appointments', payload);
                             console.log('✅ Appointment created:', response.data);
-                            
+
                             // Close modal first
                             setShowAppointmentModal(false);
                             setSelectedAppointment(null);
-                            
+
                             // Reload appointments and stats
                             await Promise.all([
                                 loadAppointments(),
                                 loadStats()
                             ]);
-                            
+
                             console.log('✅ Appointments reloaded');
                         } catch (e) {
                             console.error('❌ שגיאה ביצירת פגישה:', e);
@@ -785,21 +801,7 @@ const CalendarPage = () => {
                     }}
                 />
 
-                <AvailabilitySettings
-                    open={showAvailabilityModal}
-                    onClose={() => setShowAvailabilityModal(false)}
-                    onSave={() => {
-                        setShowAvailabilityModal(false);
-                        loadAppointments();
-                    }}
-                />
-
-                {/* Block Time Modal - placeholder */}
-                {showBlockTimeModal && (
-                    <Alert severity="info" sx={{ position: 'fixed', top: 16, right: 16, zIndex: 9999 }}>
-                        פונקציונליות חסימת זמן תתווסף בקרוב
-                    </Alert>
-                )}
+                {/* end modals */}
             </Container>
         </LocalizationProvider>
     );

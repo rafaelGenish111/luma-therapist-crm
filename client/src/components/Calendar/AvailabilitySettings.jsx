@@ -104,6 +104,37 @@ const availabilitySchema = yup.object({
     timezone: yup.string().required()
 });
 
+// מנרמל מערך לוח שבועי ל-7 ימים עם דיפולטים בטוחים
+const normalizeWeeklySchedule = (weeklyScheduleInput) => {
+    const defaultByIndex = [
+        { dayOfWeek: 0, isAvailable: false, timeSlots: [] },
+        { dayOfWeek: 1, isAvailable: true, timeSlots: [{ startTime: '09:00', endTime: '17:00' }] },
+        { dayOfWeek: 2, isAvailable: true, timeSlots: [{ startTime: '09:00', endTime: '17:00' }] },
+        { dayOfWeek: 3, isAvailable: true, timeSlots: [{ startTime: '09:00', endTime: '17:00' }] },
+        { dayOfWeek: 4, isAvailable: true, timeSlots: [{ startTime: '09:00', endTime: '17:00' }] },
+        { dayOfWeek: 5, isAvailable: true, timeSlots: [{ startTime: '09:00', endTime: '14:00' }] },
+        { dayOfWeek: 6, isAvailable: false, timeSlots: [] }
+    ];
+
+    const input = Array.isArray(weeklyScheduleInput) ? weeklyScheduleInput : [];
+    const byDay = new Map();
+    for (const item of input) {
+        if (item && typeof item.dayOfWeek === 'number') {
+            const safeSlots = Array.isArray(item.timeSlots) ? item.timeSlots : [];
+            byDay.set(item.dayOfWeek, {
+                dayOfWeek: item.dayOfWeek,
+                isAvailable: Boolean(item.isAvailable),
+                timeSlots: safeSlots.map((s) => ({
+                    startTime: s?.startTime || '09:00',
+                    endTime: s?.endTime || '17:00'
+                }))
+            });
+        }
+    }
+
+    return defaultByIndex.map((def) => byDay.get(def.dayOfWeek) || def);
+};
+
 const AvailabilitySettings = ({
     availability = null,
     blockedTimes = [],
@@ -154,12 +185,13 @@ const AvailabilitySettings = ({
     // עדכון ערכי ברירת מחדל
     useEffect(() => {
         if (availability) {
+            const normalized = normalizeWeeklySchedule(availability.weeklySchedule);
             reset({
-                weeklySchedule: availability.weeklySchedule || [],
-                bufferTime: availability.bufferTime || 15,
-                maxDailyAppointments: availability.maxDailyAppointments || 8,
-                advanceBookingDays: availability.advanceBookingDays || 60,
-                minNoticeHours: availability.minNoticeHours || 24,
+                weeklySchedule: normalized,
+                bufferTime: availability.bufferTime ?? 15,
+                maxDailyAppointments: availability.maxDailyAppointments ?? 8,
+                advanceBookingDays: availability.advanceBookingDays ?? 60,
+                minNoticeHours: availability.minNoticeHours ?? 24,
                 timezone: availability.timezone || 'Asia/Jerusalem'
             });
         }
@@ -175,9 +207,14 @@ const AvailabilitySettings = ({
         const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
         const nextWeek = moment().add(1, 'week').startOf('week');
 
-        return schedule.map((daySchedule, index) => {
+        const safeSchedule = Array.isArray(schedule) && schedule.length === 7
+            ? schedule
+            : normalizeWeeklySchedule(schedule);
+
+        return safeSchedule.map((daySchedule, index) => {
             const dayDate = nextWeek.clone().add(index, 'days');
-            const totalMinutes = daySchedule.timeSlots.reduce((total, slot) => {
+            const timeSlots = Array.isArray(daySchedule?.timeSlots) ? daySchedule.timeSlots : [];
+            const totalMinutes = timeSlots.reduce((total, slot) => {
                 const start = moment(slot.startTime, 'HH:mm');
                 const end = moment(slot.endTime, 'HH:mm');
                 return total + end.diff(start, 'minutes');
@@ -186,8 +223,8 @@ const AvailabilitySettings = ({
             return {
                 dayName: days[index],
                 date: dayDate.format('DD/MM'),
-                isAvailable: daySchedule.isAvailable,
-                timeSlots: daySchedule.timeSlots,
+                isAvailable: Boolean(daySchedule?.isAvailable),
+                timeSlots,
                 totalMinutes,
                 totalHours: Math.round(totalMinutes / 60 * 10) / 10
             };
@@ -419,7 +456,7 @@ const AvailabilitySettings = ({
                                                                 render={({ field: checkboxField }) => (
                                                                     <Checkbox
                                                                         {...checkboxField}
-                                                                        checked={checkboxField.value}
+                                                                        checked={Boolean(checkboxField.value)}
                                                                         onChange={(e) => {
                                                                             checkboxField.onChange(e.target.checked);
                                                                             if (!e.target.checked) {
@@ -433,12 +470,12 @@ const AvailabilitySettings = ({
                                                         <TableCell>
                                                             {field.isAvailable ? (
                                                                 <Box>
-                                                                    {field.timeSlots.map((slot, slotIndex) => (
+                                                                    {(Array.isArray(field.timeSlots) ? field.timeSlots : []).map((slot, slotIndex) => (
                                                                         <Box key={slotIndex} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                                                             <TextField
                                                                                 size="small"
                                                                                 type="time"
-                                                                                value={slot.startTime}
+                                                                                value={slot?.startTime || '09:00'}
                                                                                 onChange={(e) => updateTimeSlot(dayIndex, slotIndex, 'startTime', e.target.value)}
                                                                                 sx={{ width: 100 }}
                                                                             />
@@ -446,14 +483,14 @@ const AvailabilitySettings = ({
                                                                             <TextField
                                                                                 size="small"
                                                                                 type="time"
-                                                                                value={slot.endTime}
+                                                                                value={slot?.endTime || '17:00'}
                                                                                 onChange={(e) => updateTimeSlot(dayIndex, slotIndex, 'endTime', e.target.value)}
                                                                                 sx={{ width: 100 }}
                                                                             />
                                                                             <IconButton
                                                                                 size="small"
                                                                                 onClick={() => removeTimeSlot(dayIndex, slotIndex)}
-                                                                                disabled={field.timeSlots.length === 1}
+                                                                                disabled={(Array.isArray(field.timeSlots) ? field.timeSlots.length : 0) === 1}
                                                                             >
                                                                                 <DeleteIcon fontSize="small" />
                                                                             </IconButton>
