@@ -5,6 +5,39 @@ const { ensureChargeForAppointment } = require('../services/billingEngine');
 const Client = require('../models/Client');
 const { auth } = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
+const TherapistAvailability = require('../models/TherapistAvailability');
+const BlockedTime = require('../models/BlockedTime');
+const moment = require('moment');
+
+// Helper: verify slot availability (appointments + blocked times + buffer)
+async function isTherapistSlotAvailable({ therapistId, startTime, endTime, excludeAppointmentId = null }) {
+    const availability = await TherapistAvailability.findOne({ therapistId });
+    const buffer = availability?.bufferTime || 0;
+    const start = moment(startTime).subtract(buffer, 'minutes').toDate();
+    const end = moment(endTime).add(buffer, 'minutes').toDate();
+
+    // Overlap with therapist's own appointments (pending/confirmed)
+    const overlappingAppointments = await Appointment.find({
+        therapist: therapistId,
+        _id: excludeAppointmentId ? { $ne: excludeAppointmentId } : { $exists: true },
+        status: { $in: ['pending', 'confirmed'] },
+        $or: [
+            { startTime: { $lt: end }, endTime: { $gt: start } },
+            { date: { $lt: end }, $expr: { $gt: [{ $add: ['$date', { $multiply: ['$duration', 60000] }] }, start] } }
+        ]
+    }).limit(1);
+    if (overlappingAppointments.length > 0) return false;
+
+    // Overlap with blocked times
+    const overlappingBlocks = await BlockedTime.find({
+        therapistId,
+        startTime: { $lt: end },
+        endTime: { $gt: start }
+    }).limit(1);
+    if (overlappingBlocks.length > 0) return false;
+
+    return true;
+}
 
 // GET /api/appointments/stats - סטטיסטיקות פגישות
 router.get('/stats', auth, authorize(['manage_own_appointments']), async (req, res) => {
@@ -164,6 +197,19 @@ router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) 
             return res.status(400).json({ success: false, message: 'יש לספק מזהה לקוח' });
         }
 
+        // Validate availability before creating
+        if (!mapped.startTime || !mapped.endTime) {
+            return res.status(400).json({ success: false, message: 'יש לספק startTime ו-endTime' });
+        }
+        const allowed = await isTherapistSlotAvailable({
+            therapistId: req.user.id,
+            startTime: mapped.startTime,
+            endTime: mapped.endTime
+        });
+        if (!allowed) {
+            return res.status(400).json({ success: false, message: 'חלון הזמן המבוקש אינו זמין (חפיפה עם פגישה/חסימה/Buffer)' });
+        }
+
         console.log('💾 Creating appointment with data:', JSON.stringify(mapped, null, 2));
         const appointment = new Appointment(mapped);
         await appointment.save();
@@ -224,15 +270,33 @@ router.post('/', auth, authorize(['manage_own_appointments']), async (req, res) 
 // PUT /api/appointments/:id - עדכון פגישה
 router.put('/:id', auth, authorize(['manage_own_appointments']), async (req, res) => {
     try {
-        const appointment = await Appointment.findOneAndUpdate(
-            { _id: req.params.id, therapist: req.user.id },
-            req.body,
-            { new: true, runValidators: true }
-        ).populate('client', 'firstName lastName phone email');
-
-        if (!appointment) {
+        const current = await Appointment.findOne({ _id: req.params.id, therapist: req.user.id });
+        if (!current) {
             return res.status(404).json({ success: false, message: 'פגישה לא נמצאה' });
         }
+
+        // Compute proposed times
+        const newStart = req.body.startTime ? new Date(req.body.startTime) : (current.startTime || current.date);
+        const newEnd = req.body.endTime
+            ? new Date(req.body.endTime)
+            : new Date(new Date(newStart).getTime() + Number(req.body.duration || current.duration || 60) * 60000);
+
+        // Validate availability
+        const allowed = await isTherapistSlotAvailable({
+            therapistId: req.user.id,
+            startTime: newStart,
+            endTime: newEnd,
+            excludeAppointmentId: current._id
+        });
+        if (!allowed) {
+            return res.status(400).json({ success: false, message: 'חלון הזמן המבוקש אינו זמין (חפיפה עם פגישה/חסימה/Buffer)' });
+        }
+
+        const appointment = await Appointment.findOneAndUpdate(
+            { _id: req.params.id, therapist: req.user.id },
+            { ...req.body, startTime: newStart, endTime: newEnd },
+            { new: true, runValidators: true }
+        ).populate('client', 'firstName lastName phone email');
 
         // עדכון חיוב לאחר שינוי פרטי פגישה
         try {
