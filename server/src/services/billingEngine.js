@@ -42,15 +42,16 @@ async function ensureChargeForAppointment(appointment) {
 
     // בונים/מעדכנים חיוב
     const existingCharge = appointment.chargeId ? await Charge.findById(appointment.chargeId) : null;
-    const lineItems = [{ type: 'SESSION', qty: 1, unitPrice: appointment.price || 0, note: 'טיפול' }];
+    // Prefer paymentAmount, fallback to legacy price
+    const unitPrice = Number(appointment.paymentAmount ?? appointment.price ?? 0);
+    const lineItems = [{ type: 'SESSION', qty: 1, unitPrice, note: 'טיפול' }];
 
     const amount = calculateAmountFromLineItems(lineItems);
 
     // ✨ אם אין מחיר (amount = 0) ואין חיוב קיים, לא ליצור חיוב חדש
     if (amount === 0 && !existingCharge) {
         console.log('ℹ️ No charge created - amount is 0 and no existing charge');
-        appointment.paymentStatus = 'UNSET';
-        await appointment.save();
+        // Keep appointment paymentStatus as-is (default 'unpaid'); do not set invalid values
         return null;
     }
 
@@ -102,14 +103,13 @@ async function ensureChargeForAppointment(appointment) {
     }
 
     // עדכון סטטוס תשלום בפגישה לפי מצב החיוב
+    // Map charge status to appointment paymentStatus enum ('unpaid' | 'paid' | 'refunded')
     if (charge.status === 'PAID') {
-        appointment.paymentStatus = 'PAID';
-    } else if (charge.status === 'PARTIALLY_PAID') {
-        appointment.paymentStatus = 'PARTIALLY_PAID';
-    } else if (charge.status === 'PENDING') {
-        appointment.paymentStatus = 'PENDING';
+        appointment.paymentStatus = 'paid';
+    } else if (charge.status === 'REFUNDED') {
+        appointment.paymentStatus = 'refunded';
     } else {
-        appointment.paymentStatus = appointment.paymentStatus || 'UNSET';
+        appointment.paymentStatus = 'unpaid';
     }
     await appointment.save();
 

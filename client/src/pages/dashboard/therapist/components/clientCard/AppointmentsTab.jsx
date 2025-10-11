@@ -29,8 +29,8 @@ const AppointmentsTab = ({ client }) => {
         date: null,
         time: null,
         duration: 60,
-        type: 'טיפול רגיל',
-        location: '',
+        type: 'individual',
+        location: 'clinic',
         price: '',
         notes: ''
     });
@@ -60,14 +60,14 @@ const AppointmentsTab = ({ client }) => {
     const handleOpenDialog = (appointment = null) => {
         if (appointment) {
             setSelectedAppointment(appointment);
-            const appointmentDate = new Date(appointment.date);
+            const appointmentDate = new Date(appointment.startTime || appointment.date);
             setForm({
                 date: appointmentDate,
                 time: appointmentDate,
-                duration: appointment.duration,
-                type: appointment.type,
-                location: appointment.location || '',
-                price: appointment.price?.toString() || '',
+                duration: appointment.duration || 60,
+                type: appointment.serviceType || 'individual',
+                location: appointment.location || 'clinic',
+                price: (appointment.paymentAmount ?? appointment.price)?.toString() || '',
                 notes: appointment.notes || ''
             });
         } else {
@@ -76,8 +76,8 @@ const AppointmentsTab = ({ client }) => {
                 date: null,
                 time: null,
                 duration: 60,
-                type: 'טיפול רגיל',
-                location: '',
+                type: 'individual',
+                location: 'clinic',
                 price: '',
                 notes: ''
             });
@@ -86,14 +86,14 @@ const AppointmentsTab = ({ client }) => {
     };
 
     const handleCloseDialog = () => {
-        setDialogOpen(false);
+            setDialogOpen(false);
         setSelectedAppointment(null);
         setForm({
             date: null,
             time: null,
             duration: 60,
-            type: 'טיפול רגיל',
-            location: '',
+                type: 'individual',
+                location: 'clinic',
             price: '',
             notes: ''
         });
@@ -110,15 +110,18 @@ const AppointmentsTab = ({ client }) => {
             appointmentDate.setHours(form.time.getHours());
             appointmentDate.setMinutes(form.time.getMinutes());
 
+            // Align with server payload (same as CalendarPage)
             const appointmentData = {
-                client: client._id,
-                date: appointmentDate,
-                duration: form.duration,
-                type: form.type,
-                status: 'scheduled', // ברירת מחדל לפגישה חדשה
+                clientId: client._id,
+                serviceType: form.type,
+                startTime: appointmentDate,
+                endTime: new Date(appointmentDate.getTime() + Number(form.duration || 60) * 60000),
+                duration: Number(form.duration || 60),
                 location: form.location,
-                price: form.price ? parseFloat(form.price) : undefined,
-                notes: form.notes
+                notes: form.notes,
+                paymentAmount: form.price ? parseFloat(form.price) : 0,
+                paymentStatus: 'unpaid',
+                recurringPattern: { isRecurring: false }
             };
 
             if (selectedAppointment) {
