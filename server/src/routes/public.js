@@ -8,6 +8,7 @@ const TherapistAvailability = require('../models/TherapistAvailability');
 const BlockedTime = require('../models/BlockedTime');
 const { ensureChargeForAppointment } = require('../services/billingEngine');
 const emailService = require('../utils/emailService');
+const { generateAppointmentICS } = require('../utils/ics');
 
 // Helpers
 async function isSlotAvailable(therapistId, startTime, endTime) {
@@ -179,11 +180,17 @@ router.post('/appointments', async (req, res) => {
 
         try { await ensureChargeForAppointment(appointment); } catch (e) { }
 
-        // Notify therapist about new booking (always), with status info
+        // Notify therapist about new booking (always), with status info + ICS
         try {
             await emailService.init();
             const therapistEmail = therapist.businessEmail || therapist.email;
             if (therapistEmail) {
+                const icsContent = generateAppointmentICS({
+                    appointment,
+                    therapist,
+                    client: clientDoc,
+                    serverBaseUrl: process.env.SERVER_URL
+                });
                 await emailService.sendEmail({
                     email: therapistEmail,
                     subject: 'הוזמנה פגישה חדשה באתר האישי',
@@ -194,7 +201,10 @@ router.post('/appointments', async (req, res) => {
                              <li><strong>שעה:</strong> ${moment(start).format('HH:mm')} - ${moment(calcEnd).format('HH:mm')}</li>
                              <li><strong>לקוח:</strong> ${clientDoc.firstName} ${clientDoc.lastName || ''} (${clientDoc.email || ''})</li>
                            </ul>
-                           <p>סטטוס: ${autoConfirm ? 'confirmed' : 'pending'}</p>`
+                           <p>סטטוס: ${autoConfirm ? 'confirmed' : 'pending'}</p>`,
+                    attachments: [
+                        { filename: 'appointment.ics', content: icsContent, contentType: 'text/calendar; charset=UTF-8; method=PUBLISH' }
+                    ]
                 });
             }
         } catch (e) {

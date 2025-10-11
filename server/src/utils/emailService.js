@@ -113,7 +113,7 @@ class EmailService {
     /**
      * Send email
      */
-    async sendEmail({ email, subject, template, data, html, text }) {
+    async sendEmail({ email, subject, template, data, html, text, attachments }) {
         try {
             if (!this.transporter) {
                 throw new Error('Email service not initialized');
@@ -140,7 +140,8 @@ class EmailService {
                 to: email,
                 subject: subject,
                 html: htmlContent,
-                text: textContent
+                text: textContent,
+                attachments: attachments && Array.isArray(attachments) ? attachments : undefined
             };
 
             const result = await this.transporter.sendMail(mailOptions);
