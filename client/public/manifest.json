@@ -6,7 +6,7 @@
     "lang": "he",
     "dir": "rtl",
   
-    "start_url": "/?source=pwa",
+  "start_url": "/?source=pwa",
     "scope": "/",
     "display": "standalone",
     "display_override": ["standalone", "browser"],
@@ -54,6 +54,6 @@
       { "platform": "itunes", "url": "https://apps.apple.com/app/id1234567890" }
     ],
   
-    "capture_links": "new-client"
+  "capture_links": "new-client"
   }
   
