@@ -12,12 +12,7 @@ export default defineConfig(({ mode }) => {
       dedupe: ['react', 'react-dom']
     },
     plugins: [
-      react({
-        jsxImportSource: '@emotion/react',
-        babel: {
-          plugins: ['@emotion/babel-plugin'],
-        },
-      }),
+      react(),
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: null, // ידני - נרשום אחרי הטעינה
@@ -149,10 +144,8 @@ export default defineConfig(({ mode }) => {
         '@mui/material',
         '@mui/icons-material',
         '@emotion/react',
-        '@emotion/styled',
-        '@emotion/cache'
+        '@emotion/styled'
       ],
-      force: true,
       esbuildOptions: {
         loader: {
           '.js': 'jsx',
