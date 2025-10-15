@@ -1,13 +1,30 @@
 import axios from 'axios';
 
-// זיהוי אוטומטי של כתובת השרת
+// Robust base URL resolution aligned with config/api.js
+const OVERRIDE_KEY = 'API_BASE_URL_OVERRIDE';
+const FAILED_MARKERS = ['-hnku.'];
+
+const fixBadUrl = (url) => {
+  if (!url) return url;
+  return FAILED_MARKERS.some(m => url.includes(m))
+    ? 'https://luma-therapist-crm.vercel.app/api'
+    : url;
+};
+
 const getBaseURL = () => {
-    // בפרודקשן - כתובת השרת בVercel
-    if (import.meta.env.PROD) {
-        return import.meta.env.VITE_API_URL || 'https://luma-therapist-crm-hnku.vercel.app/api';
+    if (import.meta.env.DEV) {
+        const stored = (() => { try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch { return ''; } })();
+        if (stored) return fixBadUrl(stored);
+        // בפיתוח - דרך ה-proxy
+        return '/api';
     }
-    // בפיתוח - דרך ה-proxy
-    return '/api';
+    // בפרודקשן
+    const envUrl = (import.meta.env.VITE_API_URL || '').toString();
+    const stored = (() => { try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch { return ''; } })();
+    const candidate = stored || envUrl || 'https://luma-therapist-crm.vercel.app/api';
+    const fixed = fixBadUrl(candidate);
+    try { if (fixed !== stored) localStorage.setItem(OVERRIDE_KEY, fixed); } catch {}
+    return fixed;
 };
 
 const api = axios.create({
@@ -54,13 +71,10 @@ api.interceptors.response.use(
                 if (refreshResponse.data?.success) {
                     const newToken = refreshResponse.data.data.accessToken;
                     localStorage.setItem('accessToken', newToken);
-                    
-                    // נסה שוב את הבקשה המקורית
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
                     return api(originalRequest);
                 }
             } catch (refreshError) {
-                // אם הרענון נכשל, נקה והפנה להתחברות
                 localStorage.removeItem('accessToken');
                 if (window.location.pathname !== '/login') {
                     window.location.href = '/login';

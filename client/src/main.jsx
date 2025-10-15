@@ -21,16 +21,16 @@ const queryClient = new QueryClient({
 
 // Force-unregister any existing Service Workers and clear caches (production only)
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  try {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      registrations.forEach(reg => reg.unregister());
-    });
-    if (window.caches) {
-      caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+    try {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(reg => reg.unregister());
+        });
+        if (window.caches) {
+            caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+        }
+    } catch (e) {
+        // swallow cleanup errors silently
     }
-  } catch (e) {
-    // swallow cleanup errors silently
-  }
 }
 
 createRoot(document.getElementById('root')).render(

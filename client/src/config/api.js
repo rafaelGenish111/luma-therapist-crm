@@ -18,7 +18,7 @@ let resolvedBaseUrl = storedOverride || envUrl || (window.location.hostname === 
 
 if (isBadUrl(resolvedBaseUrl)) {
   resolvedBaseUrl = defaultProdUrl;
-  try { localStorage.setItem(OVERRIDE_KEY, resolvedBaseUrl); } catch {}
+  try { localStorage.setItem(OVERRIDE_KEY, resolvedBaseUrl); } catch { }
 }
 
 const API_BASE_URL = resolvedBaseUrl;
