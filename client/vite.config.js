@@ -31,5 +31,8 @@ export default defineConfig(({ mode }) => {
     define: {
       global: 'globalThis',
     },
+    resolve: {
+      dedupe: ['react', 'react-dom'],
+    },
   };
 });

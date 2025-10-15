@@ -1,10 +1,12 @@
 // API Configuration
 // Dynamic API URL based on environment
-const API_BASE_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:5000/api'
-  : 'https://luma-therapist-crm-hnku.vercel.app/api';
+const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
+    ? import.meta.env.VITE_API_URL
+    : (window.location.hostname === 'localhost'
+        ? 'http://localhost:5000/api'
+        : 'https://luma-therapist-crm.vercel.app/api');
 
-// Environment variables (only in development)
 if (import.meta.env.DEV) {
   console.log('🔧 Current hostname:', window.location.hostname);
   console.log('🔧 Selected API_BASE_URL:', API_BASE_URL);
