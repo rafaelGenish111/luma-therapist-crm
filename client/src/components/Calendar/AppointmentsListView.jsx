@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import LazyDataGrid from '../common/LazyDataGrid';
 import api from '../../services/api';
 import { format } from 'date-fns';
 
@@ -140,7 +140,7 @@ const AppointmentsListView = ({ appointments = [], onEdit, onDelete, onRefresh }
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{ maxWidth: 300, alignSelf: 'flex-start' }}
             />
-            <DataGrid
+            <LazyDataGrid
                 rows={rows}
                 columns={columns}
                 disableRowSelectionOnClick

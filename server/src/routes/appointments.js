@@ -109,8 +109,10 @@ router.get('/', auth, authorize(['manage_own_appointments']), async (req, res) =
         }
 
         const appointments = await Appointment.find(query)
+            .select('startTime endTime duration client serviceType status paymentStatus paymentAmount location notes privateNotes googleCalendarSynced date')
             .populate('client', 'firstName lastName phone email')
-            .sort({ startTime: 1, date: 1 });
+            .sort({ startTime: 1, date: 1 })
+            .lean();
 
         console.log(`📅 Loaded ${appointments.length} appointments for therapist ${req.user.id}`);
         res.json({ success: true, data: appointments });

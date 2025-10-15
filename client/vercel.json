@@ -19,7 +19,9 @@
                 "Access-Control-Allow-Headers": "Content-Type, Authorization"
             }
         },
-        { "handle": "filesystem" },
+        {
+            "handle": "filesystem"
+        },
         {
             "src": "/sw.js",
             "dest": "/sw.js",

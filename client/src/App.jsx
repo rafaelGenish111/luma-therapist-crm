@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Box } from '@mui/material'
 import { useAuth } from './context/AuthContext'
@@ -27,7 +27,6 @@ import RegisterPage from './pages/auth/RegisterPage'
 import OnboardingWizard from './pages/onboarding/OnboardingWizard'
 import DashboardPage from './pages/dashboard/therapist/DashboardPage'
 import ClientsPage from './pages/dashboard/therapist/ClientsPage'
-import ClientCard from './pages/dashboard/therapist/ClientCard'
 import AppointmentsPage from './pages/dashboard/therapist/AppointmentsPage'
 import ArticlesPage from './pages/dashboard/therapist/ArticlesPage'
 import GalleryPage from './pages/dashboard/therapist/GalleryPage'
@@ -40,9 +39,10 @@ import ImportantInfoPage from './pages/dashboard/therapist/ImportantInfoPage'
 import AccessibilityStatement from './pages/AccessibilityStatement'
 import DesignPage from './pages/dashboard/therapist/DesignPage'
 import CampaignsPage from './pages/dashboard/therapist/CampaignsPage';
-// Calendar Pages
-import CalendarPage from './pages/dashboard/CalendarPage';
-import CalendarSettings from './pages/dashboard/CalendarSettings';
+// Calendar Pages (lazy)
+import Skeleton from '@mui/material/Skeleton'
+const CalendarPage = React.lazy(() => import('./pages/dashboard/CalendarPage'));
+const CalendarSettings = React.lazy(() => import('./pages/dashboard/CalendarSettings'));
 // import WebsiteBuilderPage from './pages/dashboard/WebsiteBuilderPage'
 // import SettingsPage from './pages/dashboard/SettingsPage'
 // import ProfilePage from './pages/dashboard/ProfilePage'
@@ -52,6 +52,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 
 // Website Pages
 import { WebsiteLayout, Home, About, Articles, Gallery, BookAppointment, Contact, PublicBooking } from './pages/website';
+const ClientCard = React.lazy(() => import('./pages/dashboard/therapist/ClientCard'));
 import ArticleDetail from './pages/website/ArticleDetail';
 import HealthDeclaration from './pages/website/HealthDeclaration';
 import TermsAndPrivacyPage from './pages/TermsAndPrivacyPage';
@@ -71,6 +72,7 @@ const App = () => {
             minHeight: '100vh'
         }}>
             <Router>
+                <Suspense fallback={<Skeleton variant="rectangular" height={320} />}>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<LoginPage />} />
@@ -159,6 +161,7 @@ const App = () => {
                     />
                     */}
                 </Routes>
+                </Suspense>
                 <AccessibilityWidget onFontSize={changeFontSize} />
                 <CookieConsent />
                 <SessionWarning />

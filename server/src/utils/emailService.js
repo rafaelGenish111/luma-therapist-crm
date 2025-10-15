@@ -20,9 +20,9 @@ class EmailService {
         if (this._initialized || this._initializing) {
             return;
         }
-        
+
         this._initializing = true;
-        
+
         try {
             if (process.env.SENDGRID_API_KEY) {
                 // Use SendGrid

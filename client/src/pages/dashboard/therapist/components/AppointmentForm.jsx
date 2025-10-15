@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Grid, MenuItem, Typography, Alert } from '@mui/material';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LazyDateTimePicker } from '../../../../components/common/LazyDatePickers';
 import { he } from 'date-fns/locale';
 
 const appointmentTypes = [
@@ -110,7 +110,7 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData, clientId, clients = 
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                        <DateTimePicker
+                        <LazyDateTimePicker
                             label="תאריך ושעה"
                             value={form.date}
                             onChange={handleDateChange}

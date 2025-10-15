@@ -214,6 +214,9 @@ appointmentSchema.pre(/^find/, function () {
 // אינדקסים קיימים לשמירה על תאימות (backward compatibility)
 appointmentSchema.index({ therapist: 1, date: 1 });
 appointmentSchema.index({ client: 1, date: 1 });
+// Performance: queries by therapist/client with time window and soft-delete
+appointmentSchema.index({ therapist: 1, startTime: 1, deletedAt: 1 });
+appointmentSchema.index({ client: 1, startTime: 1, deletedAt: 1 });
 
 // וירטואלים
 appointmentSchema.virtual('isPast').get(function () {

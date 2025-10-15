@@ -27,15 +27,15 @@ const logFormat = winston.format.combine(
     winston.format.json(),
     winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
         let log = `${timestamp} [${level.toUpperCase()}]: ${message}`;
-        
+
         if (stack) {
             log += `\n${stack}`;
         }
-        
+
         if (Object.keys(meta).length > 0) {
             log += `\n${JSON.stringify(meta, null, 2)}`;
         }
-        
+
         return log;
     })
 );
@@ -90,7 +90,7 @@ const logger = winston.createLogger({
             format: logFormat
         })
     ],
-    
+
     // Handle exceptions and rejections
     exceptionHandlers: isServerless ? [
         new winston.transports.Console({ format: consoleFormat })
@@ -101,7 +101,7 @@ const logger = winston.createLogger({
             maxFiles: 3
         })
     ],
-    
+
     rejectionHandlers: isServerless ? [
         new winston.transports.Console({ format: consoleFormat })
     ] : [
@@ -212,7 +212,7 @@ logger.payment = (action, amount, status, meta = {}) => {
 // Request logging middleware
 logger.requestLogger = (req, res, next) => {
     const start = Date.now();
-    
+
     res.on('finish', () => {
         const duration = Date.now() - start;
         logger.api(req.method, req.originalUrl, res.statusCode, duration, {
@@ -222,7 +222,7 @@ logger.requestLogger = (req, res, next) => {
             contentLength: res.get('content-length')
         });
     });
-    
+
     next();
 };
 
@@ -240,14 +240,14 @@ logger.errorLogger = (err, req, res, next) => {
         query: req.query,
         params: req.params
     });
-    
+
     next(err);
 };
 
 // Performance monitoring
 logger.performanceMonitor = (operation) => {
     const start = Date.now();
-    
+
     return {
         end: (meta = {}) => {
             const duration = Date.now() - start;
@@ -260,7 +260,7 @@ logger.performanceMonitor = (operation) => {
 // Database query logging
 logger.queryLogger = (operation, collection) => {
     const monitor = logger.performanceMonitor(`DB_${operation}`);
-    
+
     return {
         end: (meta = {}) => {
             const duration = monitor.end(meta);
@@ -279,13 +279,13 @@ logger.rotateLogs = () => {
         'exceptions.log',
         'rejections.log'
     ];
-    
+
     logFiles.forEach(filename => {
         const filePath = path.join(logsDir, filename);
         if (fs.existsSync(filePath)) {
             const stats = fs.statSync(filePath);
             const fileSizeInMB = stats.size / (1024 * 1024);
-            
+
             if (fileSizeInMB > 10) { // Rotate if file is larger than 10MB
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                 const rotatedFilename = `${filename}.${timestamp}`;
@@ -319,18 +319,18 @@ logger.healthCheck = () => {
 logger.cleanupOldLogs = (daysToKeep = 30) => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-    
+
     fs.readdir(logsDir, (err, files) => {
         if (err) {
             logger.error('Error reading logs directory', { error: err.message });
             return;
         }
-        
+
         files.forEach(file => {
             const filePath = path.join(logsDir, file);
             fs.stat(filePath, (err, stats) => {
                 if (err) return;
-                
+
                 if (stats.mtime < cutoffDate && file.endsWith('.log')) {
                     fs.unlink(filePath, (err) => {
                         if (err) {

@@ -28,6 +28,10 @@ export default defineConfig(({ mode }) => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
           runtimeCaching: [
             {
+              urlPattern: /^\/api\/.*$/i,
+              handler: 'NetworkOnly',
+            },
+            {
               urlPattern: ({ request }) => request.destination === 'document',
               handler: 'NetworkFirst',
             },

@@ -1,9 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-    Calendar,
-    momentLocalizer,
-    Views
-} from 'react-big-calendar';
+import { momentLocalizer, Views } from 'react-big-calendar';
+import BigCalendarLazy from './BigCalendarLazy';
 import moment from 'moment';
 import 'moment/locale/he';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -238,6 +235,7 @@ const TherapistCalendar = ({
 
     // טיפול בגרירת אירוע
     const handleEventDrop = useCallback((event) => {
+        // כאן נשאיר את הקריאה החוצה; אימות חסימות/זמינות יתבצע בצד השרת
         if (onEventDrop) {
             onEventDrop(event);
         }
@@ -495,7 +493,7 @@ const TherapistCalendar = ({
             {/* יומן */}
             <Paper sx={{ flex: 1, overflow: 'hidden' }}>
                 <Box sx={{ height: '100%', p: 2 }}>
-                    <Calendar
+                    <BigCalendarLazy
                         localizer={localizer}
                         events={events}
                         startAccessor="start"
