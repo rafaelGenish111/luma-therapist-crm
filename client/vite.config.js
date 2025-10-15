@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        injectRegister: null, // ידני - נרשום אחרי הטעינה
+        injectRegister: null,
         includeAssets: [
           '/icons/icon-192.png',
           '/icons/icon-512.png',
@@ -58,9 +58,6 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 8000,
       host: '0.0.0.0',
-      fs: {
-        strict: false
-      },
       proxy: mode === 'development' ? {
         '/api': {
           target: env.VITE_API_URL || 'http://localhost:5000',
