@@ -164,6 +164,18 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // MongoDB connection will be handled in initializeApp()
 
+// Simple test endpoint for Vercel (must be before other routes)
+app.get('/api/test', (req, res) => {
+    res.json({
+        status: 'ok',
+        message: 'Server is working',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        mongodb: !!process.env.MONGODB_URI,
+        jwt: !!process.env.JWT_SECRET
+    });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/calendly', calendlyOAuthRoutes);
@@ -435,17 +447,7 @@ if (require.main === module || process.env.NODE_ENV === 'development') {
     startServer();
 }
 
-// Simple test endpoint for Vercel
-app.get('/api/test', (req, res) => {
-    res.json({
-        status: 'ok',
-        message: 'Server is working',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV,
-        mongodb: !!process.env.MONGODB_URI,
-        jwt: !!process.env.JWT_SECRET
-    });
-});
+// Test endpoint moved above
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -461,41 +463,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// For Vercel - initialize on first request
-let isInitialized = false;
-app.use(async (req, res, next) => {
-    console.log('Vercel request received:', req.method, req.url);
-    console.log('Environment:', process.env.NODE_ENV);
-    console.log('Vercel:', process.env.VERCEL);
-
-    // Skip initialization for test endpoints
-    if (req.url === '/api/test' || req.url === '/health' || req.url === '/') {
-        return next();
-    }
-
-    if (!isInitialized) {
-        try {
-            console.log('Initializing app for first time...');
-            console.log('Environment variables check:');
-            console.log('- MONGODB_URI:', !!process.env.MONGODB_URI);
-            console.log('- JWT_SECRET:', !!process.env.JWT_SECRET);
-            console.log('- NODE_ENV:', process.env.NODE_ENV);
-
-            await initializeApp();
-            isInitialized = true;
-            console.log('App initialized successfully');
-        } catch (error) {
-            console.error('Failed to initialize app:', error);
-            console.error('Error stack:', error.stack);
-            return res.status(500).json({
-                error: 'Server initialization failed',
-                details: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            });
-        }
-    }
-    next();
-});
+// This middleware is now handled above in the optimized version
 
 // Export for Vercel
 module.exports = app;
