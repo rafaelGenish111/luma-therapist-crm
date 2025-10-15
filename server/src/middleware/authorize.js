@@ -12,7 +12,7 @@ const authorize = (permissions = []) => {
 
     return (req, res, next) => {
         try {
-            const userRole = (req.user && (req.user.role || req.user.userType)) || 'GUEST';
+            const userRole = ((req.user && (req.user.role || req.user.userType)) || 'GUEST').toString().toUpperCase();
             const userPermissions = (req.user && req.user.permissions) || [];
 
             if (process.env.LOG_LEVEL === 'debug' && process.env.NODE_ENV !== 'production') {
@@ -24,11 +24,14 @@ const authorize = (permissions = []) => {
                 return next();
             }
 
-            const hasRolePermission = permissions.length === 0 || permissions.some((p) => {
-                const roleToCheck = p.toUpperCase();
-                const hasPermission = userPermissions.includes(p) || userPermissions.includes(roleToCheck);
-                return hasPermission;
-            });
+            const normalized = permissions.map((p) => p.toString().toUpperCase());
+
+            // אם הוגדרו תפקידי-על כמחרוזות (למשל 'THERAPIST'/'ADMIN') – בדיקת התאמה לפי role
+            const roleAllowed = normalized.some((p) => ['THERAPIST', 'ADMIN', 'SUPER_ADMIN'].includes(p) && userRole === p);
+
+            const hasPermissionString = normalized.some((p) => userPermissions.includes(p) || userPermissions.includes(p.toLowerCase()));
+
+            const hasRolePermission = permissions.length === 0 || roleAllowed || hasPermissionString;
 
             if (!hasRolePermission) {
                 return res.status(403).json({ success: false, error: 'Forbidden' });
