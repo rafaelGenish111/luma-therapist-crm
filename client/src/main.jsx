@@ -29,18 +29,4 @@ createRoot(document.getElementById('root')).render(
             </CustomThemeProvider>
         </QueryClientProvider>
     </React.StrictMode>
-)
-
-// רישום Service Worker רק אחרי שהדף נטען
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
-      registration => {
-        console.log('SW registered:', registration);
-      },
-      error => {
-        console.log('SW registration failed:', error);
-      }
-    );
-  });
-} 
+) 
