@@ -1,11 +1,27 @@
 // API Configuration
 // Dynamic API URL based on environment
-const API_BASE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
-    ? import.meta.env.VITE_API_URL
-    : (window.location.hostname === 'localhost'
-        ? 'http://localhost:5000/api'
-        : 'https://luma-therapist-crm.vercel.app/api');
+// Robust API base URL resolution with self-healing override
+const OVERRIDE_KEY = 'API_BASE_URL_OVERRIDE';
+const FAILED_MARKERS = ['-hnku.'];
+
+function isBadUrl(url) {
+  return FAILED_MARKERS.some(marker => typeof url === 'string' && url.includes(marker));
+}
+
+const defaultProdUrl = 'https://luma-therapist-crm.vercel.app/api';
+const envUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || '';
+const storedOverride = (() => {
+  try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch { return ''; }
+})();
+
+let resolvedBaseUrl = storedOverride || envUrl || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : defaultProdUrl);
+
+if (isBadUrl(resolvedBaseUrl)) {
+  resolvedBaseUrl = defaultProdUrl;
+  try { localStorage.setItem(OVERRIDE_KEY, resolvedBaseUrl); } catch {}
+}
+
+const API_BASE_URL = resolvedBaseUrl;
 
 if (import.meta.env.DEV) {
   console.log('🔧 Current hostname:', window.location.hostname);
