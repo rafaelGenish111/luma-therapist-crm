@@ -1,6 +1,6 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import { useAuth } from './context/AuthContext'
 import AccessibilityWidget from './components/AccessibilityWidget'
 import CookieConsent from './components/CookieConsent'
@@ -8,50 +8,17 @@ import SessionWarning from './components/common/SessionWarning'
 import SessionIndicator from './components/common/SessionIndicator'
 import { useThemeSettings } from './context/ThemeContext'
 
-// Layouts
+// Layouts (keep as regular imports - these are lightweight)
 import MainLayout from './layouts/MainLayout'
 import AuthLayout from './layouts/AuthLayout'
 import DashboardLayout from './layouts/DashboardLayout'
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminHome from './pages/admin/AdminHome'
 import AdminLayout from './layouts/AdminLayout'
-import PlansPage from './pages/admin/PlansPage'
-import HealthDeclarationsAdminPage from './pages/admin/HealthDeclarationsAdminPage'
-import AdminSettingsPage from './pages/admin/SettingsPage'
-import TherapistManagement from './pages/admin/TherapistManagement'
-
-// Pages
-import HomePage from './pages/HomePage'
-import LoginPage from './pages/auth/LoginPage'
-import RegisterPage from './pages/auth/RegisterPage'
-import OnboardingWizard from './pages/onboarding/OnboardingWizard'
-import DashboardPage from './pages/dashboard/therapist/DashboardPage'
-import ClientsPage from './pages/dashboard/therapist/ClientsPage'
-import AppointmentsPage from './pages/dashboard/therapist/AppointmentsPage'
-import ArticlesPage from './pages/dashboard/therapist/ArticlesPage'
-import GalleryPage from './pages/dashboard/therapist/GalleryPage'
-import ProfilePage from './pages/dashboard/therapist/ProfilePage'
-import SettingsPage from './pages/dashboard/therapist/SettingsPage'
-import CalendlyPage from './pages/dashboard/therapist/CalendlyPage'
-import HealthDeclarationsPage from './pages/dashboard/therapist/HealthDeclarationsPage'
-import TreatmentTypesPage from './pages/dashboard/therapist/TreatmentTypesPage'
-import ImportantInfoPage from './pages/dashboard/therapist/ImportantInfoPage'
-import AccessibilityStatement from './pages/AccessibilityStatement'
-import DesignPage from './pages/dashboard/therapist/DesignPage'
-import CampaignsPage from './pages/dashboard/therapist/CampaignsPage';
-// Calendar Pages (lazy)
-const CalendarPage = React.lazy(() => import('./pages/dashboard/CalendarPage'));
-const CalendarSettings = React.lazy(() => import('./pages/dashboard/CalendarSettings'));
-// import WebsiteBuilderPage from './pages/dashboard/WebsiteBuilderPage'
-// import SettingsPage from './pages/dashboard/SettingsPage'
-// import ProfilePage from './pages/dashboard/ProfilePage'
 
 // Protected Route Component
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
-// Website Pages
+// Website Pages (keep as regular imports - these are lightweight)
 import { WebsiteLayout, Home, About, Articles, Gallery, BookAppointment, Contact, PublicBooking } from './pages/website';
-const ClientCard = React.lazy(() => import('./pages/dashboard/therapist/ClientCard'));
 import ArticleDetail from './pages/website/ArticleDetail';
 import HealthDeclaration from './pages/website/HealthDeclaration';
 import TermsAndPrivacyPage from './pages/TermsAndPrivacyPage';
@@ -62,6 +29,49 @@ import PrivacyRequest from './pages/PrivacyRequest';
 import PaymentPage from './pages/PaymentPage';
 import { AboutPage, ServicesPage, GalleryPage as PublicGalleryPage, TestimonialsPage, ContactPage } from './pages/public';
 
+// Lazy load all heavy pages
+const HomePage = lazy(() => import('./pages/HomePage'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const OnboardingWizard = lazy(() => import('./pages/onboarding/OnboardingWizard'));
+const DashboardPage = lazy(() => import('./pages/dashboard/therapist/DashboardPage'));
+const ClientsPage = lazy(() => import('./pages/dashboard/therapist/ClientsPage'));
+const AppointmentsPage = lazy(() => import('./pages/dashboard/therapist/AppointmentsPage'));
+const ArticlesPage = lazy(() => import('./pages/dashboard/therapist/ArticlesPage'));
+const GalleryPage = lazy(() => import('./pages/dashboard/therapist/GalleryPage'));
+const ProfilePage = lazy(() => import('./pages/dashboard/therapist/ProfilePage'));
+const SettingsPage = lazy(() => import('./pages/dashboard/therapist/SettingsPage'));
+const CalendlyPage = lazy(() => import('./pages/dashboard/therapist/CalendlyPage'));
+const HealthDeclarationsPage = lazy(() => import('./pages/dashboard/therapist/HealthDeclarationsPage'));
+const TreatmentTypesPage = lazy(() => import('./pages/dashboard/therapist/TreatmentTypesPage'));
+const ImportantInfoPage = lazy(() => import('./pages/dashboard/therapist/ImportantInfoPage'));
+const AccessibilityStatement = lazy(() => import('./pages/AccessibilityStatement'));
+const DesignPage = lazy(() => import('./pages/dashboard/therapist/DesignPage'));
+const CampaignsPage = lazy(() => import('./pages/dashboard/therapist/CampaignsPage'));
+const CalendarPage = lazy(() => import('./pages/dashboard/CalendarPage'));
+const CalendarSettings = lazy(() => import('./pages/dashboard/CalendarSettings'));
+const ClientCard = lazy(() => import('./pages/dashboard/therapist/ClientCard'));
+
+// Admin pages (lazy)
+const AdminHome = lazy(() => import('./pages/admin/AdminHome'));
+const PlansPage = lazy(() => import('./pages/admin/PlansPage'));
+const HealthDeclarationsAdminPage = lazy(() => import('./pages/admin/HealthDeclarationsAdminPage'));
+const AdminSettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
+const TherapistManagement = lazy(() => import('./pages/admin/TherapistManagement'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <Box 
+    display="flex" 
+    justifyContent="center" 
+    alignItems="center" 
+    minHeight="100vh"
+    sx={{ backgroundColor: '#f5f5f5' }}
+  >
+    <CircularProgress size={60} />
+  </Box>
+);
+
 const App = () => {
     const { changeFontSize } = useThemeSettings();
     return (
@@ -71,7 +81,7 @@ const App = () => {
             minHeight: '100vh'
         }}>
             <Router>
-                <Suspense fallback={<div style={{ height: 320 }} />}>
+                <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/login" element={<LoginPage />} />

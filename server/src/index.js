@@ -21,14 +21,16 @@ const { rateLimit } = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
-// CRITICAL DEBUG - DO NOT REMOVE
-console.log('===========================================');
-console.log('ENVIRONMENT DEBUG:');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length || 0);
-console.log('MONGODB_URI first 50 chars:', process.env.MONGODB_URI?.substring(0, 50) || 'MISSING!');
-console.log('PORT:', process.env.PORT);
-console.log('===========================================');
+// Environment debug (only in development)
+if (process.env.NODE_ENV === 'development') {
+  console.log('===========================================');
+  console.log('ENVIRONMENT DEBUG:');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length || 0);
+  console.log('MONGODB_URI first 50 chars:', process.env.MONGODB_URI?.substring(0, 50) || 'MISSING!');
+  console.log('PORT:', process.env.PORT);
+  console.log('===========================================');
+}
 // הגדרת Cloudinary
 const cloudinary = require('cloudinary').v2;
 cloudinary.config({
@@ -109,8 +111,10 @@ app.use(cors({
         if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
             callback(null, true);
         } else {
-            console.log('❌ Blocked origin:', origin);
-            console.log('✅ Allowed origins:', allowedOrigins);
+            if (process.env.NODE_ENV === 'development') {
+                console.log('❌ Blocked origin:', origin);
+                console.log('✅ Allowed origins:', allowedOrigins);
+            }
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -257,6 +261,7 @@ app.use(globalErrorHandler);
 
 // Initialize database connection
 let isConnected = false;
+let initPromise = null;
 
 const initializeApp = async () => {
     if (!isConnected) {
@@ -284,6 +289,45 @@ const initializeApp = async () => {
     }
 };
 
+// For Vercel - initialize on first request (OPTIMIZED)
+app.use(async (req, res, next) => {
+    // דלג על נתיבים שלא צריכים אתחול
+    const skipPaths = ['/api/test', '/health', '/', '/favicon.ico', '/manifest.json'];
+    if (skipPaths.includes(req.url) || req.url.startsWith('/icons/')) {
+        return next();
+    }
+
+    if (!isConnected) {
+        // אם כבר יש אתחול בתהליך, חכה לו
+        if (!initPromise) {
+            console.log('Starting initialization...');
+            initPromise = initializeApp()
+                .then(() => {
+                    console.log('Initialization completed successfully');
+                    isConnected = true;
+                })
+                .catch(error => {
+                    console.error('Initialization failed:', error);
+                    initPromise = null; // אפשר ניסיון נוסף
+                    throw error;
+                });
+        }
+        
+        try {
+            await initPromise;
+        } catch (error) {
+            console.error('Failed to initialize app:', error);
+            return res.status(500).json({
+                error: 'Server initialization failed',
+                details: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        }
+    }
+    
+    next();
+});
+
 // Global unhandled rejection handler
 process.on('unhandledRejection', (reason, promise) => {
     console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
@@ -297,9 +341,11 @@ process.on('uncaughtException', (error) => {
     setTimeout(() => process.exit(1), 1000);
 });
 
-console.log('📝 Checking if should start server...');
-console.log('📝 require.main === module:', require.main === module);
-console.log('📝 NODE_ENV:', process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'development') {
+  console.log('📝 Checking if should start server...');
+  console.log('📝 require.main === module:', require.main === module);
+  console.log('📝 NODE_ENV:', process.env.NODE_ENV);
+}
 
 // For local development
 if (require.main === module || process.env.NODE_ENV === 'development') {

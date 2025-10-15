@@ -70,44 +70,46 @@ export const AuthProvider = ({ children }) => {
         };
     }, [user, resetSessionTimer]);
 
-    // בדיקת התחברות ראשונית
+    // בדיקת התחברות ראשונית - עם דחייה
     useEffect(() => {
         if (!accessToken) {
             setLoading(false);
             return;
         }
-        const fetchUser = async () => {
-            try {
-                const res = await api.get('/therapists/profile');
-                setUser(res.data?.data || null);
-                if (!res.data?.data) {
+        
+        // דחה את הבדיקה ב-100ms כדי לא לחסום את הרינדור הראשוני
+        const timer = setTimeout(() => {
+            const fetchUser = async () => {
+                try {
+                    const res = await api.get('/therapists/profile');
+                    setUser(res.data?.data || null);
+                    if (!res.data?.data) {
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('lastActivity');
+                    } else {
+                        localStorage.setItem('lastActivity', Date.now().toString());
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch user profile:', err);
+                    setUser(null);
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('lastActivity');
-                } else {
-                    localStorage.setItem('lastActivity', Date.now().toString());
+                } finally {
+                    setLoading(false);
                 }
-            } catch (err) {
-                console.error('Failed to fetch user profile:', err);
-                setUser(null);
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('lastActivity');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUser();
+            };
+            fetchUser();
+        }, 100);
+        
+        return () => clearTimeout(timer);
     }, [accessToken]);
 
     // התחברות
     const login = async (email, password) => {
         try {
-            console.log('Login function called with:', { email, password });
             const res = await api.post('/auth/login', { email, password });
-            console.log('Raw response:', res);
-            console.log('Login response:', res.data);
 
             if (res.data?.success) {
-                console.log('Login successful');
                 setUser(res.data.data.user);
                 setAccessToken(res.data.data.accessToken);
                 localStorage.setItem('accessToken', res.data.data.accessToken);
@@ -124,7 +126,6 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Login error:', error);
-            console.error('Error response:', error.response?.data);
 
             return {
                 success: false,
@@ -137,15 +138,11 @@ export const AuthProvider = ({ children }) => {
     const register = async (data) => {
         try {
             const res = await api.post('/auth/register', data);
-            console.log('Register response:', res);
             if (res.data?.success) {
-                console.log('Setting user:', res.data.data?.user);
-                console.log('Setting accessToken:', res.data.data?.accessToken);
                 setUser(res.data.data?.user);
                 setAccessToken(res.data.data?.accessToken);
                 localStorage.setItem('accessToken', res.data.data?.accessToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
-                console.log('accessToken saved to localStorage:', localStorage.getItem('accessToken'));
                 return {
                     success: true,
                     data: res.data.data
@@ -179,7 +176,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await api.post('/auth/logout');
         } catch (error) {
-            console.log('Logout error:', error);
+            console.error('Logout error:', error);
         }
 
         setUser(null);

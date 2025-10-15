@@ -18,11 +18,12 @@ const connectDB = async () => {
         console.log('🔄 Connecting to MongoDB...');
 
         const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 30000,
+            maxPoolSize: 10,
+            serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
-            family: 4, // מאלץ IPv4
-            maxPoolSize: 1, // בserverless, pool של 1 מספיק
-            minPoolSize: 1,
+            family: 4, // שימוש ב-IPv4
+            retryWrites: true,
+            w: 'majority'
         });
 
         isConnected = true;

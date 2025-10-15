@@ -4,11 +4,11 @@ const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000/api'
   : 'https://luma-therapist-crm-hnku.vercel.app/api';
 
-console.log('🔧 Current hostname:', window.location.hostname);
-console.log('🔧 Selected API_BASE_URL:', API_BASE_URL);
-console.log('🔧 Environment variables:');
-console.log('  - VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('  - PROD:', import.meta.env.PROD);
+// Environment variables (only in development)
+if (import.meta.env.DEV) {
+  console.log('🔧 Current hostname:', window.location.hostname);
+  console.log('🔧 Selected API_BASE_URL:', API_BASE_URL);
+}
 
 // יצירת instance של fetch מותאם
 class ApiClient {
@@ -19,7 +19,9 @@ class ApiClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
 
-    console.log('API Request:', url, options);
+    if (import.meta.env.DEV) {
+      console.log('API Request:', url, options);
+    }
 
     // הוספת Authorization header אם יש token
     const token = localStorage.getItem('accessToken');
@@ -57,7 +59,9 @@ class ApiClient {
     try {
       const response = await fetch(url, config);
 
-      console.log('API Response:', response.status, response.statusText);
+      if (import.meta.env.DEV) {
+        console.log('API Response:', response.status, response.statusText);
+      }
 
       if (!response.ok) {
         // טיפול בשגיאות 401 - מחיקת token וניתוב להתחברות
@@ -89,7 +93,9 @@ class ApiClient {
       }
 
       const data = await response.json();
-      console.log('API Response Data:', data);
+      if (import.meta.env.DEV) {
+        console.log('API Response Data:', data);
+      }
       return data;
     } catch (error) {
       console.error('API Request failed:', error);

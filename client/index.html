@@ -15,12 +15,22 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://wellness-platform.com" />
 
-    <!-- Fonts: Hebrew-friendly -->
+    <!-- Preconnect לשרתים חיצוניים -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap"
-        rel="stylesheet">
+
+    <!-- Preload לקבצים קריטיים -->
+    <link rel="modulepreload" href="/src/main.jsx">
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+    <!-- Optimize font loading -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap">
+    </noscript>
     <style>
         :root {
             --font-sans: "Rubik", "Assistant", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Noto Sans", sans-serif;
