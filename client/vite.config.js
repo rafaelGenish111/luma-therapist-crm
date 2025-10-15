@@ -58,6 +58,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 8000,
       host: '0.0.0.0',
+      fs: {
+        strict: false
+      },
       proxy: mode === 'development' ? {
         '/api': {
           target: env.VITE_API_URL || 'http://localhost:5000',
@@ -143,8 +146,10 @@ export default defineConfig(({ mode }) => {
         '@mui/material',
         '@mui/icons-material',
         '@emotion/react',
-        '@emotion/styled'
+        '@emotion/styled',
+        '@emotion/cache'
       ],
+      force: true,
       esbuildOptions: {
         loader: {
           '.js': 'jsx',
