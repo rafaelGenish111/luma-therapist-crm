@@ -30,10 +30,32 @@ const auth = async function (req, res, next) {
         if (!user) {
             return res.status(401).json({ success: false, error: 'Unauthorized' });
         }
+        const role = (user.role || user.userType || 'THERAPIST').toString().toUpperCase();
+        // הרשאות ברירת מחדל בטוחות למטפלות
+        const therapistDefaults = [
+            'manage_own_profile',
+            'manage_own_clients',
+            'manage_own_appointments',
+            'manage_own_website',
+            'view_own_analytics',
+            'manage_health_declarations',
+            'manage_own_gallery',
+            'manage_own_articles'
+        ];
+        const adminDefaults = ['*'];
+        const existingPermissions = Array.isArray(user.permissions) ? user.permissions : [];
+        const permissions = existingPermissions.length > 0
+            ? existingPermissions
+            : (role === 'ADMIN' || role === 'SUPER_ADMIN' ? adminDefaults : therapistDefaults);
+
         req.user = {
             id: user._id,
-            role: user.role || user.userType || 'THERAPIST',
-            permissions: user.permissions || []
+            role,
+            userType: role,
+            permissions,
+            isApproved: !!user.isApproved,
+            isProfileComplete: !!user.isProfileComplete,
+            isEmailVerified: !!user.isEmailVerified
         };
         next();
     } catch (err) {
