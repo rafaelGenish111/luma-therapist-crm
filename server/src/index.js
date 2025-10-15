@@ -101,14 +101,25 @@ app.use(validateRequest);
 // CORS Configuration
 const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-    : ['http://localhost:8000', 'http://localhost:5000', 'http://localhost:8004'];
+    : [
+        'http://localhost:8000',
+        'http://localhost:5000',
+        'http://localhost:8004',
+        'https://luma-therapist-crm-frontend.vercel.app'
+      ];
 
 app.use(cors({
     origin: function (origin, callback) {
         // אפשר בקשות ללא origin (mobile apps, curl)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+        const isAllowed =
+            allowedOrigins.indexOf(origin) !== -1 ||
+            allowedOrigins.includes('*') ||
+            // אפשרות מבוקרת: לאפשר כל דומיין תחת vercel.app אם צוין במשתנה סביבה
+            (process.env.ALLOW_VERCEL_WILDCARD === 'true' && /\.vercel\.app$/.test(origin));
+
+        if (isAllowed) {
             callback(null, true);
         } else {
             if (process.env.NODE_ENV === 'development') {
