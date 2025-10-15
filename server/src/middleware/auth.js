@@ -1,52 +1,46 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Client = require('../models/Client');
 const Therapist = require('../models/Therapist');
 
 /**
  * Middleware to authenticate JWT token
  */
-const auth = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    console.log('Authorization header:', authHeader);
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('No or bad Authorization header');
-        return res.status(401).json({ success: false, error: 'Unauthorized' });
-    }
-    const token = authHeader.split(' ')[1];
+const auth = async function (req, res, next) {
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Decoded JWT:', decoded);
-        let user = await User.findById(decoded.userId).select('-password');
-        console.log('User found:', user ? 'YES' : 'NO');
-        if (user) console.log('User role:', user.role);
-        if (!user) {
-            user = await Client.findById(decoded.userId).select('-password');
-            console.log('Client found:', user ? 'YES' : 'NO');
-            if (user) console.log('Client role:', user.role);
+        const authHeader = req.headers.authorization;
+        if (process.env.LOG_LEVEL === 'debug' && process.env.NODE_ENV !== 'production') {
+            console.log('Authorization header present:', !!authHeader);
         }
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            if (process.env.LOG_LEVEL === 'debug' && process.env.NODE_ENV !== 'production') {
+                console.log('No or bad Authorization header');
+            }
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (process.env.LOG_LEVEL === 'debug' && process.env.NODE_ENV !== 'production') {
+            console.log('JWT verified');
+        }
+        let user = await User.findById(decoded.userId).select('-password');
         if (!user) {
             user = await Therapist.findById(decoded.userId).select('-password');
-            console.log('Therapist found:', user ? 'YES' : 'NO');
-            if (user) console.log('Therapist role:', user.role);
         }
         if (!user) {
-            console.log('User not found in any collection');
-            return res.status(401).json({ success: false, error: 'User not found' });
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
         }
-        req.user = user;
-        console.log('Before normalization - user.role:', req.user.role);
-        console.log('Before normalization - user.userType:', req.user.userType);
-        // נרמול role ו-userType לאותיות גדולות
-        const normalizedUserType = (req.user.userType || req.user.role || '').toString().toUpperCase();
-        req.user.role = normalizedUserType;
-        req.user.userType = normalizedUserType;
-        console.log('After normalization - user.role:', req.user.role);
-        console.log('After normalization - user.userType:', req.user.userType);
+        req.user = {
+            id: user._id,
+            role: user.role || user.userType || 'THERAPIST',
+            permissions: user.permissions || []
+        };
         next();
     } catch (err) {
-        console.error('JWT error:', err.message);
-        return res.status(401).json({ success: false, error: 'Invalid token', message: err.message });
+        if (process.env.LOG_LEVEL === 'debug' && process.env.NODE_ENV !== 'production') {
+            console.warn('Auth middleware error:', err.message);
+        }
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 };
 

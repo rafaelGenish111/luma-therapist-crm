@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    resolve: {
+      dedupe: ['react', 'react-dom']
+    },
     plugins: [
       react(),
       VitePWA({

@@ -40,7 +40,6 @@ import AccessibilityStatement from './pages/AccessibilityStatement'
 import DesignPage from './pages/dashboard/therapist/DesignPage'
 import CampaignsPage from './pages/dashboard/therapist/CampaignsPage';
 // Calendar Pages (lazy)
-import Skeleton from '@mui/material/Skeleton'
 const CalendarPage = React.lazy(() => import('./pages/dashboard/CalendarPage'));
 const CalendarSettings = React.lazy(() => import('./pages/dashboard/CalendarSettings'));
 // import WebsiteBuilderPage from './pages/dashboard/WebsiteBuilderPage'
@@ -72,85 +71,85 @@ const App = () => {
             minHeight: '100vh'
         }}>
             <Router>
-                <Suspense fallback={<Skeleton variant="rectangular" height={320} />}>
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route
-                        path="/admin"
-                        element={
-                            <ProtectedRoute requiredRole="ADMIN">
-                                <AdminLayout />
-                            </ProtectedRoute>
-                        }
-                    >
-                        <Route index element={<AdminHome />} />
-                        <Route path="therapists" element={<TherapistManagement />} />
-                        <Route path="plans" element={<PlansPage />} />
-                        <Route path="health-declarations" element={<HealthDeclarationsAdminPage />} />
-                        <Route path="settings" element={<AdminSettingsPage />} />
-                    </Route>
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route
-                        path="/onboarding"
-                        element={
-                            <ProtectedRoute>
-                                <OnboardingWizard />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <ProtectedRoute>
-                                <DashboardLayout />
-                            </ProtectedRoute>
-                        }
-                    >
-                        <Route index element={<DashboardPage />} />
-                        <Route path="calendar" element={<CalendarPage />} />
-                        <Route path="calendar/settings" element={<CalendarSettings />} />
-                        <Route path="clients" element={<ClientsPage />} />
-                        <Route path="clients/:clientId" element={<ClientCard />} />
-                        {/* הפניה: דף תורים ישן -> דף יומן */}
-                        <Route path="appointments" element={<Navigate to="/dashboard/calendar" replace />} />
-                        <Route path="articles" element={<ArticlesPage />} />
-                        <Route path="articles/:id" element={<ArticlesPage />} />
-                        <Route path="gallery" element={<GalleryPage />} />
-                        <Route path="profile" element={<ProfilePage />} />
-                        <Route path="calendly" element={<CalendlyPage />} />
-                        <Route path="treatment-types" element={<TreatmentTypesPage />} />
-                        <Route path="important-info" element={<ImportantInfoPage />} />
-                        <Route path="settings" element={<SettingsPage />} />
-                        <Route path="health-declarations" element={<HealthDeclarationsPage />} />
-                        <Route path="design" element={<DesignPage />} />
-                        <Route path="campaigns" element={<CampaignsPage />} />
-                    </Route>
-                    <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
-                    <Route path="/terms" element={<TermsOfUse />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/privacy-request" element={<PrivacyRequest />} />
-                    <Route path="/pay/:paymentLinkId" element={<PaymentPage />} />
+                <Suspense fallback={<div style={{ height: 320 }} />}>
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route
+                            path="/admin"
+                            element={
+                                <ProtectedRoute requiredRole="ADMIN">
+                                    <AdminLayout />
+                                </ProtectedRoute>
+                            }
+                        >
+                            <Route index element={<AdminHome />} />
+                            <Route path="therapists" element={<TherapistManagement />} />
+                            <Route path="plans" element={<PlansPage />} />
+                            <Route path="health-declarations" element={<HealthDeclarationsAdminPage />} />
+                            <Route path="settings" element={<AdminSettingsPage />} />
+                        </Route>
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route
+                            path="/onboarding"
+                            element={
+                                <ProtectedRoute>
+                                    <OnboardingWizard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <ProtectedRoute>
+                                    <DashboardLayout />
+                                </ProtectedRoute>
+                            }
+                        >
+                            <Route index element={<DashboardPage />} />
+                            <Route path="calendar" element={<CalendarPage />} />
+                            <Route path="calendar/settings" element={<CalendarSettings />} />
+                            <Route path="clients" element={<ClientsPage />} />
+                            <Route path="clients/:clientId" element={<ClientCard />} />
+                            {/* הפניה: דף תורים ישן -> דף יומן */}
+                            <Route path="appointments" element={<Navigate to="/dashboard/calendar" replace />} />
+                            <Route path="articles" element={<ArticlesPage />} />
+                            <Route path="articles/:id" element={<ArticlesPage />} />
+                            <Route path="gallery" element={<GalleryPage />} />
+                            <Route path="profile" element={<ProfilePage />} />
+                            <Route path="calendly" element={<CalendlyPage />} />
+                            <Route path="treatment-types" element={<TreatmentTypesPage />} />
+                            <Route path="important-info" element={<ImportantInfoPage />} />
+                            <Route path="settings" element={<SettingsPage />} />
+                            <Route path="health-declarations" element={<HealthDeclarationsPage />} />
+                            <Route path="design" element={<DesignPage />} />
+                            <Route path="campaigns" element={<CampaignsPage />} />
+                        </Route>
+                        <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
+                        <Route path="/terms" element={<TermsOfUse />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
+                        <Route path="/privacy-request" element={<PrivacyRequest />} />
+                        <Route path="/pay/:paymentLinkId" element={<PaymentPage />} />
 
-                    {/* דפים ציבוריים */}
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/services" element={<ServicesPage />} />
-                    <Route path="/gallery" element={<PublicGalleryPage />} />
-                    <Route path="/testimonials" element={<TestimonialsPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/website/:therapistId" element={<WebsiteLayout />}>
-                        <Route index element={<Home />} />
-                        <Route path="about" element={<About />} />
-                        <Route path="articles" element={<Articles />} />
-                        <Route path="articles/:articleSlug" element={<ArticleDetail />} />
-                        <Route path="gallery" element={<Gallery />} />
-                        <Route path="health-declaration" element={<HealthDeclaration />} />
-                        <Route path="book" element={<PublicBooking />} />
-                        <Route path="contact" element={<Contact />} />
-                    </Route>
-                    {/* דוגמה לראוט עם הרשאה */}
-                    {/*
+                        {/* דפים ציבוריים */}
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/services" element={<ServicesPage />} />
+                        <Route path="/gallery" element={<PublicGalleryPage />} />
+                        <Route path="/testimonials" element={<TestimonialsPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/website/:therapistId" element={<WebsiteLayout />}>
+                            <Route index element={<Home />} />
+                            <Route path="about" element={<About />} />
+                            <Route path="articles" element={<Articles />} />
+                            <Route path="articles/:articleSlug" element={<ArticleDetail />} />
+                            <Route path="gallery" element={<Gallery />} />
+                            <Route path="health-declaration" element={<HealthDeclaration />} />
+                            <Route path="book" element={<PublicBooking />} />
+                            <Route path="contact" element={<Contact />} />
+                        </Route>
+                        {/* דוגמה לראוט עם הרשאה */}
+                        {/*
                     <Route
                         path="/admin"
                         element={
@@ -160,7 +159,7 @@ const App = () => {
                         }
                     />
                     */}
-                </Routes>
+                    </Routes>
                 </Suspense>
                 <AccessibilityWidget onFontSize={changeFontSize} />
                 <CookieConsent />

@@ -129,7 +129,9 @@ router.get('/profile', auth, authorize(['manage_own_profile']), async (req, res)
         console.log('Fetching therapist profile for user:', req.user.id);
 
         const therapist = await Therapist.findById(req.user.id);
-        console.log('Therapist found:', !!therapist);
+        if (process.env.LOG_LEVEL === 'debug' && process.env.NODE_ENV !== 'production') {
+            console.log('Therapist found:', !!therapist);
+        }
 
         if (!therapist) {
             console.log('Therapist not found for user ID:', req.user.id);

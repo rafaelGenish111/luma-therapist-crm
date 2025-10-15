@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -118,7 +118,7 @@ const CalendarPage = () => {
     const [autoConfirm, setAutoConfirm] = useState(!!localStorage.getItem('autoConfirmBookings'));
 
     // Load appointments
-    const loadAppointments = useCallback(async () => {
+    const loadAppointments = useCallback(async (signal) => {
         try {
             setLoading(true);
             // Load appointments for the entire month (or selected date range)
@@ -130,7 +130,8 @@ const CalendarPage = () => {
                     startDate: startDate.toISOString(),
                     endDate: endDate.toISOString(),
                     ...filters
-                }
+                },
+                signal
             });
 
             setAppointments(response.data.data || []);
@@ -167,22 +168,60 @@ const CalendarPage = () => {
     }, []);
 
     // Effects
+    const didInitRef = useRef(false);
     useEffect(() => {
-        loadAppointments();
-        // טען לקוחות להצגת רשימה נפתחת בטופס
+        if (didInitRef.current) return;
+        didInitRef.current = true;
+        const controller = new AbortController();
+
         (async () => {
             try {
-                const res = await api.get('/clients');
-                const list = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.clients || []);
+                setLoading(true);
+                const startDate = moment(currentDate).startOf('month').toDate();
+                const endDate = moment(currentDate).endOf('month').toDate();
+
+                const [appointmentsRes, clientsRes, statsRes, syncRes] = await Promise.all([
+                    api.get('/appointments', {
+                        params: {
+                            startDate: startDate.toISOString(),
+                            endDate: endDate.toISOString(),
+                            ...filters
+                        },
+                        signal: controller.signal
+                    }),
+                    api.get('/clients', { signal: controller.signal }),
+                    api.get('/appointments/stats', { params: { date: moment().startOf('day').toDate().toISOString() }, signal: controller.signal }).catch(() => null),
+                    api.get('/calendar/sync-status', { signal: controller.signal }).catch(() => null)
+                ]);
+
+                setAppointments(appointmentsRes.data?.data || []);
+                const list = Array.isArray(clientsRes?.data) ? clientsRes.data : (clientsRes?.data?.data || clientsRes?.data?.clients || []);
                 setClients(list);
+                if (statsRes?.data) setStats(statsRes.data);
+                if (syncRes?.data) setSyncStatus(syncRes.data);
             } catch (e) {
-                console.error('שגיאה בטעינת לקוחות:', e);
-                setClients([]);
+                console.error('שגיאה בטעינה הראשונית:', e);
+            } finally {
+                setLoading(false);
             }
         })();
-    }, [loadAppointments]);
 
+        return () => controller.abort();
+    }, []);
+
+    // ריענון פגישות במעבר חודש/פילטרים עם debounce וביטול בקשות קודמות
     useEffect(() => {
+        const controller = new AbortController();
+        const t = setTimeout(() => {
+            loadAppointments(controller.signal);
+        }, 250);
+        return () => { controller.abort(); clearTimeout(t); };
+    }, [currentDate, filters, loadAppointments]);
+
+    const didInitSideRef = useRef(false);
+    useEffect(() => {
+        if (didInitSideRef.current) return;
+        didInitSideRef.current = true;
         loadStats();
         loadSyncStatus();
         // Try load preference from therapist profile if exists
@@ -223,7 +262,7 @@ const CalendarPage = () => {
             try { bc && bc.close && bc.close(); } catch (_) { }
             window.removeEventListener('storage', storageHandler);
         };
-    }, [loadStats, loadSyncStatus]);
+    }, [loadStats, loadSyncStatus, loadAppointments]);
 
     // Auto-refresh every 5 minutes
     useEffect(() => {
