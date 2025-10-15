@@ -12,7 +12,12 @@ export default defineConfig(({ mode }) => {
       dedupe: ['react', 'react-dom']
     },
     plugins: [
-      react(),
+      react({
+        jsxImportSource: '@emotion/react',
+        babel: {
+          plugins: ['@emotion/babel-plugin'],
+        },
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: null, // ידני - נרשום אחרי הטעינה
@@ -76,11 +81,11 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
-      sourcemap: !isProduction, // רק בדבלופמנט
+      sourcemap: !isProduction,
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: isProduction, // הסר console.log בפרודקשן
+          drop_console: isProduction,
           drop_debugger: true,
           pure_funcs: isProduction ? ['console.log', 'console.info'] : []
         }
@@ -88,7 +93,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // פיצול ספריות node_modules לחלקים נפרדים
             if (id.includes('node_modules')) {
               if (id.includes('@mui/material')) {
                 return 'mui-material';
@@ -117,7 +121,6 @@ export default defineConfig(({ mode }) => {
               if (id.includes('axios')) {
                 return 'axios';
               }
-              // כל השאר
               return 'vendor';
             }
           },
@@ -127,7 +130,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       chunkSizeWarningLimit: 1000,
-      assetsInlineLimit: 4096 // inline assets קטנים מ-4kb
+      assetsInlineLimit: 4096
     },
     define: {
       global: 'globalThis',
