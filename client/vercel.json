@@ -11,7 +11,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api/$1"
+            "dest": "https://luma-therapist-crm.vercel.app/api/$1"
         },
         {
             "handle": "filesystem"

@@ -25,7 +25,7 @@ try {
       resolvedBaseUrl = defaultProdUrl;
     }
   }
-} catch {}
+} catch { }
 
 const API_BASE_URL = resolvedBaseUrl;
 

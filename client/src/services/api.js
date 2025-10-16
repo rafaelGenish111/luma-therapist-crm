@@ -30,13 +30,13 @@ const getBaseURL = () => {
                 localStorage.removeItem(OVERRIDE_KEY);
             }
         }
-    } catch {}
+    } catch { }
 
-    // אם הוגדר במפורש VITE_API_URL נשתמש בו, אחרת ברירת מחדל יחסית
+    // ב-Production: נשתמש תמיד בנתיב יחסי '/api' כדי לעבוד דרך ה-rewrite של Vercel
     const defaultUrl = '/api';
-    const candidate = envUrl || defaultUrl;
+    const candidate = defaultUrl;
     const fixed = fixBadUrl(candidate);
-    try { if (fixed !== stored) localStorage.setItem(OVERRIDE_KEY, fixed); } catch {}
+    try { if (fixed !== stored) localStorage.setItem(OVERRIDE_KEY, fixed); } catch { }
     return fixed;
 };
 
