@@ -8,7 +8,7 @@ function isBadUrl(url) {
   return FAILED_MARKERS.some(marker => typeof url === 'string' && url.includes(marker));
 }
 
-const defaultProdUrl = 'https://luma-therapist-crm.vercel.app/api';
+const defaultProdUrl = 'https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api';
 const envUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || '';
 const storedOverride = (() => {
   try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch { return ''; }

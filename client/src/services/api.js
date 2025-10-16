@@ -7,7 +7,7 @@ const FAILED_MARKERS = ['-hnku.'];
 const fixBadUrl = (url) => {
   if (!url) return url;
   return FAILED_MARKERS.some(m => url.includes(m))
-    ? 'https://luma-therapist-crm.vercel.app/api'
+    ? 'https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api'
     : url;
 };
 
