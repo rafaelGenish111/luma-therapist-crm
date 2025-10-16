@@ -81,16 +81,18 @@ export const AuthProvider = ({ children }) => {
         const timer = setTimeout(() => {
             const fetchUser = async () => {
                 try {
-                    const res = await api.get('/therapists/profile');
-                    setUser(res.data?.data || null);
-                    if (!res.data?.data) {
+                    // שימוש ב-/auth/me מתאים לכל סוג משתמש (THERAPIST/ADMIN/CLIENT)
+                    const res = await api.get('/auth/me');
+                    const u = res.data?.data?.user || res.data?.data || null;
+                    setUser(u);
+                    if (!u) {
                         localStorage.removeItem('accessToken');
                         localStorage.removeItem('lastActivity');
                     } else {
                         localStorage.setItem('lastActivity', Date.now().toString());
                     }
                 } catch (err) {
-                    console.error('Failed to fetch user profile:', err);
+                    console.error('Failed to fetch current user:', err);
                     setUser(null);
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('lastActivity');
@@ -195,8 +197,9 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('accessToken', newToken);
                 localStorage.setItem('lastActivity', Date.now().toString());
                 // למשוך את המשתמש מחדש
-                const me = await api.get('/therapists/profile');
-                setUser(me.data?.data || null);
+                const me = await api.get('/auth/me');
+                const u = me.data?.data?.user || me.data?.data || null;
+                setUser(u);
                 return true;
             }
         } catch {
