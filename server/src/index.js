@@ -23,13 +23,13 @@ require('dotenv').config();
 
 // Environment debug (only in development)
 if (process.env.NODE_ENV === 'development') {
-  console.log('===========================================');
-  console.log('ENVIRONMENT DEBUG:');
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length || 0);
-  console.log('MONGODB_URI first 50 chars:', process.env.MONGODB_URI?.substring(0, 50) || 'MISSING!');
-  console.log('PORT:', process.env.PORT);
-  console.log('===========================================');
+    console.log('===========================================');
+    console.log('ENVIRONMENT DEBUG:');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length || 0);
+    console.log('MONGODB_URI first 50 chars:', process.env.MONGODB_URI?.substring(0, 50) || 'MISSING!');
+    console.log('PORT:', process.env.PORT);
+    console.log('===========================================');
 }
 // הגדרת Cloudinary
 const cloudinary = require('cloudinary').v2;
@@ -106,7 +106,7 @@ const allowedOrigins = process.env.CORS_ORIGIN
         'http://localhost:5000',
         'http://localhost:8004',
         'https://luma-therapist-crm-frontend.vercel.app'
-      ];
+    ];
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -163,6 +163,16 @@ const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // MongoDB connection will be handled in initializeApp()
+
+// CORS preflight handler for all API routes
+app.options('/api/*', (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'https://luma-therapist-crm-frontend.vercel.app');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Expose-Headers', 'set-cookie');
+    res.sendStatus(200);
+});
 
 // Simple test endpoint for Vercel (must be before other routes)
 app.get('/api/test', (req, res) => {
@@ -335,7 +345,7 @@ app.use(async (req, res, next) => {
                     throw error;
                 });
         }
-        
+
         try {
             await initPromise;
         } catch (error) {
@@ -347,7 +357,7 @@ app.use(async (req, res, next) => {
             });
         }
     }
-    
+
     next();
 });
 
@@ -365,9 +375,9 @@ process.on('uncaughtException', (error) => {
 });
 
 if (process.env.NODE_ENV === 'development') {
-  console.log('📝 Checking if should start server...');
-  console.log('📝 require.main === module:', require.main === module);
-  console.log('📝 NODE_ENV:', process.env.NODE_ENV);
+    console.log('📝 Checking if should start server...');
+    console.log('📝 require.main === module:', require.main === module);
+    console.log('📝 NODE_ENV:', process.env.NODE_ENV);
 }
 
 // For local development
