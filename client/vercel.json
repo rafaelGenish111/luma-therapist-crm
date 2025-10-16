@@ -9,8 +9,16 @@
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
     "routes": [
-        { "src": "/api/(.*)", "dest": "https://luma-therapist-crm.vercel.app/api/$1" },
-        { "handle": "filesystem" },
-        { "src": "/(.*)", "dest": "/index.html" }
+        {
+            "src": "/api/(.*)",
+            "dest": "https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api/$1"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
     ]
 }
