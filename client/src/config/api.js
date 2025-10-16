@@ -8,7 +8,8 @@ function isBadUrl(url) {
   return FAILED_MARKERS.some(marker => typeof url === 'string' && url.includes(marker));
 }
 
-const defaultProdUrl = 'https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api';
+// בפרודקשן נשתמש בנתיב יחסי '/api' כדי לעבוד עם ה-rewrite של Vercel
+const defaultProdUrl = '/api';
 const envUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || '';
 const storedOverride = (() => {
   try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch { return ''; }
@@ -16,10 +17,15 @@ const storedOverride = (() => {
 
 let resolvedBaseUrl = storedOverride || envUrl || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : defaultProdUrl);
 
-if (isBadUrl(resolvedBaseUrl)) {
-  resolvedBaseUrl = defaultProdUrl;
-  try { localStorage.setItem(OVERRIDE_KEY, resolvedBaseUrl); } catch { }
-}
+// אם רץ על vercel.app וה-override מצביע ל-URL חיצוני — ננקה אותו
+try {
+  if (typeof window !== 'undefined' && /vercel\.app$/.test(window.location.host)) {
+    if (storedOverride && /^https?:\/\//.test(storedOverride)) {
+      localStorage.removeItem(OVERRIDE_KEY);
+      resolvedBaseUrl = defaultProdUrl;
+    }
+  }
+} catch {}
 
 const API_BASE_URL = resolvedBaseUrl;
 

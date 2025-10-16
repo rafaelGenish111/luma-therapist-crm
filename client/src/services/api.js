@@ -5,10 +5,10 @@ const OVERRIDE_KEY = 'API_BASE_URL_OVERRIDE';
 const FAILED_MARKERS = ['-hnku.'];
 
 const fixBadUrl = (url) => {
-  if (!url) return url;
-  return FAILED_MARKERS.some(m => url.includes(m))
-    ? 'https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api'
-    : url;
+    if (!url) return url;
+    return FAILED_MARKERS.some(m => url.includes(m))
+        ? 'https://luma-therapist-cu4gmw082-rafaelgenish111s-projects.vercel.app/api'
+        : url;
 };
 
 const getBaseURL = () => {
@@ -18,10 +18,23 @@ const getBaseURL = () => {
         // בפיתוח - דרך ה-proxy
         return '/api';
     }
-    // בפרודקשן
+    // בפרודקשן: השתמש בנתיב יחסי '/api' כדי לנצל את ה-rewrite של Vercel
+    // ננקה override ישן שמצביע לדומיין חיצוני כדי למנוע CORS/SSO
     const envUrl = (import.meta.env.VITE_API_URL || '').toString();
     const stored = (() => { try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch { return ''; } })();
-    const candidate = stored || envUrl || 'https://luma-therapist-crm.vercel.app/api';
+
+    // אם רץ על vercel.app ויש override מוחלט (http/https) — נבטל אותו
+    try {
+        if (typeof window !== 'undefined' && /vercel\.app$/.test(window.location.host)) {
+            if (stored && /^https?:\/\//.test(stored)) {
+                localStorage.removeItem(OVERRIDE_KEY);
+            }
+        }
+    } catch {}
+
+    // אם הוגדר במפורש VITE_API_URL נשתמש בו, אחרת ברירת מחדל יחסית
+    const defaultUrl = '/api';
+    const candidate = envUrl || defaultUrl;
     const fixed = fixBadUrl(candidate);
     try { if (fixed !== stored) localStorage.setItem(OVERRIDE_KEY, fixed); } catch {}
     return fixed;
