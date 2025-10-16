@@ -5,10 +5,14 @@ const { auth } = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
 // GET /api/clients - קבלת כל הלקוחות של המטפלת
-router.get('/', auth, authorize(['manage_own_clients']), async (req, res) => {
+// מאפשר גישה לכל מטפלת (ROLE) גם אם אין לה הרשאות פרטניות ברשימה
+router.get('/', auth, authorize(['THERAPIST', 'manage_own_clients']), async (req, res) => {
     try {
+        // החזר שדות קלים לדרופדאון כברירת מחדל
         const clients = await Client.find({ therapist: req.user.id })
-            .sort({ createdAt: -1 });
+            .select('_id firstName lastName status createdAt')
+            .sort({ createdAt: -1 })
+            .lean();
         res.json({ success: true, data: clients });
     } catch (error) {
         res.status(500).json({ success: false, message: 'שגיאה בקבלת לקוחות', error: error.message });
