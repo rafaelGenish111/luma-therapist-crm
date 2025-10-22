@@ -5,7 +5,7 @@
   "description": "CRM נייד למטפלות ומטפלים: לקוחות, פגישות, תשלומים ומסמכים.",
   "lang": "he",
   "dir": "rtl",
-  "start_url": "/dashboard?source=pwa",
+  "start_url": "/dashboard/?source=pwa",
   "scope": "/dashboard/",
   "display": "standalone",
   "display_override": [

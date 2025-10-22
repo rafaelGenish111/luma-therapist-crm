@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
           display: 'standalone',
           orientation: 'portrait',
           scope: '/dashboard/',
-          start_url: '/dashboard?source=pwa',
+          start_url: '/dashboard/?source=pwa',
           icons: [
             {
               src: 'icons/icon-192.png',
@@ -74,6 +74,10 @@ export default defineConfig(({ mode }) => {
     preview: {
       host: true,
       port: 4173,
+      headers: {
+        'Cross-Origin-Embedder-Policy': 'credentialless',
+        'Cross-Origin-Opener-Policy': 'same-origin',
+      },
     },
     build: {
       outDir: 'dist',
