@@ -26,9 +26,12 @@
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
     <!-- Optimize font loading -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap">
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@300;400;600;700;800&display=swap">
     </noscript>
     <style>
         :root {
@@ -54,7 +57,20 @@
 
 <body>
     <div id="root"></div>
-    <!-- Vite injects the correct scripts during build -->
+    <!-- Dev script: only when running via Vite dev server -->
+    <script>
+        (function () {
+            try {
+                var isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+                if (isDev) {
+                    var s = document.createElement('script');
+                    s.type = 'module';
+                    s.src = '/src/main.jsx';
+                    document.currentScript.parentNode.appendChild(s);
+                }
+            } catch (e) { /* no-op */ }
+        })();
+    </script>
 </body>
 
 </html>
