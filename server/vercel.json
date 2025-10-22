@@ -9,6 +9,12 @@
   "env": {
     "NODE_ENV": "production"
   },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "src/index.js"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

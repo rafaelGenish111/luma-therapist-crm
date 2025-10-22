@@ -5,8 +5,8 @@
   "description": "CRM נייד למטפלות ומטפלים: לקוחות, פגישות, תשלומים ומסמכים.",
   "lang": "he",
   "dir": "rtl",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "start_url": "/dashboard?source=pwa",
+  "scope": "/dashboard/",
   "display": "standalone",
   "display_override": [
     "standalone",
@@ -61,7 +61,7 @@
       "name": "פגישה חדשה",
       "short_name": "פגישה",
       "description": "פתיחת מסך יצירת פגישה",
-      "url": "/appointments/new",
+      "url": "/dashboard/calendar",
       "icons": [
         {
           "src": "/icons/shortcut-appointments.png",
@@ -74,7 +74,7 @@
       "name": "לקוחות",
       "short_name": "לקוחות",
       "description": "רשימת לקוחות",
-      "url": "/clients",
+      "url": "/dashboard/clients",
       "icons": [
         {
           "src": "/icons/shortcut-clients.png",

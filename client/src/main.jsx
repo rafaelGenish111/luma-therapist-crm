@@ -19,18 +19,21 @@ const queryClient = new QueryClient({
     },
 });
 
-// Force-unregister any existing Service Workers and clear caches (production only)
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-    try {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-            registrations.forEach(reg => reg.unregister());
-        });
-        if (window.caches) {
-            caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+// רישום Service Worker מותנה לאזור האישי בלבד
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // רשום רק אם אנחנו ב-/dashboard
+        if (window.location.pathname.startsWith('/dashboard')) {
+            navigator.serviceWorker
+                .register('/sw.js')
+                .then(registration => {
+                    console.log('SW registered:', registration);
+                })
+                .catch(error => {
+                    console.log('SW registration failed:', error);
+                });
         }
-    } catch (e) {
-        // swallow cleanup errors silently
-    }
+    });
 }
 
 createRoot(document.getElementById('root')).render(

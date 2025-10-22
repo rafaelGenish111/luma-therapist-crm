@@ -100,3 +100,4 @@ public/uploads/
 *.pem
 *.key
 *.crt *.dmg
+.vercel

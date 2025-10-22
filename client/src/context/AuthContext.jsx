@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
             return;
         }
-        
+
         // דחה את הבדיקה ב-100ms כדי לא לחסום את הרינדור הראשוני
         const timer = setTimeout(() => {
             const fetchUser = async () => {
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
             };
             fetchUser();
         }, 100);
-        
+
         return () => clearTimeout(timer);
     }, [accessToken]);
 
