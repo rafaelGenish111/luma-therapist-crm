@@ -84,12 +84,6 @@
       ]
     }
   ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+wellness",
-      "url": "https://luma-therapist-crm-frontend.vercel.app/deeplink?target=%s"
-    }
-  ],
   "prefer_related_applications": false,
   "related_applications": [
     {

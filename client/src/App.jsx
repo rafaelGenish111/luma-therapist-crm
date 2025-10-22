@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import AccessibilityWidget from './components/AccessibilityWidget'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
 import CookieConsent from './components/CookieConsent'
 import SessionWarning from './components/common/SessionWarning'

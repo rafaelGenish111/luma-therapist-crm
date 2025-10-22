@@ -19,8 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Preload לקבצים קריטיים -->
-    <link rel="modulepreload" href="/src/main.jsx">
+    <!-- Vite will inject built assets; no manual modulepreload in production -->
 
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -55,7 +54,7 @@
 
 <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <!-- Vite injects the correct scripts during build -->
 </body>
 
 </html>
