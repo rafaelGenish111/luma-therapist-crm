@@ -8,17 +8,14 @@
     ],
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "https://luma-therapist-crm.vercel.app/api/$1"
+            "source": "/api/(.*)",
+            "destination": "https://luma-therapist-crm.vercel.app/api/$1"
         },
         {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ],
     "headers": [
